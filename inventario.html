@@ -4,254 +4,164 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Inventario · ArquiDulces</title>
-<!-- IMPORTANTE: Aquí llamamos al comun.js -->
-<script src="comun.js?v=5"></script>
+<script src="comun.js?v=6"></script>
 <style>
   :root {
-    --bg-app: #0F111A; --bg-card: #1A1D2D; --bg-input: #25293D;
-    --texto: #F8FAFC; --texto-suave: #94A3B8; --borde: #334155;
-    --acento: #F59E0B; --acento-bg: rgba(245, 158, 11, 0.15);
-    --peligro: #EF4444; --exito: #10B981;
+    --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
+    --suave: #94A3B8; --borde: #334155; --acento: #F59E0B; --peligro: #EF4444; --exito: #10B981;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background-color: var(--bg-app); color: var(--texto); padding: 20px; padding-bottom: 50px; }
+  body { background: var(--bg); color: var(--texto); padding: 20px; padding-bottom: 50px; }
   
-  .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-top: 10px; }
-  .header-top h1 { font-size: 28px; font-weight: 800; color: var(--acento); letter-spacing: -0.5px; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .header h1 { font-size: 24px; color: var(--acento); font-weight: 800; }
+  .btn-volver { background: none; border: none; color: var(--suave); font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
+
+  #estado { padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: none; }
+  .ok { background: rgba(16, 185, 129, 0.2); color: var(--exito); border: 1px solid var(--exito); }
+  .error { background: rgba(239, 68, 68, 0.2); color: var(--peligro); border: 1px solid var(--peligro); }
+  .aviso { background: rgba(245, 158, 11, 0.2); color: var(--acento); border: 1px solid var(--acento); }
+
+  .toggle { display: flex; background: var(--card); border-radius: 14px; padding: 4px; margin-bottom: 20px; border: 1px solid var(--borde); }
+  .toggle button { flex: 1; padding: 12px; border: none; border-radius: 10px; background: transparent; color: var(--suave); font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
+  .toggle button.active { background: var(--acento); color: #000; }
+
+  input[type="text"], input[type="number"], select { width: 100%; padding: 16px; border-radius: 14px; border: 1px solid var(--borde); background: var(--input); color: var(--texto); font-size: 16px; margin-bottom: 16px; outline: none; }
   
-  .toggle-container { background: var(--bg-card); padding: 6px; border-radius: 16px; display: flex; gap: 6px; margin-bottom: 24px; border: 1px solid var(--borde); }
-  .toggle-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 14px; background: transparent; color: var(--texto-suave); cursor: pointer; transition: all 0.2s; }
-  .toggle-btn.active { background: var(--acento); color: #000; box-shadow: 0 4px 12px var(--acento-bg); }
+  .card { background: var(--card); padding: 16px; border-radius: 16px; margin-bottom: 12px; display: flex; gap: 16px; align-items: center; border: 1px solid var(--borde); cursor: pointer; }
+  .card img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; background: var(--input); }
+  .card .inicial { width: 50px; height: 50px; border-radius: 10px; background: var(--input); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--acento); font-weight: bold; }
+  .card-info h3 { font-size: 16px; }
+  .card-info p { font-size: 13px; color: var(--suave); margin-top: 4px; }
 
-  .input-group { margin-bottom: 20px; }
-  .input-group label { display: block; font-size: 13px; font-weight: 700; color: var(--texto-suave); margin-bottom: 8px; text-transform: uppercase; }
-  input[type="text"], input[type="number"], select { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--borde); background: var(--bg-input); color: var(--texto); font-size: 16px; outline: none; }
-  input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--acento); }
-
-  #resultados { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-  .card-producto { background: var(--bg-card); padding: 16px; border-radius: 20px; display: flex; align-items: center; gap: 16px; border: 1px solid var(--borde); cursor: pointer; transition: transform 0.1s; }
-  .card-producto:active { transform: scale(0.98); }
-  
-  .foto-producto { width: 56px; height: 56px; border-radius: 14px; background: var(--bg-input); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--acento); flex-shrink: 0; overflow: hidden; }
-  .foto-producto img { width: 100%; height: 100%; object-fit: cover; }
-
-  .info-producto { flex: 1; min-width: 0; }
-  .nombre-producto { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .meta-producto { font-size: 13px; color: var(--texto-suave); margin-top: 4px; display: flex; align-items: center; gap: 8px; }
-  .badge-stock { padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 13px; }
-  .badge-ok { background: rgba(16, 185, 129, 0.2); color: var(--exito); }
-  .badge-cero { background: rgba(239, 68, 68, 0.2); color: var(--peligro); }
-
-  .panel-edicion { background: var(--bg-card); padding: 24px; border-radius: 20px; border: 1px solid var(--borde); margin-top: 24px; display: none; }
-  .btn-primario { width: 100%; padding: 18px; border-radius: 16px; border: none; background: var(--acento); color: #000; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 24px; }
-
-  #estado { padding: 16px; border-radius: 16px; font-weight: 600; font-size: 14px; text-align: center; margin-bottom: 20px; display: none; }
-  .estado-ok { background: rgba(16, 185, 129, 0.15); color: var(--exito); border: 1px solid var(--exito); }
-  .estado-error { background: rgba(239, 68, 68, 0.15); color: var(--peligro); border: 1px solid var(--peligro); }
-  .estado-aviso { background: var(--acento-bg); color: var(--acento); border: 1px solid var(--acento); }
+  #panel { background: var(--card); padding: 24px; border-radius: 20px; border: 1px solid var(--borde); display: none; margin-top: 20px; }
+  .btn-primario { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--acento); color: #000; font-size: 16px; font-weight: 800; cursor: pointer; }
 </style>
 </head>
 <body>
 
-<header class="header-top">
-  <div>
+  <div class="header">
     <h1>Inventario</h1>
-  </div>
-</header>
-
-<div id="estado" class="estado-aviso" style="display: block;">Conectando con Google Sheets...</div>
-
-<div class="toggle-container">
-  <button id="modoInicial" class="toggle-btn active">Conteo Inicial</button>
-  <button id="modoAjuste" class="toggle-btn">Ajuste de Stock</button>
-</div>
-
-<div class="input-group">
-  <label>Buscar Producto</label>
-  <input type="text" id="buscar" placeholder="Escribe 2 letras o más..." autocomplete="off">
-</div>
-
-<div id="resultados"></div>
-
-<div class="panel-edicion" id="panel">
-  <h2 id="infoNombre">Producto</h2>
-  <div style="margin-bottom: 24px;">Stock actual: <strong id="infoStock" style="font-size: 20px; color: var(--acento);">0</strong></div>
-  
-  <div style="margin-bottom: 24px; margin-top: 16px;">
-    <button id="btnSubirFoto" style="background: var(--bg-input); color: var(--acento); border: 1px dashed var(--acento); padding: 12px; border-radius: 12px; width: 100%; font-weight: 700; cursor: pointer;">
-      📷 Subir o cambiar foto
-    </button>
-    <input type="file" id="inputFoto" accept="image/*" style="display: none;">
+    <a href="index.html" class="btn-volver">← Volver</a>
   </div>
 
-  <div class="input-group">
-    <label>Conteo Físico Real</label>
-    <input type="number" id="conteo" min="0" step="1" placeholder="Ej: 12">
+  <div id="estado" class="aviso" style="display: block;">Conectando con Google Sheets...</div>
+
+  <div class="toggle">
+    <button id="btn-inicial" class="active" onclick="cambiarModo('inicial')">Conteo Inicial</button>
+    <button id="btn-ajuste" onclick="cambiarModo('ajuste')">Ajuste de Stock</button>
   </div>
 
-  <div class="input-group" id="bloqueMotivo" style="display:none;">
-    <label>Motivo del Ajuste</label>
-    <select id="motivo">
-      <option value="">Elige el motivo...</option>
-      <option value="Venta no registrada">Venta no registrada</option>
-      <option value="Consumo interno">Consumo interno</option>
-      <option value="Error del sistema">Error del sistema</option>
-    </select>
-  </div>
+  <input type="text" id="buscar" placeholder="Buscar producto..." autocomplete="off" oninput="filtrar()">
 
-  <button class="btn-primario" id="btnGuardar">Guardar Cambios</button>
-</div>
+  <div id="lista"></div>
+
+  <div id="panel">
+    <h2 id="p-nombre" style="margin-bottom: 8px;">Producto</h2>
+    <p style="margin-bottom: 20px; color: var(--suave);">Stock actual: <strong id="p-stock" style="color: var(--acento); font-size: 20px;">0</strong></p>
+    
+    <input type="number" id="conteo" placeholder="Conteo real">
+    
+    <div id="div-motivo" style="display: none;">
+      <select id="motivo">
+        <option value="Venta no registrada">Venta no registrada</option>
+        <option value="Consumo interno">Consumo interno</option>
+        <option value="Error de conteo">Error de conteo</option>
+      </select>
+    </div>
+
+    <button class="btn-primario" id="btn-guardar" onclick="guardarCambios()">Guardar Cambios</button>
+  </div>
 
 <script>
 let productos = [];
 let elegido = null;
 let modo = 'inicial';
 
-// --- CARGA INICIAL (CORREGIDA PARA JSONP) ---
+// --- CARGA INICIAL ---
 (async function () {
-  mostrar('Cargando productos...', 'aviso');
+  mostrarMensaje('Cargando productos...', 'aviso');
   try {
-    // Enviamos texto plano en vez de un objeto
+    // Usamos JSONP enviando el texto tal cual
     const r = await apiGet('accion=inventario');
-    
     if (!r.ok) throw new Error(r.error);
+    
     productos = r.items;
-    mostrar('¡Catálogo cargado! Busca un producto.', 'ok');
+    mostrarMensaje('¡Catálogo cargado!', 'ok');
     setTimeout(() => { document.getElementById('estado').style.display = 'none'; }, 3000);
   } catch (err) {
-    mostrar('ERROR al conectar: ' + err.message, 'error');
+    mostrarMensaje('Error de conexión: ' + err.message, 'error');
   }
 })();
 
-function norm(s) { return String(s || '').toLowerCase().trim(); }
+function mostrarMensaje(msg, tipo) {
+  const el = document.getElementById('estado');
+  el.textContent = msg;
+  el.className = tipo;
+  el.style.display = 'block';
+}
 
-document.getElementById('buscar').addEventListener('input', function() {
-  const q = norm(this.value);
-  const cont = document.getElementById('resultados');
+function cambiarModo(m) {
+  modo = m;
+  document.getElementById('btn-inicial').className = (m === 'inicial') ? 'active' : '';
+  document.getElementById('btn-ajuste').className = (m === 'ajuste') ? 'active' : '';
+  document.getElementById('div-motivo').style.display = (m === 'ajuste') ? 'block' : 'none';
+}
+
+function filtrar() {
+  const q = document.getElementById('buscar').value.toLowerCase();
+  const cont = document.getElementById('lista');
   cont.innerHTML = '';
   if (q.length < 2) return;
 
-  const items = productos.filter(p => norm(p.id + ' ' + p.nombre).indexOf(q) >= 0).slice(0, 15);
-
-  if (items.length === 0) {
-    cont.innerHTML = '<div style="text-align:center; padding:20px; color:var(--texto-suave);">Producto no encontrado.</div>';
-    return;
-  }
-
-  items.forEach(p => {
+  productos.filter(p => (p.id + ' ' + p.nombre).toLowerCase().includes(q)).slice(0, 15).forEach(p => {
     const d = document.createElement('div');
-    d.className = 'card-producto';
+    d.className = 'card';
+    let foto = p.imagen_url ? `<img src="${p.imagen_url}">` : `<div class="inicial">${p.nombre.charAt(0)}</div>`;
+    d.innerHTML = `${foto}<div class="card-info"><h3>${p.nombre}</h3><p>${p.id} · Stock: <strong>${p.stock_actual}</strong></p></div>`;
     
-    let fotoHTML = p.imagen_url ? `<img src="${p.imagen_url}" alt="">` : p.nombre.charAt(0).toUpperCase();
-    
-    d.innerHTML = `
-      <div class="foto-producto">${fotoHTML}</div>
-      <div class="info-producto">
-        <div class="nombre-producto">${p.nombre}</div>
-        <div class="meta-producto"><span>${p.id}</span> <span class="badge-stock badge-cero">${p.stock_actual} und</span></div>
-      </div>
-    `;
-    
-    d.addEventListener('click', () => {
+    d.onclick = () => {
       elegido = p;
       document.getElementById('panel').style.display = 'block';
-      document.getElementById('infoNombre').textContent = p.nombre;
-      document.getElementById('infoStock').textContent = p.stock_actual;
-      cont.innerHTML = '';
-      document.getElementById('buscar').value = '';
+      document.getElementById('p-nombre').textContent = p.nombre;
+      document.getElementById('p-stock').textContent = p.stock_actual;
+      document.getElementById('conteo').value = '';
+      cont.innerHTML = ''; document.getElementById('buscar').value = '';
       document.getElementById('panel').scrollIntoView({ behavior: 'smooth' });
-    });
+    };
     cont.appendChild(d);
   });
-});
+}
 
-document.getElementById('modoInicial').addEventListener('click', () => {
-  modo = 'inicial';
-  document.getElementById('modoInicial').classList.add('active');
-  document.getElementById('modoAjuste').classList.remove('active');
-  document.getElementById('bloqueMotivo').style.display = 'none';
-});
-
-document.getElementById('modoAjuste').addEventListener('click', () => {
-  modo = 'ajuste';
-  document.getElementById('modoAjuste').classList.add('active');
-  document.getElementById('modoInicial').classList.remove('active');
-  document.getElementById('bloqueMotivo').style.display = 'block';
-});
-
-// --- GUARDAR CAMBIOS (CORREGIDO PARA JSONP) ---
-document.getElementById('btnGuardar').addEventListener('click', async function () {
+async function guardarCambios() {
   if (!elegido) return;
-  const conteo = Number(document.getElementById('conteo').value);
-  if (isNaN(conteo)) { mostrar('Escribe un número válido', 'error'); return; }
+  const cant = Number(document.getElementById('conteo').value);
+  if (isNaN(cant)) return mostrarMensaje('Escribe un número válido', 'error');
 
-  if (modo === 'ajuste' && !document.getElementById('motivo').value) {
-    mostrar('Elige un motivo para el ajuste', 'error'); return;
-  }
-
-  this.disabled = true;
-  this.textContent = 'Guardando...';
+  document.getElementById('btn-guardar').textContent = 'Guardando...';
 
   try {
     let r;
     if (modo === 'inicial') {
-      // Enviamos texto plano
-      r = await apiGet('accion=inventario_inicial&id_producto=' + elegido.id + '&conteo=' + conteo);
+      r = await apiGet('accion=inventario_inicial&id_producto=' + elegido.id + '&conteo=' + cant);
     } else {
-      const motivo = document.getElementById('motivo').value;
-      r = await apiGet('accion=ajuste_inventario&id_producto=' + elegido.id + '&conteo_real=' + conteo + '&motivo=' + encodeURIComponent(motivo));
+      const mot = document.getElementById('motivo').value;
+      r = await apiGet('accion=ajuste_inventario&id_producto=' + elegido.id + '&conteo_real=' + cant + '&motivo=' + encodeURIComponent(mot));
     }
 
     if (r.ok) {
-      mostrar('Guardado exitosamente', 'ok');
+      mostrarMensaje('Guardado exitosamente', 'ok');
       elegido.stock_actual = (modo === 'inicial') ? r.stock_inicial : r.stock_nuevo;
       document.getElementById('panel').style.display = 'none';
     } else {
-      mostrar(r.error || 'Error al guardar', 'error');
+      mostrarMensaje(r.error || 'Error al guardar', 'error');
     }
   } catch (err) {
-    mostrar('Error de conexión al guardar', 'error');
+    mostrarMensaje('Error de conexión', 'error');
   } finally {
-    this.disabled = false;
-    this.textContent = 'Guardar Cambios';
+    document.getElementById('btn-guardar').textContent = 'Guardar Cambios';
   }
-});
-
-// --- LÓGICA PARA SUBIR FOTOS (CORREGIDO PARA JSONP) ---
-document.getElementById('btnSubirFoto').addEventListener('click', function() {
-  document.getElementById('inputFoto').click();
-});
-
-document.getElementById('inputFoto').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = async function(event) {
-    const base64 = event.target.result;
-    document.getElementById('btnSubirFoto').textContent = 'Subiendo...';
-    document.getElementById('btnSubirFoto').disabled = true;
-
-    try {
-      // La foto es un texto muy largo, encodeURIComponent lo hace seguro para JSONP
-      const r = await apiGet('accion=subir_foto&id_producto=' + elegido.id + '&base64=' + encodeURIComponent(base64));
-      
-      if (r.ok) {
-        mostrar('Foto actualizada con éxito', 'ok');
-        elegido.imagen_url = r.url;
-      } else {
-        mostrar(r.error || 'Error al subir', 'error');
-      }
-    } catch (err) {
-      mostrar('Error de conexión al subir foto', 'error');
-    } finally {
-      document.getElementById('btnSubirFoto').textContent = '📷 Subir o cambiar foto';
-      document.getElementById('btnSubirFoto').disabled = false;
-      document.getElementById('inputFoto').value = '';
-    }
-  };
-  reader.readAsDataURL(file);
-});
+}
 </script>
 </body>
 </html>
