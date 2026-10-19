@@ -3,395 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Inventario · ACEII</title>
-<link rel="stylesheet" href="estilos.css">
-<script src="comun.js"></script>
+<title>ACEII · Menú Principal</title>
 <style>
-  /* --- NUEVO DISEÑO: "Dark Professional" --- */
   :root {
-    --bg-app: #0F111A;          /* Fondo principal muy oscuro */
-    --bg-card: #1A1D2D;         /* Fondo de las tarjetas */
-    --bg-input: #25293D;        /* Fondo de los inputs */
-    --texto: #F8FAFC;           /* Texto principal */
-    --texto-suave: #94A3B8;     /* Texto secundario */
-    --borde: #334155;           /* Bordes sutiles */
-    --acento: #6366F1;          /* Índigo eléctrico */
+    --bg-app: #0F111A;
+    --bg-card: #1A1D2D;
+    --texto: #F8FAFC;
+    --texto-suave: #94A3B8;
+    --borde: #334155;
+    --acento: #6366F1;
     --acento-bg: rgba(99, 102, 241, 0.15);
-    --peligro: #EF4444;
-    --exito: #10B981;
-    --radio-tarjeta: 20px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  body { background-color: var(--bg-app); color: var(--texto); padding: 24px; display: flex; flex-direction: column; min-height: 100vh; }
+  
+  .header { margin-bottom: 40px; margin-top: 20px; }
+  .header h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+  .header p { font-size: 15px; color: var(--texto-suave); margin-top: 8px; }
 
-  body {
-    background-color: var(--bg-app);
-    color: var(--texto);
-    padding: 20px;
-    padding-bottom: 100px; /* Espacio para el nav inferior */
-  }
-
-  /* Header */
-  .header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    padding-top: 10px;
-  }
-  .header-top h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
-  .header-top p { font-size: 14px; color: var(--texto-suave); font-weight: 500; margin-top: 4px; }
-  .btn-icono {
-    background: var(--bg-card); border: 1px solid var(--borde); color: var(--texto);
-    width: 44px; height: 44px; border-radius: 50%; font-size: 20px;
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-  }
-
-  /* Toggle Modo (Inventario / Ajuste) */
-  .toggle-container {
+  .menu-grid { display: flex; flex-direction: column; gap: 16px; }
+  
+  .menu-card {
     background: var(--bg-card);
-    padding: 6px; border-radius: 16px; display: flex; gap: 6px; margin-bottom: 24px;
     border: 1px solid var(--borde);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    text-decoration: none;
+    color: var(--texto);
+    transition: transform 0.2s, border-color 0.2s;
   }
-  .toggle-btn {
-    flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 14px;
-    background: transparent; color: var(--texto-suave); cursor: pointer; transition: all 0.2s;
-  }
-  .toggle-btn.active { background: var(--acento); color: #FFF; box-shadow: 0 4px 12px var(--acento-bg); }
-
-  /* Inputs */
-  .input-group { margin-bottom: 20px; }
-  .input-group label { display: block; font-size: 13px; font-weight: 700; color: var(--texto-suave); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-  input[type="text"], input[type="number"], select {
-    width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--borde);
-    background: var(--bg-input); color: var(--texto); font-size: 16px; outline: none; transition: border 0.2s;
-  }
-  input:focus, select:focus { border-color: var(--acento); }
-  input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--acento); }
-
-  /* Resultados (Tarjetas) */
-  #resultados { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-  .card-producto {
-    background: var(--bg-card); padding: 16px; border-radius: var(--radio-tarjeta);
-    display: flex; align-items: center; gap: 16px; border: 1px solid var(--borde);
-    cursor: pointer; transition: transform 0.1s, border-color 0.2s;
-  }
-  .card-producto:active { transform: scale(0.98); }
-  .card-producto:hover { border-color: var(--acento); }
-
-  .foto-producto {
-    width: 56px; height: 56px; border-radius: 14px; background: var(--bg-input);
+  .menu-card:active { transform: scale(0.98); }
+  .menu-card:hover { border-color: var(--acento); }
+  
+  .icon-box {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: var(--acento-bg); color: var(--acento);
     display: flex; align-items: center; justify-content: center;
-    font-size: 20px; font-weight: 800; color: var(--acento); flex-shrink: 0; overflow: hidden;
+    font-size: 28px; flex-shrink: 0;
   }
-  .foto-producto img { width: 100%; height: 100%; object-fit: cover; }
-
-  .info-producto { flex: 1; min-width: 0; }
-  .nombre-producto { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .meta-producto { font-size: 13px; color: var(--texto-suave); margin-top: 4px; display: flex; align-items: center; gap: 8px; }
-  .badge-stock { padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 13px; }
-  .badge-ok { background: rgba(16, 185, 129, 0.2); color: var(--exito); }
-  .badge-bajo { background: rgba(245, 158, 11, 0.2); color: #F59E0B; }
-  .badge-cero { background: rgba(239, 68, 68, 0.2); color: var(--peligro); }
-
-  /* Panel de edición */
-  .panel-edicion {
-    background: var(--bg-card); padding: 24px; border-radius: var(--radio-tarjeta);
-    border: 1px solid var(--borde); margin-top: 24px; display: none;
-  }
-  .panel-edicion h2 { font-size: 20px; margin-bottom: 4px; }
-  .panel-edicion .stock-actual { font-size: 14px; color: var(--texto-suave); margin-bottom: 24px; }
-  .panel-edicion .stock-num { font-size: 24px; font-weight: 800; color: var(--acento); }
-
-  .btn-primario {
-    width: 100%; padding: 18px; border-radius: 16px; border: none;
-    background: var(--acento); color: #FFF; font-size: 16px; font-weight: 800;
-    cursor: pointer; margin-top: 24px; transition: opacity 0.2s;
-  }
-  .btn-primario:active { opacity: 0.8; }
-
-  /* Alertas / Mensajes */
-  #estado {
-    padding: 16px; border-radius: 16px; font-weight: 600; font-size: 14px;
-    text-align: center; margin-bottom: 20px; display: none;
-  }
-  .estado-ok { background: rgba(16, 185, 129, 0.15); color: var(--exito); border: 1px solid var(--exito); }
-  .estado-error { background: rgba(239, 68, 68, 0.15); color: var(--peligro); border: 1px solid var(--peligro); }
-  .estado-aviso { background: var(--acento-bg); color: var(--acento); border: 1px solid var(--acento); }
-
+  
+  .menu-text h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .menu-text p { font-size: 13px; color: var(--texto-suave); }
 </style>
 </head>
 <body>
 
-<header class="header-top">
-  <div>
-    <h1>Inventario</h1>
-    <p>Stock y Ajustes</p>
-  </div>
-  <!-- Botón para tema (opcional, lo dejamos por ahora) -->
-  <button class="btn-icono" id="btnTema">🌙</button>
-</header>
-
-<div id="estado" class="estado-aviso">Cargando inventario...</div>
-
-<div class="toggle-container">
-  <button id="modoInicial" class="toggle-btn active">Conteo Inicial</button>
-  <button id="modoAjuste" class="toggle-btn">Ajuste de Stock</button>
-</div>
-
-<div class="input-group">
-  <label>Buscar Producto</label>
-  <input type="text" id="buscar" placeholder="Escribe 2 letras o más..." autocomplete="off">
-  <label style="display:flex; align-items:center; gap:8px; margin-top:16px; text-transform:none; font-size:14px;">
-    <input type="checkbox" id="soloPendientes"> Mostrar solo productos con stock 0
-  </label>
-</div>
-
-<div id="resultados"></div>
-
-<div class="panel-edicion" id="panel">
-  <h2 id="infoNombre">Producto</h2>
-  <div class="stock-actual">Stock del sistema: <span class="stock-num" id="infoStock">0</span></div>
-    <div style="margin-bottom: 20px;">
-    <button id="btnSubirFoto" style="background: var(--bg-input); color: var(--acento); border: 1px dashed var(--acento); padding: 12px; border-radius: 12px; width: 100%; font-weight: 700; cursor: pointer;">
-      📷 Subir o cambiar foto
-    </button>
-    <input type="file" id="inputFoto" accept="image/*" style="display: none;">
+  <div class="header">
+    <h1>ACEII</h1>
+    <p>Selecciona una opción para continuar</p>
   </div>
 
-
-
-
-  <div class="input-group">
-    <label>Conteo Físico Real (Unidades)</label>
-    <input type="number" id="conteo" min="0" step="1" inputmode="numeric" placeholder="Ej: 12">
-  </div>
-
-  <div class="input-group" id="bloqueMotivo" style="display:none;">
-    <label>Motivo del Ajuste</label>
-    <select id="motivo">
-      <option value="">Elige el motivo...</option>
-      <option value="Venta no registrada">Venta no registrada</option>
-      <option value="Consumo interno">Consumo interno (sin pago)</option>
-      <option value="Error del sistema">Error del sistema</option>
-      <option value="Producto dañado / vencido">Producto dañado / vencido</option>
-      <option value="Otro">Otro</option>
-    </select>
-  </div>
-
-  <div class="input-group">
-    <label>Observaciones (Opcional)</label>
-    <input type="text" id="obs" maxlength="200" placeholder="Ej: Faltaron 3 por error...">
-  </div>
-
-  <button class="btn-primario" id="btnGuardar">Guardar Cambios</button>
-</div>
-
-<script>
-// --- LÓGICA DE LA INTERFAZ ---
-
-let productos = [];
-let elegido = null;
-let modo = 'inicial';
-
-// Botón de tema (simple toggle visual)
-document.getElementById('btnTema').addEventListener('click', function() {
-  const body = document.body;
-  if(body.style.backgroundColor === 'white') {
-    body.style.backgroundColor = '#0F111A'; body.style.color = '#F8FAFC';
-  } else {
-    body.style.backgroundColor = 'white'; body.style.color = '#0F111A';
-  }
-});
-
-// Carga inicial
-(async function () {
-  try {
-    const r = await apiGet({ accion: 'inventario' });
-    if (!r.ok) throw new Error(r.error);
-    productos = r.items;
-    mostrar('Elige un producto para continuar', 'ok');
-    pintarResultados();
-  } catch (err) {
-    mostrar('Error al cargar: ' + err.message, 'error');
-  }
-})();
-
-function norm(s) { return String(s || '').toLowerCase().trim(); }
-
-function pintarResultados() {
-  const q = norm(document.getElementById('buscar').value);
-  const soloPend = document.getElementById('soloPendientes').checked;
-  const cont = document.getElementById('resultados');
-  cont.innerHTML = '';
-
-  if (q.length < 2 && !soloPend) return;
-
-  let items = productos.slice();
-  if (soloPend) items = items.filter(p => p.stock_actual === 0);
-  if (q) items = items.filter(p => norm(p.id + ' ' + p.nombre).indexOf(q) >= 0);
-
-  items = items.slice(0, 20); // Mostrar hasta 20
-
-  if (!items.length) {
-    cont.innerHTML = '<div style="text-align:center; padding:20px; color:var(--texto-suave);">Sin resultados.</div>';
-    return;
-  }
-
-  items.forEach(p => {
-    const d = document.createElement('div');
-    d.className = 'card-producto';
-
-    // Lógica de la imagen (si tiene URL de Drive)
-    let fotoHTML = '';
-    if (p.imagen_url) {
-      // Usamos un endpoint de Google Drive para incrustar la imagen directamente
-      fotoHTML = `<img src="${p.imagen_url}" alt="" loading="lazy">`;
-    } else {
-      fotoHTML = p.nombre.charAt(0).toUpperCase();
-    }
-
-    let stockClase = 'badge-ok';
-    if (p.stock_actual === 0) stockClase = 'badge-cero';
-    else if (p.stock_actual <= 5) stockClase = 'badge-bajo';
-
-    d.innerHTML = `
-      <div class="foto-producto">${fotoHTML}</div>
-      <div class="info-producto">
-        <div class="nombre-producto">${p.nombre}</div>
-        <div class="meta-producto">
-          <span>${p.id}</span>
-          <span class="badge-stock ${stockClase}">${p.stock_actual} und</span>
-        </div>
-      </div>
-    `;
-
-    d.addEventListener('click', () => {
-      elegido = p;
-      mostrarPanel();
-      document.getElementById('resultados').innerHTML = '';
-      document.getElementById('buscar').value = '';
-    });
-
-    cont.appendChild(d);
-  });
-}
-
-function mostrarPanel() {
-  const panel = document.getElementById('panel');
-  panel.style.display = 'block';
-  document.getElementById('infoNombre').textContent = elegido.nombre;
-  document.getElementById('infoStock').textContent = elegido.stock_actual;
-  document.getElementById('conteo').value = '';
-  document.getElementById('obs').value = '';
-  document.getElementById('motivo').value = '';
-  panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-function fijarModo(m) {
-  modo = m;
-  document.getElementById('modoInicial').classList.toggle('active', m === 'inicial');
-  document.getElementById('modoAjuste').classList.toggle('active', m === 'ajuste');
-  document.getElementById('bloqueMotivo').style.display = (m === 'ajuste') ? 'block' : 'none';
-}
-
-document.getElementById('modoInicial').addEventListener('click', () => fijarModo('inicial'));
-document.getElementById('modoAjuste').addEventListener('click', () => fijarModo('ajuste'));
-document.getElementById('buscar').addEventListener('input', pintarResultados);
-document.getElementById('soloPendientes').addEventListener('change', pintarResultados);
-
-document.getElementById('btnGuardar').addEventListener('click', async function () {
-  if (!elegido) return;
-  const conteo = Number(document.getElementById('conteo').value);
-  
-  if (isNaN(conteo) || conteo < 0) {
-    mostrar('El conteo debe ser un número válido', 'error'); return;
-  }
-
-  if (modo === 'ajuste' && !document.getElementById('motivo').value) {
-    mostrar('Elige un motivo para el ajuste', 'error'); return;
-  }
-
-  this.disabled = true;
-  this.textContent = 'Guardando...';
-
-  try {
-    let r;
-    if (modo === 'inicial') {
-      r = await apiGet({ accion: 'inventario_inicial', id_producto: elegido.id, conteo: conteo, id_usuario: 'Admin' });
-    } else {
-      r = await apiGet({ accion: 'ajuste_inventario', id_producto: elegido.id, conteo_real: conteo, id_usuario: 'Admin', motivo: document.getElementById('motivo').value, observaciones: document.getElementById('obs').value });
-    }
-
-    if (r.ok) {
-      mostrar('Guardado exitosamente', 'ok');
-      elegido.stock_actual = (modo === 'inicial') ? r.stock_inicial : r.stock_nuevo;
-      document.getElementById('panel').style.display = 'none';
-      pintarResultados();
-    } else {
-      mostrar(r.error || 'Error al guardar', 'error');
-    }
-  } catch (err) {
-    mostrar('Error de conexión', 'error');
-  } finally {
-    this.disabled = false;
-    this.textContent = 'Guardar Cambios';
-  }
-});
-
-// Funciones auxiliares
-function mostrar(msg, tipo) {
-  const el = document.getElementById('estado');
-  el.textContent = msg;
-  el.className = 'estado-' + (tipo || 'aviso');
-  el.style.display = 'block';
-  setTimeout(() => { el.style.display = 'none'; }, 4000);
-}
-
-
-// --- LÓGICA PARA SUBIR FOTOS ---
-document.getElementById('btnSubirFoto').addEventListener('click', function() {
-  document.getElementById('inputFoto').click();
-});
-
-document.getElementById('inputFoto').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = async function(event) {
-    const base64 = event.target.result;
+  <div class="menu-grid">
     
-    // Mostrar estado de carga
-    document.getElementById('btnSubirFoto').textContent = 'Subiendo...';
-    document.getElementById('btnSubirFoto').disabled = true;
+    <!-- Enlace a Inventario -->
+    <a href="inventario.html" class="menu-card">
+      <div class="icon-box">📦</div>
+      <div class="menu-text">
+        <h2>Inventario y Ajustes</h2>
+        <p>Conteo físico, stock actual y fotos</p>
+      </div>
+    </a>
 
-    try {
-      const r = await apiGet({ 
-        accion: 'subir_foto', 
-        id_producto: elegido.id, 
-        base64: base64 
-      });
+    <!-- Estos los crearemos después -->
+    <a href="#" class="menu-card" style="opacity: 0.5; pointer-events: none;">
+      <div class="icon-box">📥</div>
+      <div class="menu-text">
+        <h2>Recepción de Mercancía</h2>
+        <p>Próximamente...</p>
+      </div>
+    </a>
 
-      if (r.ok) {
-        mostrar('Foto actualizada con éxito', 'ok');
-        // Actualizamos la imagen en el objeto del producto para que se vea al instante
-        elegido.imagen_url = r.url;
-      } else {
-        mostrar(r.error || 'Error al subir', 'error');
-      }
-    } catch (err) {
-      mostrar('Error de conexión al subir foto', 'error');
-    } finally {
-      document.getElementById('btnSubirFoto').textContent = '📷 Subir o cambiar foto';
-      document.getElementById('btnSubirFoto').disabled = false;
-      // Limpiamos el input para poder subir otra foto del mismo archivo si se quiere
-      document.getElementById('inputFoto').value = '';
-    }
-  };
-  reader.readAsDataURL(file);
-});
-</script>
-<script src="nav.js"></script>
+    <a href="#" class="menu-card" style="opacity: 0.5; pointer-events: none;">
+      <div class="icon-box">📤</div>
+      <div class="menu-text">
+        <h2>Salidas y Ventas</h2>
+        <p>Próximamente...</p>
+      </div>
+    </a>
+
+  </div>
+
 </body>
 </html>
