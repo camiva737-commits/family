@@ -1,6 +1,5 @@
 // --- CONFIGURACIÓN GLOBAL ---
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxJTtF1dkIdS21iiDer0mYOoykbRKMs6yEqZlL8uxNMNVmvY6jr0dMrWbD_He7kO5GU/exec';
-
+const WEB_APP_URL = 'https://script.google.com/macros/library/d/17yh_8hy8yO4NGQGy1Qx48hIIDrkkv7qezXTY1-3-dkOIGgqqbHQw6H-N/7'
 // Función para mostrar mensajes
 function mostrar(msg, tipo) {
   const el = document.getElementById('estado');
