@@ -3,88 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>ArquiDulces · Menú Principal</title>
+<title>ArquiDulces</title>
 <style>
   :root {
-    --bg-app: #0F111A;
-    --bg-card: #1A1D2D;
-    --texto: #F8FAFC;
-    --texto-suave: #94A3B8;
-    --borde: #334155;
-    --acento: #F59E0B; /* Naranja ArquiDulces */
-    --acento-bg: rgba(245, 158, 11, 0.15);
+    --bg: #0F111A; --card: #1A1D2D; --texto: #F8FAFC; --suave: #94A3B8; --borde: #334155; --acento: #F59E0B;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background-color: var(--bg-app); color: var(--texto); padding: 24px; display: flex; flex-direction: column; min-height: 100vh; }
+  body { background: var(--bg); color: var(--texto); padding: 24px; min-height: 100vh; }
   
-  .header { margin-bottom: 40px; margin-top: 20px; }
-  .header h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; color: var(--acento); }
-  .header p { font-size: 15px; color: var(--texto-suave); margin-top: 8px; }
+  h1 { font-size: 32px; font-weight: 800; color: var(--acento); letter-spacing: -1px; margin-top: 20px; }
+  p.sub { color: var(--suave); font-size: 15px; margin-bottom: 40px; margin-top: 8px; }
 
-  .menu-grid { display: flex; flex-direction: column; gap: 16px; }
-  
-  .menu-card {
-    background: var(--bg-card);
-    border: 1px solid var(--borde);
-    border-radius: 20px;
-    padding: 24px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    text-decoration: none;
-    color: var(--texto);
-    transition: transform 0.2s, border-color 0.2s;
+  .card {
+    background: var(--card); border: 1px solid var(--borde); border-radius: 20px;
+    padding: 24px; display: flex; align-items: center; gap: 20px;
+    text-decoration: none; color: var(--texto); margin-bottom: 16px;
+    transition: transform 0.2s;
   }
-  .menu-card:active { transform: scale(0.98); }
-  .menu-card:hover { border-color: var(--acento); }
-  
-  .icon-box {
-    width: 56px; height: 56px; border-radius: 16px;
-    background: var(--acento-bg); color: var(--acento);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px; flex-shrink: 0;
-  }
-  
-  .menu-text h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-  .menu-text p { font-size: 13px; color: var(--texto-suave); }
+  .card:active { transform: scale(0.98); }
+  .icon { width: 56px; height: 56px; border-radius: 16px; background: rgba(245, 158, 11, 0.15); color: var(--acento); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .card-text h2 { font-size: 18px; margin-bottom: 4px; }
+  .card-text p { font-size: 13px; color: var(--suave); }
 </style>
 </head>
 <body>
+  <h1>ArquiDulces</h1>
+  <p class="sub">Selecciona una opción</p>
 
-  <div class="header">
-    <h1>ArquiDulces</h1>
-    <p>Selecciona una opción para continuar</p>
+  <a href="inventario.html" class="card">
+    <div class="icon">📦</div>
+    <div class="card-text">
+      <h2>Inventario</h2>
+      <p>Stock y ajustes</p>
+    </div>
+  </a>
+
+  <div class="card" style="opacity: 0.5;">
+    <div class="icon">📥</div>
+    <div class="card-text">
+      <h2>Recepciones</h2>
+      <p>Próximamente...</p>
+    </div>
   </div>
-
-  <div class="menu-grid">
-    
-    <!-- Enlace a Inventario -->
-    <a href="inventario.html" class="menu-card">
-      <div class="icon-box">📦</div>
-      <div class="menu-text">
-        <h2>Inventario y Ajustes</h2>
-        <p>Conteo físico, stock actual y fotos</p>
-      </div>
-    </a>
-
-    <!-- Estos los crearemos después -->
-    <a href="#" class="menu-card" style="opacity: 0.5; pointer-events: none;">
-      <div class="icon-box">📥</div>
-      <div class="menu-text">
-        <h2>Recepción de Mercancía</h2>
-        <p>Próximamente...</p>
-      </div>
-    </a>
-
-    <a href="#" class="menu-card" style="opacity: 0.5; pointer-events: none;">
-      <div class="icon-box">📤</div>
-      <div class="menu-text">
-        <h2>Salidas y Ventas</h2>
-        <p>Próximamente...</p>
-      </div>
-    </a>
-
-  </div>
-
 </body>
 </html>
