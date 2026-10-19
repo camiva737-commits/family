@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>ArquiDulces</title>
+<title>ArquiDulces · Menú Principal</title>
 <style>
   :root {
     --bg: #0F111A; --card: #1A1D2D; --texto: #F8FAFC; --suave: #94A3B8; --borde: #334155; --acento: #F59E0B;
@@ -30,6 +30,7 @@
   <h1>ArquiDulces</h1>
   <p class="sub">Selecciona una opción</p>
 
+  <!-- Botón de Inventario -->
   <a href="inventario.html" class="card">
     <div class="icon">📦</div>
     <div class="card-text">
@@ -38,10 +39,20 @@
     </div>
   </a>
 
-  <div class="card" style="opacity: 0.5;">
+  <!-- Botón de Recepciones (Actualizado) -->
+  <a href="entradas.html" class="card">
     <div class="icon">📥</div>
     <div class="card-text">
       <h2>Recepciones</h2>
+      <p>Registro de mercancía nueva</p>
+    </div>
+  </a>
+
+  <!-- Botón de Salidas (Próximamente) -->
+  <div class="card" style="opacity: 0.5;">
+    <div class="icon" style="color: var(--suave); background: rgba(148, 163, 184, 0.1);">📤</div>
+    <div class="card-text">
+      <h2>Salidas</h2>
       <p>Próximamente...</p>
     </div>
   </div>
