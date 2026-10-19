@@ -193,6 +193,57 @@ async function guardarEntrada() {
     document.getElementById('btn-guardar').disabled = false;
   }
 }
+
+async function procesarFotoIA(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const base64 = e.target.result;
+    
+    // Mostrar estado de carga
+    const btn = document.querySelector('button[onclick*="fotoFactura"]');
+    btn.textContent = '⏳';
+    btn.disabled = true;
+
+    try {
+      const r = await apiGet('accion=escanear_ia&base64=' + encodeURIComponent(base64));
+      
+      if (r.ok || r.proveedor) { // Asumiendo que la IA devuelve los datos directos
+        document.getElementById('factura').value = r.factura || '';
+        
+        // Aquí podrías agregar la lógica para buscar los productos en tu catálogo
+        // y rellenar las líneas automáticamente.
+        alert("¡Factura leída! Proveedor: " + r.proveedor + ". Se encontraron " + (r.productos ? r.productos.length : 0) + " productos.");
+        
+        // Ejemplo rápido de cómo agregar líneas:
+        /*
+        r.productos.forEach(prodIA => {
+          const match = productos.find(p => p.nombre.toLowerCase().includes(prodIA.nombre.toLowerCase()));
+          if (match) {
+            lineasAgregadas.push({
+              id_producto: match.id,
+              nombre: match.nombre,
+              cantidad: prodIA.cantidad
+            });
+          }
+        });
+        renderizarLineas();
+        */
+      } else {
+        alert("No se pudo leer la factura.");
+      }
+    } catch (err) {
+      alert("Error al conectar con la IA: " + err.message);
+    } finally {
+      btn.textContent = '📷';
+      btn.disabled = false;
+      input.value = '';
+    }
+  };
+  reader.readAsDataURL(file);
+}
 </script>
 </body>
 </html>
