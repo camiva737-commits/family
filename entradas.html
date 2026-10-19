@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Entradas · ArquiDulces</title>
-<script src="comun.js"></script>
+<script src="comun.js?v=7"></script>
 <style>
   :root {
     --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
@@ -17,7 +17,7 @@
   .header h1 { font-size: 24px; color: var(--acento); font-weight: 800; }
   .btn-volver { background: none; border: none; color: var(--suave); font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
 
-  #estado { padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: none; }
+  #estado { padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: none; white-space: pre-line; }
   .ok { background: rgba(16, 185, 129, 0.2); color: var(--acento); border: 1px solid var(--acento); }
   .error { background: rgba(239, 68, 68, 0.2); color: var(--peligro); border: 1px solid var(--peligro); }
 
@@ -34,16 +34,18 @@
   .btn-eliminar { background: none; border: none; color: var(--peligro); font-size: 20px; cursor: pointer; padding: 5px; }
 
   .btn-primario { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--acento); color: #000; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+  .btn-primario:disabled { opacity: 0.6; }
   .btn-secundario { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--acento); background: transparent; color: var(--acento); font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
   #buscador-wrapper { display: none; background: var(--bg); position: sticky; top: 0; padding: 10px 0; z-index: 10; }
   .resultado { padding: 12px; background: var(--card); border-bottom: 1px solid var(--borde); cursor: pointer; }
   .resultado:active { background: var(--input); }
 
-  /* Estilos para la cámara */
+  /* Botones de cámara y galería */
   .input-camara-group { display: flex; gap: 10px; align-items: stretch; margin-bottom: 12px; }
-  .input-camara-group input { margin-bottom: 0; flex: 1; }
+  .input-camara-group input { margin-bottom: 0; flex: 1; min-width: 0; }
   .btn-camara { padding: 0 16px; border-radius: 12px; background: var(--acento); border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .btn-camara:disabled { opacity: 0.5; }
 </style>
 </head>
 <body>
@@ -58,11 +60,12 @@
   <div class="card">
     <div class="input-camara-group">
       <input type="text" id="factura" placeholder="Número de factura">
-      <!-- BOTÓN DE LA CÁMARA -->
-      <button id="btn-camara" class="btn-camara" onclick="document.getElementById('fotoFactura').click()" title="Escanear factura con IA">📷</button>
+      <button class="btn-camara" title="Tomar foto de la factura" onclick="document.getElementById('fotoCamara').click()">📷</button>
+      <button class="btn-camara" title="Elegir foto de la galería" onclick="document.getElementById('fotoGaleria').click()">🖼️</button>
     </div>
-    <!-- INPUT OCULTO PARA LA FOTO -->
-    <input type="file" id="fotoFactura" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
+    <!-- Inputs ocultos: uno abre la cámara, el otro la galería -->
+    <input type="file" id="fotoCamara" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoIA(this)">
+    <input type="file" id="fotoGaleria" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
     
     <select id="proveedor">
       <option value="">Seleccione Proveedor...</option>
@@ -99,75 +102,55 @@ let lineasAgregadas = [];
     productos = r.items;
     document.getElementById('estado').style.display = 'none';
   } catch (err) {
-    document.getElementById('estado').textContent = 'Error al cargar catálogo';
+    document.getElementById('estado').textContent = 'Error al cargar catálogo: ' + err.message;
     document.getElementById('estado').className = 'error';
   }
 })();
 
-// --- LÓGICA DE LA IA (FOTO) ---
+// --- LECTURA DE FACTURA CON IA (FOTO POR POST) ---
 async function procesarFotoIA(input) {
   const file = input.files[0];
   if (!file) return;
 
-  const btn = document.getElementById('btn-camara');
-  btn.textContent = '⏳';
-  btn.disabled = true;
+  const botones = document.querySelectorAll('.btn-camara');
+  botones.forEach(b => { b.disabled = true; });
 
-  // 1. COMPRIMIR LA IMAGEN ANTES DE ENVIARLA
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img = new Image();
-    img.onload = async function() {
-      // Creamos un canvas para redimensionar
-      const canvas = document.createElement('canvas');
-      const MAX_WIDTH = 800; // Ancho máximo para que sea rápido
-      const scale = MAX_WIDTH / img.width;
-      canvas.width = MAX_WIDTH;
-      canvas.height = img.height * scale;
-      
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      
-      // Exportamos como JPEG con calidad media (0.6)
-      const base64 = canvas.toDataURL('image/jpeg', 0.6);
+  const estado = document.getElementById('estado');
+  estado.className = 'ok';
+  estado.textContent = 'Leyendo factura con IA... (puede tardar unos segundos)';
+  estado.style.display = 'block';
 
-      try {
-        const r = await apiGet('accion=escanear_ia&base64=' + encodeURIComponent(base64));
-        
-        if (r.ok || r.proveedor) { 
-          document.getElementById('factura').value = r.factura || '';
-          
-          if (r.productos && r.productos.length > 0) {
-            r.productos.forEach(prodIA => {
-              const match = productos.find(p => p.nombre.toLowerCase().includes(prodIA.nombre.toLowerCase()));
-              if (match) {
-                lineasAgregadas.push({
-                  id_producto: match.id,
-                  nombre: match.nombre,
-                  cantidad: prodIA.cantidad,
-                  precio: prodIA.precio || ''
-                });
-              }
-            });
-            renderizarLineas();
-            alert("¡Factura leída! Se agregaron los productos encontrados.");
-          } else {
-            alert("La IA no encontró productos en la factura.");
-          }
-        } else {
-          alert("No se pudo leer la factura. Intenta de nuevo.");
-        }
-      } catch (err) {
-        alert("Error al conectar con la IA: " + err.message);
-      } finally {
-        btn.textContent = '📷';
-        btn.disabled = false;
-        input.value = '';
-      }
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+  try {
+    const base64 = await comprimirImagen(file, 1200, 0.7);
+    const r = await apiPost({ accion: 'escanear_ia', base64: base64 }, 90);
+
+    if (!r.ok) throw new Error(r.error || 'No se pudo leer la factura');
+
+    if (r.factura) document.getElementById('factura').value = r.factura;
+
+    (r.lineas || []).forEach(l => {
+      lineasAgregadas.push({
+        id_producto: l.id_producto,
+        nombre: l.nombre,
+        cantidad: l.cantidad,
+        precio: l.precio
+      });
+    });
+    renderizarLineas();
+
+    let msg = 'Factura leída. Productos agregados: ' + (r.lineas || []).length + '.';
+    if (r.sin_coincidencia && r.sin_coincidencia.length) {
+      msg += '\n\nNo reconocí estos, agrégalos manualmente:\n- ' + r.sin_coincidencia.join('\n- ');
+    }
+    alert(msg);
+    estado.style.display = 'none';
+  } catch (err) {
+    estado.className = 'error';
+    estado.textContent = 'Error: ' + err.message;
+  } finally {
+    botones.forEach(b => { b.disabled = false; });
+    input.value = '';
+  }
 }
 
 // --- BUSCADOR MANUAL ---
@@ -239,7 +222,7 @@ function eliminarLinea(index) {
   renderizarLineas();
 }
 
-// --- GUARDAR ENTRADA ---
+// --- GUARDAR ENTRADA (POST) ---
 async function guardarEntrada() {
   const factura = document.getElementById('factura').value.trim();
   const proveedor = document.getElementById('proveedor').value;
@@ -248,8 +231,9 @@ async function guardarEntrada() {
   if (!proveedor) return alert('Selecciona un proveedor');
   if (lineasAgregadas.length === 0) return alert('Agrega al menos un producto');
 
-  document.getElementById('btn-guardar').textContent = 'Guardando...';
-  document.getElementById('btn-guardar').disabled = true;
+  const btn = document.getElementById('btn-guardar');
+  btn.textContent = 'Guardando...';
+  btn.disabled = true;
 
   const datos = {
     factura: factura,
@@ -259,9 +243,8 @@ async function guardarEntrada() {
   };
 
   try {
-    // Para enviar objetos complejos por JSONP, los convertimos a string
-    const r = await apiGet('accion=guardar_entrada&datos=' + encodeURIComponent(JSON.stringify(datos)));
-    
+    const r = await apiPost({ accion: 'guardar_entrada', datos: datos });
+
     if (r.ok) {
       alert('¡Recepción guardada con éxito! ID: ' + r.id_entrada);
       location.reload(); // Recargar para limpiar
@@ -269,10 +252,10 @@ async function guardarEntrada() {
       alert('Error: ' + r.error);
     }
   } catch (err) {
-    alert('Error de conexión');
+    alert('Error de conexión: ' + err.message);
   } finally {
-    document.getElementById('btn-guardar').textContent = 'Guardar Recepción';
-    document.getElementById('btn-guardar').disabled = false;
+    btn.textContent = 'Guardar Recepción';
+    btn.disabled = false;
   }
 }
 </script>
