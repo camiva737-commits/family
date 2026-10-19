@@ -4,24 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Inventario · ArquiDulces</title>
-<link rel="stylesheet" href="estilos.css">
-<!-- AQUÍ SE CONECTA CON EL COMUN.JS -->
-<script src="comun.js"></script> 
+<!-- IMPORTANTE: Aquí llamamos al comun.js -->
+<script src="comun.js?v=5"></script>
 <style>
   :root {
-    --bg-app: #0F111A;
-    --bg-card: #1A1D2D;
-    --bg-input: #25293D;
-    --texto: #F8FAFC;
-    --texto-suave: #94A3B8;
-    --borde: #334155;
-    --acento: #F59E0B;
-    --acento-bg: rgba(245, 158, 11, 0.15);
-    --peligro: #EF4444;
-    --exito: #10B981;
+    --bg-app: #0F111A; --bg-card: #1A1D2D; --bg-input: #25293D;
+    --texto: #F8FAFC; --texto-suave: #94A3B8; --borde: #334155;
+    --acento: #F59E0B; --acento-bg: rgba(245, 158, 11, 0.15);
+    --peligro: #EF4444; --exito: #10B981;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background-color: var(--bg-app); color: var(--texto); padding: 20px; }
+  body { background-color: var(--bg-app); color: var(--texto); padding: 20px; padding-bottom: 50px; }
   
   .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-top: 10px; }
   .header-top h1 { font-size: 28px; font-weight: 800; color: var(--acento); letter-spacing: -0.5px; }
@@ -33,16 +26,17 @@
   .input-group { margin-bottom: 20px; }
   .input-group label { display: block; font-size: 13px; font-weight: 700; color: var(--texto-suave); margin-bottom: 8px; text-transform: uppercase; }
   input[type="text"], input[type="number"], select { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--borde); background: var(--bg-input); color: var(--texto); font-size: 16px; outline: none; }
-  
+  input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--acento); }
+
   #resultados { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-  .card-producto { background: var(--bg-card); padding: 16px; border-radius: 20px; display: flex; align-items: center; gap: 16px; border: 1px solid var(--borde); cursor: pointer; }
+  .card-producto { background: var(--bg-card); padding: 16px; border-radius: 20px; display: flex; align-items: center; gap: 16px; border: 1px solid var(--borde); cursor: pointer; transition: transform 0.1s; }
   .card-producto:active { transform: scale(0.98); }
   
   .foto-producto { width: 56px; height: 56px; border-radius: 14px; background: var(--bg-input); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--acento); flex-shrink: 0; overflow: hidden; }
   .foto-producto img { width: 100%; height: 100%; object-fit: cover; }
 
   .info-producto { flex: 1; min-width: 0; }
-  .nombre-producto { font-size: 16px; font-weight: 700; }
+  .nombre-producto { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .meta-producto { font-size: 13px; color: var(--texto-suave); margin-top: 4px; display: flex; align-items: center; gap: 8px; }
   .badge-stock { padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 13px; }
   .badge-ok { background: rgba(16, 185, 129, 0.2); color: var(--exito); }
@@ -83,6 +77,13 @@
   <h2 id="infoNombre">Producto</h2>
   <div style="margin-bottom: 24px;">Stock actual: <strong id="infoStock" style="font-size: 20px; color: var(--acento);">0</strong></div>
   
+  <div style="margin-bottom: 24px; margin-top: 16px;">
+    <button id="btnSubirFoto" style="background: var(--bg-input); color: var(--acento); border: 1px dashed var(--acento); padding: 12px; border-radius: 12px; width: 100%; font-weight: 700; cursor: pointer;">
+      📷 Subir o cambiar foto
+    </button>
+    <input type="file" id="inputFoto" accept="image/*" style="display: none;">
+  </div>
+
   <div class="input-group">
     <label>Conteo Físico Real</label>
     <input type="number" id="conteo" min="0" step="1" placeholder="Ej: 12">
@@ -106,12 +107,13 @@ let productos = [];
 let elegido = null;
 let modo = 'inicial';
 
-// --- CARGA INICIAL ---
+// --- CARGA INICIAL (CORREGIDA PARA JSONP) ---
 (async function () {
   mostrar('Cargando productos...', 'aviso');
   try {
-    // Llamamos a la función del comun.js
-    const r = await apiGet({ accion: 'inventario' });
+    // Enviamos texto plano en vez de un objeto
+    const r = await apiGet('accion=inventario');
+    
     if (!r.ok) throw new Error(r.error);
     productos = r.items;
     mostrar('¡Catálogo cargado! Busca un producto.', 'ok');
@@ -139,13 +141,17 @@ document.getElementById('buscar').addEventListener('input', function() {
   items.forEach(p => {
     const d = document.createElement('div');
     d.className = 'card-producto';
+    
+    let fotoHTML = p.imagen_url ? `<img src="${p.imagen_url}" alt="">` : p.nombre.charAt(0).toUpperCase();
+    
     d.innerHTML = `
-      <div class="foto-producto">${p.nombre.charAt(0)}</div>
+      <div class="foto-producto">${fotoHTML}</div>
       <div class="info-producto">
         <div class="nombre-producto">${p.nombre}</div>
         <div class="meta-producto"><span>${p.id}</span> <span class="badge-stock badge-cero">${p.stock_actual} und</span></div>
       </div>
     `;
+    
     d.addEventListener('click', () => {
       elegido = p;
       document.getElementById('panel').style.display = 'block';
@@ -159,7 +165,93 @@ document.getElementById('buscar').addEventListener('input', function() {
   });
 });
 
-// (El resto de la lógica de botones de guardar sigue igual...)
+document.getElementById('modoInicial').addEventListener('click', () => {
+  modo = 'inicial';
+  document.getElementById('modoInicial').classList.add('active');
+  document.getElementById('modoAjuste').classList.remove('active');
+  document.getElementById('bloqueMotivo').style.display = 'none';
+});
+
+document.getElementById('modoAjuste').addEventListener('click', () => {
+  modo = 'ajuste';
+  document.getElementById('modoAjuste').classList.add('active');
+  document.getElementById('modoInicial').classList.remove('active');
+  document.getElementById('bloqueMotivo').style.display = 'block';
+});
+
+// --- GUARDAR CAMBIOS (CORREGIDO PARA JSONP) ---
+document.getElementById('btnGuardar').addEventListener('click', async function () {
+  if (!elegido) return;
+  const conteo = Number(document.getElementById('conteo').value);
+  if (isNaN(conteo)) { mostrar('Escribe un número válido', 'error'); return; }
+
+  if (modo === 'ajuste' && !document.getElementById('motivo').value) {
+    mostrar('Elige un motivo para el ajuste', 'error'); return;
+  }
+
+  this.disabled = true;
+  this.textContent = 'Guardando...';
+
+  try {
+    let r;
+    if (modo === 'inicial') {
+      // Enviamos texto plano
+      r = await apiGet('accion=inventario_inicial&id_producto=' + elegido.id + '&conteo=' + conteo);
+    } else {
+      const motivo = document.getElementById('motivo').value;
+      r = await apiGet('accion=ajuste_inventario&id_producto=' + elegido.id + '&conteo_real=' + conteo + '&motivo=' + encodeURIComponent(motivo));
+    }
+
+    if (r.ok) {
+      mostrar('Guardado exitosamente', 'ok');
+      elegido.stock_actual = (modo === 'inicial') ? r.stock_inicial : r.stock_nuevo;
+      document.getElementById('panel').style.display = 'none';
+    } else {
+      mostrar(r.error || 'Error al guardar', 'error');
+    }
+  } catch (err) {
+    mostrar('Error de conexión al guardar', 'error');
+  } finally {
+    this.disabled = false;
+    this.textContent = 'Guardar Cambios';
+  }
+});
+
+// --- LÓGICA PARA SUBIR FOTOS (CORREGIDO PARA JSONP) ---
+document.getElementById('btnSubirFoto').addEventListener('click', function() {
+  document.getElementById('inputFoto').click();
+});
+
+document.getElementById('inputFoto').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function(event) {
+    const base64 = event.target.result;
+    document.getElementById('btnSubirFoto').textContent = 'Subiendo...';
+    document.getElementById('btnSubirFoto').disabled = true;
+
+    try {
+      // La foto es un texto muy largo, encodeURIComponent lo hace seguro para JSONP
+      const r = await apiGet('accion=subir_foto&id_producto=' + elegido.id + '&base64=' + encodeURIComponent(base64));
+      
+      if (r.ok) {
+        mostrar('Foto actualizada con éxito', 'ok');
+        elegido.imagen_url = r.url;
+      } else {
+        mostrar(r.error || 'Error al subir', 'error');
+      }
+    } catch (err) {
+      mostrar('Error de conexión al subir foto', 'error');
+    } finally {
+      document.getElementById('btnSubirFoto').textContent = '📷 Subir o cambiar foto';
+      document.getElementById('btnSubirFoto').disabled = false;
+      document.getElementById('inputFoto').value = '';
+    }
+  };
+  reader.readAsDataURL(file);
+});
 </script>
 </body>
 </html>
