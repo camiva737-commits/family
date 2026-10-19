@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Salidas · ArquiDulces</title>
+<script src="comun.js?v=8"></script>
+<style>
+  :root {
+    --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
+    --suave: #94A3B8; --borde: #334155; --acento: #EF4444; --peligro: #DC2626;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: var(--bg); color: var(--texto); padding: 20px; padding-bottom: 50px; }
+  
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .header h1 { font-size: 24px; color: var(--acento); font-weight: 800; }
+  .btn-volver { background: none; border: none; color: var(--suave); font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
+
+  #estado { padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: none; white-space: pre-line; }
+  .ok { background: rgba(16, 185, 129, 0.2); color: #10B981; border: 1px solid #10B981; }
+  .error { background: rgba(239, 68, 68, 0.2); color: var(--peligro); border: 1px solid var(--peligro); }
+
+  input, select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--borde); background: var(--input); color: var(--texto); font-size: 16px; margin-bottom: 12px; outline: none; }
+  
+  .card { background: var(--card); padding: 16px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--borde); }
+  
+  .linea { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--borde); cursor: pointer; }
+  .linea:last-child { border-bottom: none; }
+  .linea-info { flex: 1; }
+  .linea-info h4 { font-size: 15px; }
+  .linea-info p { font-size: 13px; color: var(--suave); margin-top: 4px; }
+  .badge-unidad { display: inline-block; background: var(--borde); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-left: 6px; color: var(--texto); }
+  .btn-eliminar { background: none; border: none; color: var(--peligro); font-size: 20px; cursor: pointer; padding: 5px; }
+
+  /* Estilo para alertar stock negativo */
+  .alerta-stock { color: var(--peligro); font-weight: bold; font-size: 12px; margin-top: 4px; display: block; }
+
+  .btn-primario { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--acento); color: #FFF; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+  .btn-primario:disabled { opacity: 0.6; }
+  .btn-secundario { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--acento); background: transparent; color: var(--acento); font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+  #buscador-wrapper { display: none; background: var(--bg); position: sticky; top: 0; padding: 10px 0; z-index: 10; }
+  .resultado { padding: 12px; background: var(--card); border-bottom: 1px solid var(--borde); cursor: pointer; }
+  .resultado:active { background: var(--input); }
+
+  .input-camara-group { display: flex; gap: 10px; align-items: stretch; margin-bottom: 12px; }
+  .input-camara-group input { margin-bottom: 0; flex: 1; min-width: 0; }
+  .btn-camara { padding: 0 16px; border-radius: 12px; background: var(--acento); border: none; font-size: 20px; color: #FFF; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .btn-camara:disabled { opacity: 0.5; }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Salidas / Ventas</h1>
+    <a href="index.html" class="btn-volver">← Volver</a>
+  </div>
+
+  <div id="estado" class="ok" style="display: block;">Cargando productos...</div>
+
+  <div class="card">
+    <div class="input-camara-group">
+      <input type="text" id="documento" placeholder="Número de factura / pedido">
+      <button class="btn-camara" onclick="document.getElementById('fotoCamara').click()">📷</button>
+      <button class="btn-camara" onclick="document.getElementById('fotoGaleria').click()">🖼️</button>
+    </div>
+    <input type="file" id="fotoCamara" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoIA(this)">
+    <input type="file" id="fotoGaleria" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
+    
+    <select id="cliente">
+      <option value="esporadico">Cliente Esporádico / Mostrador</option>
+      <!-- Aquí puedes agregar más clientes luego -->
+    </select>
+  </div>
+
+  <div id="lista-lineas" class="card">
+    <p style="text-align: center; color: var(--suave); font-size: 14px;">No hay productos agregados.</p>
+  </div>
+
+  <button class="btn-secundario" onclick="abrirBuscador()">+ Agregar Producto Manualmente</button>
+  <button class="btn-primario" id="btn-guardar" onclick="guardarSalida()">Guardar Salida</button>
+
+  <div id="buscador-wrapper">
+    <input type="text" id="input-buscar" placeholder="Buscar producto..." oninput="filtrar()">
+    <div id="resultados-busqueda" style="max-height: 300px; overflow-y: auto; border-radius: 12px; overflow: hidden;"></div>
+    <button class="btn-volver" style="margin-top: 10px; color: var(--peligro);" onclick="cerrarBuscador()">Cancelar</button>
+  </div>
+
+<script>
+let productos = [];
+let lineasAgregadas = [];
+
+// --- CARGA INICIAL DEL CATÁLOGO (Con stock) ---
+(async function () {
+  try {
+    const r = await apiGet('accion=inventario');
+    if (!r.ok) throw new Error(r.error);
+    productos = r.items;
+    document.getElementById('estado').style.display = 'none';
+  } catch (err) {
+    document.getElementById('estado').textContent = 'Error al cargar catálogo: ' + err.message;
+    document.getElementById('estado').className = 'error';
+  }
+})();
+
+// --- LECTURA DE FACTURA CON IA ---
+async function procesarFotoIA(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const botones = document.querySelectorAll('.btn-camara');
+  botones.forEach(b => { b.disabled = true; });
+
+  const estado = document.getElementById('estado');
+  estado.className = 'ok';
+  estado.textContent = 'Leyendo factura con IA...';
+  estado.style.display = 'block';
+
+  try {
+    const base64 = await comprimirImagen(file, 1200, 0.7);
+    const r = await apiPost({ accion: 'escanear_ia', base64: base64 }, 90);
+
+    if (!r.ok) throw new Error(r.error || 'No se pudo leer');
+    if (r.factura) document.getElementById('documento').value = r.factura;
+
+    (r.lineas || []).forEach(l => {
+      const match = productos.find(p => p.id === l.id_producto);
+      if (match) {
+        lineasAgregadas.push({
+          id_producto: l.id_producto,
+          nombre: l.nombre,
+          unidad: match.unidad_base || 'Unidad',
+          cantidad: l.cantidad,
+          stock_sistema: match.stock_actual // Guardamos cuánto hay para alertar
+        });
+      }
+    });
+    renderizarLineas();
+
+    let msg = 'Factura leída. Productos agregados: ' + (r.lineas || []).length + '.';
+    if (r.sin_coincidencia && r.sin_coincidencia.length) {
+      msg += '\n\nNo reconocí:\n- ' + r.sin_coincidencia.join('\n- ');
+    }
+    alert(msg);
+    estado.style.display = 'none';
+  } catch (err) {
+    estado.className = 'error';
+    estado.textContent = 'Error: ' + err.message;
+  } finally {
+    botones.forEach(b => { b.disabled = false; });
+    input.value = '';
+  }
+}
+
+// --- BUSCADOR MANUAL ---
+function abrirBuscador() { document.getElementById('buscador-wrapper').style.display = 'block'; document.getElementById('input-buscar').focus(); }
+function cerrarBuscador() { document.getElementById('buscador-wrapper').style.display = 'none'; document.getElementById('input-buscar').value = ''; document.getElementById('resultados-busqueda').innerHTML = ''; }
+
+function filtrar() {
+  const q = document.getElementById('input-buscar').value.toLowerCase();
+  const cont = document.getElementById('resultados-busqueda');
+  cont.innerHTML = '';
+  if (q.length < 2) return;
+
+  productos.filter(p => (p.id + ' ' + p.nombre).toLowerCase().includes(q)).slice(0, 10).forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'resultado';
+    d.innerHTML = `<strong>${p.nombre}</strong> <span style="color:var(--suave);font-size:12px;">(${p.stock_actual} und)</span>`;
+    d.onclick = () => agregarLinea(p);
+    cont.appendChild(d);
+  });
+}
+
+function agregarLinea(p) {
+  cerrarBuscador();
+  const cant = prompt(`¿Cuántas unidades de ${p.nombre} van a salir?\n(Stock actual: ${p.stock_actual})`);
+  if (!cant || isNaN(cant)) return;
+
+  lineasAgregadas.push({
+    id_producto: p.id,
+    nombre: p.nombre,
+    unidad: p.unidad_base || 'Unidad',
+    cantidad: Number(cant),
+    stock_sistema: p.stock_actual
+  });
+  renderizarLineas();
+}
+
+// --- RENDERIZADO ---
+function renderizarLineas() {
+  const cont = document.getElementById('lista-lineas');
+  if (lineasAgregadas.length === 0) {
+    cont.innerHTML = '<p style="text-align: center; color: var(--suave); font-size: 14px;">No hay productos agregados.</p>';
+    return;
+  }
+
+  cont.innerHTML = '';
+  lineasAgregadas.forEach((l, index) => {
+    const div = document.createElement('div');
+    div.className = 'linea';
+    
+    // Verificamos si se pasa del stock
+    let alerta = '';
+    if (l.cantidad > l.stock_sistema) {
+      alerta = `<span class="alerta-stock">⚠️ ¡No hay suficiente! (Stock: ${l.stock_sistema})</span>`;
+    }
+
+    div.innerHTML = `
+      <div class="linea-info" onclick="editarCantidad(${index})">
+        <h4>${l.nombre} <span class="badge-unidad">${l.unidad}</span></h4>
+        <p>${l.cantidad} ${l.unidad.toLowerCase()}(s) (Toca para editar)</p>
+        ${alerta}
+      </div>
+      <button class="btn-eliminar" onclick="eliminarLinea(${index})">×</button>
+    `;
+    cont.appendChild(div);
+  });
+}
+
+function editarCantidad(index) {
+  const actual = lineasAgregadas[index].cantidad;
+  const nueva = prompt(`Editar cantidad de ${lineasAgregadas[index].nombre}:`, actual);
+  if (nueva !== null && nueva !== '' && !isNaN(nueva)) {
+    lineasAgregadas[index].cantidad = Number(nueva);
+    renderizarLineas();
+  }
+}
+
+function eliminarLinea(index) {
+  lineasAgregadas.splice(index, 1);
+  renderizarLineas();
+}
+
+// --- GUARDAR SALIDA ---
+async function guardarSalida() {
+  const documento = document.getElementById('documento').value.trim();
+  const cliente = document.getElementById('cliente').value;
+
+  if (!documento) return alert('Escribe el número de factura/documento');
+  if (lineasAgregadas.length === 0) return alert('Agrega al menos un producto');
+
+  // Alerta final de stock
+  const excede = lineasAgregadas.find(l => l.cantidad > l.stock_sistema);
+  if (excede) {
+    if(!confirm(`Atención: Estás sacando más ${excede.nombre} del que hay en stock.\n¿Deseas continuar de todos modos?`)) return;
+  }
+
+  const btn = document.getElementById('btn-guardar');
+  btn.textContent = 'Guardando...';
+  btn.disabled = true;
+
+  const datos = {
+    documento: documento,
+    cliente: cliente,
+    fecha: new Date().toISOString().split('T')[0],
+    lineas: lineasAgregadas
+  };
+
+  try {
+    const r = await apiPost({ accion: 'guardar_salida', datos: datos });
+
+    if (r.ok) {
+      alert('¡Salida guardada con éxito! ID: ' + r.id_salida);
+      location.reload();
+    } else {
+      alert('Error: ' + r.error);
+    }
+  } catch (err) {
+    alert('Error de conexión: ' + err.message);
+  } finally {
+    btn.textContent = 'Guardar Salida';
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
