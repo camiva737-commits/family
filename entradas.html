@@ -109,53 +109,63 @@ async function procesarFotoIA(input) {
   const file = input.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = async function(e) {
-    const base64 = e.target.result;
-    
-    // Mostrar estado de carga
-    const btn = document.getElementById('btn-camara');
-    btn.textContent = '⏳';
-    btn.disabled = true;
+  const btn = document.getElementById('btn-camara');
+  btn.textContent = '⏳';
+  btn.disabled = true;
 
-    try {
-      const r = await apiGet('accion=escanear_ia&base64=' + encodeURIComponent(base64));
+  // 1. COMPRIMIR LA IMAGEN ANTES DE ENVIARLA
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = async function() {
+      // Creamos un canvas para redimensionar
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 800; // Ancho máximo para que sea rápido
+      const scale = MAX_WIDTH / img.width;
+      canvas.width = MAX_WIDTH;
+      canvas.height = img.height * scale;
       
-      if (r.ok || r.proveedor) { 
-        document.getElementById('factura').value = r.factura || '';
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // Exportamos como JPEG con calidad media (0.6)
+      const base64 = canvas.toDataURL('image/jpeg', 0.6);
+
+      try {
+        const r = await apiGet('accion=escanear_ia&base64=' + encodeURIComponent(base64));
         
-        // Agregar productos leídos por la IA a la lista
-        if (r.productos && r.productos.length > 0) {
-          r.productos.forEach(prodIA => {
-            // Busca si el producto de la factura coincide con uno del catálogo
-            const match = productos.find(p => p.nombre.toLowerCase().includes(prodIA.nombre.toLowerCase()));
-            
-            if (match) {
-              lineasAgregadas.push({
-                id_producto: match.id,
-                nombre: match.nombre,
-                cantidad: prodIA.cantidad,
-                precio: prodIA.precio || ''
-              });
-            } else {
-              console.log("Producto no encontrado en catálogo: " + prodIA.nombre);
-            }
-          });
-          renderizarLineas();
-          alert("¡Factura leída! Se agregaron los productos encontrados.");
+        if (r.ok || r.proveedor) { 
+          document.getElementById('factura').value = r.factura || '';
+          
+          if (r.productos && r.productos.length > 0) {
+            r.productos.forEach(prodIA => {
+              const match = productos.find(p => p.nombre.toLowerCase().includes(prodIA.nombre.toLowerCase()));
+              if (match) {
+                lineasAgregadas.push({
+                  id_producto: match.id,
+                  nombre: match.nombre,
+                  cantidad: prodIA.cantidad,
+                  precio: prodIA.precio || ''
+                });
+              }
+            });
+            renderizarLineas();
+            alert("¡Factura leída! Se agregaron los productos encontrados.");
+          } else {
+            alert("La IA no encontró productos en la factura.");
+          }
         } else {
-          alert("La IA no encontró productos en la factura.");
+          alert("No se pudo leer la factura. Intenta de nuevo.");
         }
-      } else {
-        alert("No se pudo leer la factura. Intenta de nuevo.");
+      } catch (err) {
+        alert("Error al conectar con la IA: " + err.message);
+      } finally {
+        btn.textContent = '📷';
+        btn.disabled = false;
+        input.value = '';
       }
-    } catch (err) {
-      alert("Error al conectar con la IA: " + err.message);
-    } finally {
-      btn.textContent = '📷';
-      btn.disabled = false;
-      input.value = '';
-    }
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
