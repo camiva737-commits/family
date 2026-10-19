@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Entradas · ArquiDulces</title>
-<script src="comun.js?v=7"></script>
+<script src="comun.js?v=8"></script>
 <style>
   :root {
     --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
@@ -26,11 +26,12 @@
   .card { background: var(--card); padding: 16px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--borde); }
   .card-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; }
   
-  .linea { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--borde); }
+  .linea { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--borde); cursor: pointer; }
   .linea:last-child { border-bottom: none; }
   .linea-info { flex: 1; }
-  .linea-info h4 { font-size: 14px; }
-  .linea-info p { font-size: 12px; color: var(--suave); }
+  .linea-info h4 { font-size: 15px; }
+  .linea-info p { font-size: 13px; color: var(--suave); margin-top: 4px; }
+  .badge-unidad { display: inline-block; background: var(--borde); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-left: 6px; color: var(--texto); }
   .btn-eliminar { background: none; border: none; color: var(--peligro); font-size: 20px; cursor: pointer; padding: 5px; }
 
   .btn-primario { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--acento); color: #000; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; }
@@ -129,11 +130,15 @@ async function procesarFotoIA(input) {
     if (r.factura) document.getElementById('factura').value = r.factura;
 
     (r.lineas || []).forEach(l => {
+      // Buscamos la info del catálogo para mostrarla en la lista
+      const match = productos.find(p => p.id === l.id_producto);
+      
       lineasAgregadas.push({
         id_producto: l.id_producto,
         nombre: l.nombre,
+        unidad: match ? (match.unidad_base || 'Unidad') : 'Unidad', // Etiqueta verde
         cantidad: l.cantidad,
-        precio: l.precio
+        precio: l.precio || ''
       });
     });
     renderizarLineas();
@@ -188,6 +193,7 @@ function agregarLinea(p) {
   lineasAgregadas.push({
     id_producto: p.id,
     nombre: p.nombre,
+    unidad: p.unidad_base || 'Unidad',
     cantidad: Number(cant)
   });
 
@@ -206,15 +212,27 @@ function renderizarLineas() {
   lineasAgregadas.forEach((l, index) => {
     const div = document.createElement('div');
     div.className = 'linea';
+    
+    // Hacemos la línea clickeable para editar la cantidad
     div.innerHTML = `
-      <div class="linea-info">
-        <h4>${l.nombre}</h4>
-        <p>${l.cantidad} unidades</p>
+      <div class="linea-info" onclick="editarCantidad(${index})">
+        <h4>${l.nombre} <span class="badge-unidad">${l.unidad}</span></h4>
+        <p>${l.cantidad} ${l.unidad.toLowerCase()}(s) (Toca para editar)</p>
       </div>
       <button class="btn-eliminar" onclick="eliminarLinea(${index})">×</button>
     `;
     cont.appendChild(div);
   });
+}
+
+// --- EDICIÓN RÁPIDA DE CANTIDAD ---
+function editarCantidad(index) {
+  const actual = lineasAgregadas[index].cantidad;
+  const nueva = prompt(`Editar cantidad de ${lineasAgregadas[index].nombre}:`, actual);
+  if (nueva !== null && nueva !== '' && !isNaN(nueva)) {
+    lineasAgregadas[index].cantidad = Number(nueva);
+    renderizarLineas();
+  }
 }
 
 function eliminarLinea(index) {
