@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Salidas · ArquiDulces</title>
-<script src="comun.js?v=8"></script>
+<script src="comun.js?v=10"></script>
 <style>
   :root {
     --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
-    --suave: #94A3B8; --borde: #334155; --acento: #EF4444; --peligro: #DC2626;
+    --suave: #94A3B8; --borde: #334155; --acento: #EF4444; --peligro: #DC2626; --ok: #10B981;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
   body { background: var(--bg); color: var(--texto); padding: 20px; padding-bottom: 50px; }
@@ -18,7 +18,7 @@
   .btn-volver { background: none; border: none; color: var(--suave); font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
 
   #estado { padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: none; white-space: pre-line; }
-  .ok { background: rgba(16, 185, 129, 0.2); color: #10B981; border: 1px solid #10B981; }
+  .ok { background: rgba(16, 185, 129, 0.2); color: var(--ok); border: 1px solid var(--ok); }
   .error { background: rgba(239, 68, 68, 0.2); color: var(--peligro); border: 1px solid var(--peligro); }
 
   input, select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--borde); background: var(--input); color: var(--texto); font-size: 16px; margin-bottom: 12px; outline: none; }
@@ -31,14 +31,17 @@
   .linea-info h4 { font-size: 15px; }
   .linea-info p { font-size: 13px; color: var(--suave); margin-top: 4px; }
   .badge-unidad { display: inline-block; background: var(--borde); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-left: 6px; color: var(--texto); }
+  
+  /* Estilo para los no reconocidos */
+  .pendiente { border-left: 4px solid var(--peligro); padding-left: 12px; background: rgba(239, 68, 68, 0.05); border-radius: 4px; }
+  .pendiente h4 { color: var(--peligro); }
+  
   .btn-eliminar { background: none; border: none; color: var(--peligro); font-size: 20px; cursor: pointer; padding: 5px; }
-
-  /* Estilo para alertar stock negativo */
   .alerta-stock { color: var(--peligro); font-weight: bold; font-size: 12px; margin-top: 4px; display: block; }
 
   .btn-primario { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--acento); color: #FFF; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; }
-  .btn-primario:disabled { opacity: 0.6; }
   .btn-secundario { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--acento); background: transparent; color: var(--acento); font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+  .btn-limpiar { background: none; border: none; color: var(--suave); font-size: 13px; cursor: pointer; margin-top: 15px; text-align: center; display: block; width: 100%; text-decoration: underline; }
 
   #buscador-wrapper { display: none; background: var(--bg); position: sticky; top: 0; padding: 10px 0; z-index: 10; }
   .resultado { padding: 12px; background: var(--card); border-bottom: 1px solid var(--borde); cursor: pointer; }
@@ -61,16 +64,15 @@
 
   <div class="card">
     <div class="input-camara-group">
-      <input type="text" id="documento" placeholder="Número de factura / pedido">
+      <input type="text" id="documento" placeholder="Número de factura / pedido" oninput="guardarBorrador()">
       <button class="btn-camara" onclick="document.getElementById('fotoCamara').click()">📷</button>
       <button class="btn-camara" onclick="document.getElementById('fotoGaleria').click()">🖼️</button>
     </div>
     <input type="file" id="fotoCamara" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoIA(this)">
     <input type="file" id="fotoGaleria" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
     
-    <select id="cliente">
+    <select id="cliente" onchange="guardarBorrador()">
       <option value="esporadico">Cliente Esporádico / Mostrador</option>
-      <!-- Aquí puedes agregar más clientes luego -->
     </select>
   </div>
 
@@ -78,8 +80,9 @@
     <p style="text-align: center; color: var(--suave); font-size: 14px;">No hay productos agregados.</p>
   </div>
 
-  <button class="btn-secundario" onclick="abrirBuscador()">+ Agregar Producto Manualmente</button>
+  <button class="btn-secundario" onclick="abrirBuscador(-1)">+ Agregar Producto Manualmente</button>
   <button class="btn-primario" id="btn-guardar" onclick="guardarSalida()">Guardar Salida</button>
+  <button class="btn-limpiar" onclick="limpiarTodo()">Vaciar lista y borrador</button>
 
   <div id="buscador-wrapper">
     <input type="text" id="input-buscar" placeholder="Buscar producto..." oninput="filtrar()">
@@ -90,21 +93,47 @@
 <script>
 let productos = [];
 let lineasAgregadas = [];
+let indexEditando = -1; 
 
-// --- CARGA INICIAL DEL CATÁLOGO (Con stock) ---
+// --- 1. CARGAR BORRADOR Y CATÁLOGO ---
 (async function () {
+  const borrador = localStorage.getItem('arqui_borrador_salida');
+  if (borrador) {
+    try {
+      const parsed = JSON.parse(borrador);
+      lineasAgregadas = parsed.lineas || [];
+      document.getElementById('documento').value = parsed.documento || '';
+      renderizarLineas();
+    } catch(e) {}
+  }
+
   try {
     const r = await apiGet('accion=inventario');
     if (!r.ok) throw new Error(r.error);
     productos = r.items;
     document.getElementById('estado').style.display = 'none';
   } catch (err) {
-    document.getElementById('estado').textContent = 'Error al cargar catálogo: ' + err.message;
-    document.getElementById('estado').className = 'error';
+    document.getElementById('estado').textContent = 'Error al cargar: ' + err.message;
   }
 })();
 
-// --- LECTURA DE FACTURA CON IA ---
+function guardarBorrador() {
+  localStorage.setItem('arqui_borrador_salida', JSON.stringify({
+    documento: document.getElementById('documento').value,
+    lineas: lineasAgregadas
+  }));
+}
+
+function limpiarTodo() {
+  if(confirm('¿Seguro que quieres borrar la lista actual?')) {
+    lineasAgregadas = [];
+    document.getElementById('documento').value = '';
+    localStorage.removeItem('arqui_borrador_salida');
+    renderizarLineas();
+  }
+}
+
+// --- 2. LECTURA IA ---
 async function procesarFotoIA(input) {
   const file = input.files[0];
   if (!file) return;
@@ -114,35 +143,43 @@ async function procesarFotoIA(input) {
 
   const estado = document.getElementById('estado');
   estado.className = 'ok';
-  estado.textContent = 'Leyendo factura con IA...';
+  estado.textContent = 'Leyendo factura...';
   estado.style.display = 'block';
 
   try {
     const base64 = await comprimirImagen(file, 1200, 0.7);
     const r = await apiPost({ accion: 'escanear_ia', base64: base64 }, 90);
 
-    if (!r.ok) throw new Error(r.error || 'No se pudo leer');
+    if (!r.ok) throw new Error(r.error);
     if (r.factura) document.getElementById('documento').value = r.factura;
 
+    // Productos reconocidos
     (r.lineas || []).forEach(l => {
       const match = productos.find(p => p.id === l.id_producto);
       if (match) {
         lineasAgregadas.push({
           id_producto: l.id_producto,
-          nombre: l.nombre,
+          nombre: match.nombre,
           unidad: match.unidad_base || 'Unidad',
           cantidad: l.cantidad,
-          stock_sistema: match.stock_actual // Guardamos cuánto hay para alertar
+          stock_sistema: match.stock_actual
         });
       }
     });
-    renderizarLineas();
 
-    let msg = 'Factura leída. Productos agregados: ' + (r.lineas || []).length + '.';
-    if (r.sin_coincidencia && r.sin_coincidencia.length) {
-      msg += '\n\nNo reconocí:\n- ' + r.sin_coincidencia.join('\n- ');
-    }
-    alert(msg);
+    // Productos NO reconocidos (los agregamos como pendientes)
+    (r.sin_coincidencia || []).forEach(nombreOriginal => {
+      lineasAgregadas.push({
+        id_producto: null, // Al no tener ID, sabemos que está pendiente
+        nombre: nombreOriginal,
+        unidad: 'Pendiente',
+        cantidad: 1, // Asumimos 1 por defecto
+        stock_sistema: 0
+      });
+    });
+
+    renderizarLineas();
+    guardarBorrador();
     estado.style.display = 'none';
   } catch (err) {
     estado.className = 'error';
@@ -153,9 +190,18 @@ async function procesarFotoIA(input) {
   }
 }
 
-// --- BUSCADOR MANUAL ---
-function abrirBuscador() { document.getElementById('buscador-wrapper').style.display = 'block'; document.getElementById('input-buscar').focus(); }
-function cerrarBuscador() { document.getElementById('buscador-wrapper').style.display = 'none'; document.getElementById('input-buscar').value = ''; document.getElementById('resultados-busqueda').innerHTML = ''; }
+// --- 3. BUSCADOR Y REEMPLAZO (LA MAGIA) ---
+function abrirBuscador(index) {
+  indexEditando = index;
+  document.getElementById('buscador-wrapper').style.display = 'block';
+  document.getElementById('input-buscar').focus();
+}
+
+function cerrarBuscador() {
+  document.getElementById('buscador-wrapper').style.display = 'none';
+  document.getElementById('input-buscar').value = '';
+  document.getElementById('resultados-busqueda').innerHTML = '';
+}
 
 function filtrar() {
   const q = document.getElementById('input-buscar').value.toLowerCase();
@@ -166,28 +212,49 @@ function filtrar() {
   productos.filter(p => (p.id + ' ' + p.nombre).toLowerCase().includes(q)).slice(0, 10).forEach(p => {
     const d = document.createElement('div');
     d.className = 'resultado';
-    d.innerHTML = `<strong>${p.nombre}</strong> <span style="color:var(--suave);font-size:12px;">(${p.stock_actual} und)</span>`;
-    d.onclick = () => agregarLinea(p);
+    d.innerHTML = `<strong>${p.nombre}</strong> <span style="color:var(--suave);font-size:12px;">(Stock: ${p.stock_actual})</span>`;
+    d.onclick = () => seleccionarProducto(p);
     cont.appendChild(d);
   });
 }
 
-function agregarLinea(p) {
+function seleccionarProducto(p) {
   cerrarBuscador();
-  const cant = prompt(`¿Cuántas unidades de ${p.nombre} van a salir?\n(Stock actual: ${p.stock_actual})`);
-  if (!cant || isNaN(cant)) return;
+  
+  if (indexEditando === -1) {
+    // Agregar nuevo manual
+    lineasAgregadas.push({
+      id_producto: p.id,
+      nombre: p.nombre,
+      unidad: p.unidad_base || 'Unidad',
+      cantidad: 1,
+      stock_sistema: p.stock_actual
+    });
+  } else {
+    // Reemplazar un pendiente
+    const anterior = lineasAgregadas[indexEditando];
+    
+    // Si el anterior era pendiente, guardamos el Alias en el backend
+    if (!anterior.id_producto) {
+      // Llamada en segundo plano para guardar el alias
+      apiPost({ accion: 'guardar_alias', alias: anterior.nombre, id_producto: p.id });
+    }
 
-  lineasAgregadas.push({
-    id_producto: p.id,
-    nombre: p.nombre,
-    unidad: p.unidad_base || 'Unidad',
-    cantidad: Number(cant),
-    stock_sistema: p.stock_actual
-  });
+    // Reemplazamos en la lista
+    lineasAgregadas[indexEditando] = {
+      id_producto: p.id,
+      nombre: p.nombre,
+      unidad: p.unidad_base || 'Unidad',
+      cantidad: anterior.cantidad,
+      stock_sistema: p.stock_actual
+    };
+  }
+  
   renderizarLineas();
+  guardarBorrador();
 }
 
-// --- RENDERIZADO ---
+// --- 4. RENDERIZADO ---
 function renderizarLineas() {
   const cont = document.getElementById('lista-lineas');
   if (lineasAgregadas.length === 0) {
@@ -200,20 +267,33 @@ function renderizarLineas() {
     const div = document.createElement('div');
     div.className = 'linea';
     
-    // Verificamos si se pasa del stock
-    let alerta = '';
-    if (l.cantidad > l.stock_sistema) {
-      alerta = `<span class="alerta-stock">⚠️ ¡No hay suficiente! (Stock: ${l.stock_sistema})</span>`;
+    if (!l.id_producto) {
+      // PENDIENTE
+      div.classList.add('pendiente');
+      div.onclick = () => abrirBuscador(index);
+      div.innerHTML = `
+        <div class="linea-info">
+          <h4>${l.nombre} (No reconocido)</h4>
+          <p>Toca aquí para asignarle un producto del catálogo</p>
+        </div>
+        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>
+      `;
+    } else {
+      // RECONOCIDO
+      let alerta = '';
+      if (l.cantidad > l.stock_sistema) {
+        alerta = `<span class="alerta-stock">⚠️ ¡No hay suficiente! (Stock: ${l.stock_sistema})</span>`;
+      }
+      div.onclick = () => editarCantidad(index);
+      div.innerHTML = `
+        <div class="linea-info">
+          <h4>${l.nombre} <span class="badge-unidad">${l.unidad}</span></h4>
+          <p>${l.cantidad} ${l.unidad.toLowerCase()}(s)</p>
+          ${alerta}
+        </div>
+        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>
+      `;
     }
-
-    div.innerHTML = `
-      <div class="linea-info" onclick="editarCantidad(${index})">
-        <h4>${l.nombre} <span class="badge-unidad">${l.unidad}</span></h4>
-        <p>${l.cantidad} ${l.unidad.toLowerCase()}(s) (Toca para editar)</p>
-        ${alerta}
-      </div>
-      <button class="btn-eliminar" onclick="eliminarLinea(${index})">×</button>
-    `;
     cont.appendChild(div);
   });
 }
@@ -224,26 +304,32 @@ function editarCantidad(index) {
   if (nueva !== null && nueva !== '' && !isNaN(nueva)) {
     lineasAgregadas[index].cantidad = Number(nueva);
     renderizarLineas();
+    guardarBorrador();
   }
 }
 
 function eliminarLinea(index) {
   lineasAgregadas.splice(index, 1);
   renderizarLineas();
+  guardarBorrador();
 }
 
-// --- GUARDAR SALIDA ---
+// --- 5. GUARDAR SALIDA ---
 async function guardarSalida() {
   const documento = document.getElementById('documento').value.trim();
   const cliente = document.getElementById('cliente').value;
 
-  if (!documento) return alert('Escribe el número de factura/documento');
+  if (!documento) return alert('Escribe el número de factura');
+  
+  // Validar que no haya pendientes
+  const hayPendientes = lineasAgregadas.some(l => !l.id_producto);
+  if (hayPendientes) return alert('Tienes productos "No reconocidos" en rojo. Tócalos y asígnalos a tu catálogo antes de guardar.');
+
   if (lineasAgregadas.length === 0) return alert('Agrega al menos un producto');
 
-  // Alerta final de stock
   const excede = lineasAgregadas.find(l => l.cantidad > l.stock_sistema);
   if (excede) {
-    if(!confirm(`Atención: Estás sacando más ${excede.nombre} del que hay en stock.\n¿Deseas continuar de todos modos?`)) return;
+    if(!confirm(`Atención: Estás sacando más ${excede.nombre} del que hay en stock.\n¿Deseas continuar?`)) return;
   }
 
   const btn = document.getElementById('btn-guardar');
@@ -262,12 +348,13 @@ async function guardarSalida() {
 
     if (r.ok) {
       alert('¡Salida guardada con éxito! ID: ' + r.id_salida);
+      localStorage.removeItem('arqui_borrador_salida'); // Limpiar borrador
       location.reload();
     } else {
       alert('Error: ' + r.error);
     }
   } catch (err) {
-    alert('Error de conexión: ' + err.message);
+    alert('Error de conexión');
   } finally {
     btn.textContent = 'Guardar Salida';
     btn.disabled = false;
