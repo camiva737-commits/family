@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Entradas · ArquiDulces</title>
+<script src="comun.js"></script>
+<style>
+  :root {
+    --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
+    --suave: #94A3B8; --borde: #334155; --acento: #10B981; --peligro: #EF4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: var(--bg); color: var(--texto); padding: 20px; padding-bottom: 50px; }
+  
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .header h1 { font-size: 24px; color: var(--acento); font-weight: 800; }
+  .btn-volver { background: none; border: none; color: var(--suave); font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
+
+  #estado { padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: none; }
+  .ok { background: rgba(16, 185, 129, 0.2); color: var(--acento); border: 1px solid var(--acento); }
+  .error { background: rgba(239, 68, 68, 0.2); color: var(--peligro); border: 1px solid var(--peligro); }
+
+  input, select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--borde); background: var(--input); color: var(--texto); font-size: 16px; margin-bottom: 12px; outline: none; }
+  
+  .card { background: var(--card); padding: 16px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--borde); }
+  .card-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; }
+  
+  .linea { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--borde); }
+  .linea:last-child { border-bottom: none; }
+  .linea-info { flex: 1; }
+  .linea-info h4 { font-size: 14px; }
+  .linea-info p { font-size: 12px; color: var(--suave); }
+  .btn-eliminar { background: none; border: none; color: var(--peligro); font-size: 20px; cursor: pointer; padding: 5px; }
+
+  .btn-primario { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--acento); color: #000; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+  .btn-secundario { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--acento); background: transparent; color: var(--acento); font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+  #buscador-wrapper { display: none; background: var(--bg); position: sticky; top: 0; padding: 10px 0; z-index: 10; }
+  .resultado { padding: 12px; background: var(--card); border-bottom: 1px solid var(--borde); cursor: pointer; }
+  .resultado:active { background: var(--input); }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Recepción</h1>
+    <a href="index.html" class="btn-volver">← Volver</a>
+  </div>
+
+  <div id="estado" class="ok" style="display: block;">Cargando productos...</div>
+
+  <div class="card">
+    <input type="text" id="factura" placeholder="Número de factura">
+    <select id="proveedor">
+      <option value="">Seleccione Proveedor...</option>
+      <option value="7314450-5">Distribuidora Jencar</option>
+      <option value="9010515728.0">Dulces y Marcas S.A.S</option>
+      <option value="7223562-0">Margarita</option>
+      <option value="860020308-9">Comestibles Ricos S.A</option>
+      <!-- Aquí puedes agregar más proveedores -->
+    </select>
+  </div>
+
+  <div id="lista-lineas" class="card">
+    <p style="text-align: center; color: var(--suave); font-size: 14px;">No hay productos agregados.</p>
+  </div>
+
+  <button class="btn-secundario" onclick="abrirBuscador()">+ Agregar Producto</button>
+  <button class="btn-primario" id="btn-guardar" onclick="guardarEntrada()">Guardar Recepción</button>
+
+  <!-- Buscador flotante -->
+  <div id="buscador-wrapper">
+    <input type="text" id="input-buscar" placeholder="Buscar producto..." oninput="filtrar()">
+    <div id="resultados-busqueda" style="max-height: 300px; overflow-y: auto; border-radius: 12px; overflow: hidden;"></div>
+    <button class="btn-volver" style="margin-top: 10px; color: var(--peligro);" onclick="cerrarBuscador()">Cancelar</button>
+  </div>
+
+<script>
+let productos = [];
+let lineasAgregadas = [];
+
+(async function () {
+  try {
+    const r = await apiGet('accion=inventario');
+    if (!r.ok) throw new Error(r.error);
+    productos = r.items;
+    document.getElementById('estado').style.display = 'none';
+  } catch (err) {
+    document.getElementById('estado').textContent = 'Error al cargar catálogo';
+  }
+})();
+
+function abrirBuscador() {
+  document.getElementById('buscador-wrapper').style.display = 'block';
+  document.getElementById('input-buscar').focus();
+}
+
+function cerrarBuscador() {
+  document.getElementById('buscador-wrapper').style.display = 'none';
+  document.getElementById('input-buscar').value = '';
+  document.getElementById('resultados-busqueda').innerHTML = '';
+}
+
+function filtrar() {
+  const q = document.getElementById('input-buscar').value.toLowerCase();
+  const cont = document.getElementById('resultados-busqueda');
+  cont.innerHTML = '';
+  if (q.length < 2) return;
+
+  productos.filter(p => (p.id + ' ' + p.nombre).toLowerCase().includes(q)).slice(0, 10).forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'resultado';
+    d.innerHTML = `<strong>${p.nombre}</strong> <span style="color:var(--suave);font-size:12px;">(${p.id})</span>`;
+    d.onclick = () => agregarLinea(p);
+    cont.appendChild(d);
+  });
+}
+
+function agregarLinea(p) {
+  cerrarBuscador();
+  const cant = prompt(`¿Cuántas unidades de ${p.nombre} llegaron?`);
+  if (!cant || isNaN(cant)) return;
+
+  lineasAgregadas.push({
+    id_producto: p.id,
+    nombre: p.nombre,
+    cantidad: Number(cant)
+  });
+
+  renderizarLineas();
+}
+
+function renderizarLineas() {
+  const cont = document.getElementById('lista-lineas');
+  if (lineasAgregadas.length === 0) {
+    cont.innerHTML = '<p style="text-align: center; color: var(--suave); font-size: 14px;">No hay productos agregados.</p>';
+    return;
+  }
+
+  cont.innerHTML = '';
+  lineasAgregadas.forEach((l, index) => {
+    const div = document.createElement('div');
+    div.className = 'linea';
+    div.innerHTML = `
+      <div class="linea-info">
+        <h4>${l.nombre}</h4>
+        <p>${l.cantidad} unidades</p>
+      </div>
+      <button class="btn-eliminar" onclick="eliminarLinea(${index})">×</button>
+    `;
+    cont.appendChild(div);
+  });
+}
+
+function eliminarLinea(index) {
+  lineasAgregadas.splice(index, 1);
+  renderizarLineas();
+}
+
+async function guardarEntrada() {
+  const factura = document.getElementById('factura').value.trim();
+  const proveedor = document.getElementById('proveedor').value;
+
+  if (!factura) return alert('Escribe el número de factura');
+  if (!proveedor) return alert('Selecciona un proveedor');
+  if (lineasAgregadas.length === 0) return alert('Agrega al menos un producto');
+
+  document.getElementById('btn-guardar').textContent = 'Guardando...';
+  document.getElementById('btn-guardar').disabled = true;
+
+  const datos = {
+    factura: factura,
+    proveedor: proveedor,
+    fecha: new Date().toISOString().split('T')[0],
+    lineas: lineasAgregadas
+  };
+
+  try {
+    // Para enviar objetos complejos por JSONP, los convertimos a string
+    const r = await apiGet('accion=guardar_entrada&datos=' + encodeURIComponent(JSON.stringify(datos)));
+    
+    if (r.ok) {
+      alert('¡Recepción guardada con éxito! ID: ' + r.id_entrada);
+      location.reload(); // Recargar para limpiar
+    } else {
+      alert('Error: ' + r.error);
+    }
+  } catch (err) {
+    alert('Error de conexión');
+  } finally {
+    document.getElementById('btn-guardar').textContent = 'Guardar Recepción';
+    document.getElementById('btn-guardar').disabled = false;
+  }
+}
+</script>
+</body>
+</html>
