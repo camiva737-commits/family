@@ -39,6 +39,11 @@
   #buscador-wrapper { display: none; background: var(--bg); position: sticky; top: 0; padding: 10px 0; z-index: 10; }
   .resultado { padding: 12px; background: var(--card); border-bottom: 1px solid var(--borde); cursor: pointer; }
   .resultado:active { background: var(--input); }
+
+  /* Estilos para la cámara */
+  .input-camara-group { display: flex; gap: 10px; align-items: stretch; margin-bottom: 12px; }
+  .input-camara-group input { margin-bottom: 0; flex: 1; }
+  .btn-camara { padding: 0 16px; border-radius: 12px; background: var(--acento); border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 </style>
 </head>
 <body>
@@ -51,14 +56,20 @@
   <div id="estado" class="ok" style="display: block;">Cargando productos...</div>
 
   <div class="card">
-    <input type="text" id="factura" placeholder="Número de factura">
+    <div class="input-camara-group">
+      <input type="text" id="factura" placeholder="Número de factura">
+      <!-- BOTÓN DE LA CÁMARA -->
+      <button id="btn-camara" class="btn-camara" onclick="document.getElementById('fotoFactura').click()" title="Escanear factura con IA">📷</button>
+    </div>
+    <!-- INPUT OCULTO PARA LA FOTO -->
+    <input type="file" id="fotoFactura" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
+    
     <select id="proveedor">
       <option value="">Seleccione Proveedor...</option>
       <option value="7314450-5">Distribuidora Jencar</option>
       <option value="9010515728.0">Dulces y Marcas S.A.S</option>
       <option value="7223562-0">Margarita</option>
       <option value="860020308-9">Comestibles Ricos S.A</option>
-      <!-- Aquí puedes agregar más proveedores -->
     </select>
   </div>
 
@@ -66,7 +77,7 @@
     <p style="text-align: center; color: var(--suave); font-size: 14px;">No hay productos agregados.</p>
   </div>
 
-  <button class="btn-secundario" onclick="abrirBuscador()">+ Agregar Producto</button>
+  <button class="btn-secundario" onclick="abrirBuscador()">+ Agregar Producto Manualmente</button>
   <button class="btn-primario" id="btn-guardar" onclick="guardarEntrada()">Guardar Recepción</button>
 
   <!-- Buscador flotante -->
@@ -80,6 +91,7 @@
 let productos = [];
 let lineasAgregadas = [];
 
+// --- CARGA INICIAL DEL CATÁLOGO ---
 (async function () {
   try {
     const r = await apiGet('accion=inventario');
@@ -88,9 +100,67 @@ let lineasAgregadas = [];
     document.getElementById('estado').style.display = 'none';
   } catch (err) {
     document.getElementById('estado').textContent = 'Error al cargar catálogo';
+    document.getElementById('estado').className = 'error';
   }
 })();
 
+// --- LÓGICA DE LA IA (FOTO) ---
+async function procesarFotoIA(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const base64 = e.target.result;
+    
+    // Mostrar estado de carga
+    const btn = document.getElementById('btn-camara');
+    btn.textContent = '⏳';
+    btn.disabled = true;
+
+    try {
+      const r = await apiGet('accion=escanear_ia&base64=' + encodeURIComponent(base64));
+      
+      if (r.ok || r.proveedor) { 
+        document.getElementById('factura').value = r.factura || '';
+        
+        // Agregar productos leídos por la IA a la lista
+        if (r.productos && r.productos.length > 0) {
+          r.productos.forEach(prodIA => {
+            // Busca si el producto de la factura coincide con uno del catálogo
+            const match = productos.find(p => p.nombre.toLowerCase().includes(prodIA.nombre.toLowerCase()));
+            
+            if (match) {
+              lineasAgregadas.push({
+                id_producto: match.id,
+                nombre: match.nombre,
+                cantidad: prodIA.cantidad,
+                precio: prodIA.precio || ''
+              });
+            } else {
+              console.log("Producto no encontrado en catálogo: " + prodIA.nombre);
+            }
+          });
+          renderizarLineas();
+          alert("¡Factura leída! Se agregaron los productos encontrados.");
+        } else {
+          alert("La IA no encontró productos en la factura.");
+        }
+      } else {
+        alert("No se pudo leer la factura. Intenta de nuevo.");
+      }
+    } catch (err) {
+      alert("Error al conectar con la IA: " + err.message);
+    } finally {
+      btn.textContent = '📷';
+      btn.disabled = false;
+      input.value = '';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// --- BUSCADOR MANUAL ---
 function abrirBuscador() {
   document.getElementById('buscador-wrapper').style.display = 'block';
   document.getElementById('input-buscar').focus();
@@ -131,6 +201,7 @@ function agregarLinea(p) {
   renderizarLineas();
 }
 
+// --- RENDERIZADO DE LA LISTA ---
 function renderizarLineas() {
   const cont = document.getElementById('lista-lineas');
   if (lineasAgregadas.length === 0) {
@@ -158,6 +229,7 @@ function eliminarLinea(index) {
   renderizarLineas();
 }
 
+// --- GUARDAR ENTRADA ---
 async function guardarEntrada() {
   const factura = document.getElementById('factura').value.trim();
   const proveedor = document.getElementById('proveedor').value;
@@ -192,57 +264,6 @@ async function guardarEntrada() {
     document.getElementById('btn-guardar').textContent = 'Guardar Recepción';
     document.getElementById('btn-guardar').disabled = false;
   }
-}
-
-async function procesarFotoIA(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = async function(e) {
-    const base64 = e.target.result;
-    
-    // Mostrar estado de carga
-    const btn = document.querySelector('button[onclick*="fotoFactura"]');
-    btn.textContent = '⏳';
-    btn.disabled = true;
-
-    try {
-      const r = await apiGet('accion=escanear_ia&base64=' + encodeURIComponent(base64));
-      
-      if (r.ok || r.proveedor) { // Asumiendo que la IA devuelve los datos directos
-        document.getElementById('factura').value = r.factura || '';
-        
-        // Aquí podrías agregar la lógica para buscar los productos en tu catálogo
-        // y rellenar las líneas automáticamente.
-        alert("¡Factura leída! Proveedor: " + r.proveedor + ". Se encontraron " + (r.productos ? r.productos.length : 0) + " productos.");
-        
-        // Ejemplo rápido de cómo agregar líneas:
-        /*
-        r.productos.forEach(prodIA => {
-          const match = productos.find(p => p.nombre.toLowerCase().includes(prodIA.nombre.toLowerCase()));
-          if (match) {
-            lineasAgregadas.push({
-              id_producto: match.id,
-              nombre: match.nombre,
-              cantidad: prodIA.cantidad
-            });
-          }
-        });
-        renderizarLineas();
-        */
-      } else {
-        alert("No se pudo leer la factura.");
-      }
-    } catch (err) {
-      alert("Error al conectar con la IA: " + err.message);
-    } finally {
-      btn.textContent = '📷';
-      btn.disabled = false;
-      input.value = '';
-    }
-  };
-  reader.readAsDataURL(file);
 }
 </script>
 </body>
