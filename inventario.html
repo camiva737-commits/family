@@ -12,18 +12,16 @@
     --texto: #F8FAFC;
     --texto-suave: #94A3B8;
     --borde: #334155;
-    --acento: #F59E0B; /* Naranja dulce para ArquiDulces */
+    --acento: #F59E0B;
     --acento-bg: rgba(245, 158, 11, 0.15);
     --peligro: #EF4444;
     --exito: #10B981;
-    --radio-tarjeta: 20px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background-color: var(--bg-app); color: var(--texto); padding: 20px; padding-bottom: 100px; }
+  body { background-color: var(--bg-app); color: var(--texto); padding: 20px; }
   
   .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-top: 10px; }
   .header-top h1 { font-size: 28px; font-weight: 800; color: var(--acento); letter-spacing: -0.5px; }
-  .header-top p { font-size: 14px; color: var(--texto-suave); font-weight: 500; margin-top: 4px; }
   
   .toggle-container { background: var(--bg-card); padding: 6px; border-radius: 16px; display: flex; gap: 6px; margin-bottom: 24px; border: 1px solid var(--borde); }
   .toggle-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 14px; background: transparent; color: var(--texto-suave); cursor: pointer; transition: all 0.2s; }
@@ -35,7 +33,7 @@
   input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--acento); }
 
   #resultados { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-  .card-producto { background: var(--bg-card); padding: 16px; border-radius: var(--radio-tarjeta); display: flex; align-items: center; gap: 16px; border: 1px solid var(--borde); cursor: pointer; transition: transform 0.1s; }
+  .card-producto { background: var(--bg-card); padding: 16px; border-radius: 20px; display: flex; align-items: center; gap: 16px; border: 1px solid var(--borde); cursor: pointer; transition: transform 0.1s; }
   .card-producto:active { transform: scale(0.98); }
   
   .foto-producto { width: 56px; height: 56px; border-radius: 14px; background: var(--bg-input); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--acento); flex-shrink: 0; overflow: hidden; }
@@ -48,13 +46,8 @@
   .badge-ok { background: rgba(16, 185, 129, 0.2); color: var(--exito); }
   .badge-cero { background: rgba(239, 68, 68, 0.2); color: var(--peligro); }
 
-  .panel-edicion { background: var(--bg-card); padding: 24px; border-radius: var(--radio-tarjeta); border: 1px solid var(--borde); margin-top: 24px; display: none; }
-  .panel-edicion h2 { font-size: 20px; margin-bottom: 4px; }
-  .stock-actual { font-size: 14px; color: var(--texto-suave); margin-bottom: 24px; }
-  .stock-num { font-size: 24px; font-weight: 800; color: var(--acento); }
-
+  .panel-edicion { background: var(--bg-card); padding: 24px; border-radius: 20px; border: 1px solid var(--borde); margin-top: 24px; display: none; }
   .btn-primario { width: 100%; padding: 18px; border-radius: 16px; border: none; background: var(--acento); color: #000; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 24px; }
-  .btn-primario:active { opacity: 0.8; }
 
   #estado { padding: 16px; border-radius: 16px; font-weight: 600; font-size: 14px; text-align: center; margin-bottom: 20px; display: none; }
   .estado-ok { background: rgba(16, 185, 129, 0.15); color: var(--exito); border: 1px solid var(--exito); }
@@ -66,12 +59,12 @@
 
 <header class="header-top">
   <div>
-    <h1>ArquiDulces</h1>
-    <p>Control de Inventario</p>
+    <h1>Inventario</h1>
   </div>
 </header>
 
-<div id="estado" class="estado-aviso">Cargando inventario...</div>
+<!-- Aquí verás si está cargando o si hay error -->
+<div id="estado" class="estado-aviso" style="display: block;">Conectando con Google Sheets...</div>
 
 <div class="toggle-container">
   <button id="modoInicial" class="toggle-btn active">Conteo Inicial</button>
@@ -81,27 +74,17 @@
 <div class="input-group">
   <label>Buscar Producto</label>
   <input type="text" id="buscar" placeholder="Escribe 2 letras o más..." autocomplete="off">
-  <label style="display:flex; align-items:center; gap:8px; margin-top:16px; text-transform:none; font-size:14px;">
-    <input type="checkbox" id="soloPendientes"> Mostrar solo productos con stock 0
-  </label>
 </div>
 
 <div id="resultados"></div>
 
 <div class="panel-edicion" id="panel">
   <h2 id="infoNombre">Producto</h2>
-  <div class="stock-actual">Stock del sistema: <span class="stock-num" id="infoStock">0</span></div>
+  <div style="margin-bottom: 24px;">Stock actual: <strong id="infoStock" style="font-size: 20px; color: var(--acento);">0</strong></div>
   
-  <div style="margin-bottom: 24px; margin-top: 16px;">
-    <button id="btnSubirFoto" style="background: var(--bg-input); color: var(--acento); border: 1px dashed var(--acento); padding: 12px; border-radius: 12px; width: 100%; font-weight: 700; cursor: pointer;">
-      📷 Subir o cambiar foto
-    </button>
-    <input type="file" id="inputFoto" accept="image/*" style="display: none;">
-  </div>
-
   <div class="input-group">
-    <label>Conteo Físico Real (Unidades)</label>
-    <input type="number" id="conteo" min="0" step="1" inputmode="numeric" placeholder="Ej: 12">
+    <label>Conteo Físico Real</label>
+    <input type="number" id="conteo" min="0" step="1" placeholder="Ej: 12">
   </div>
 
   <div class="input-group" id="bloqueMotivo" style="display:none;">
@@ -111,21 +94,14 @@
       <option value="Venta no registrada">Venta no registrada</option>
       <option value="Consumo interno">Consumo interno</option>
       <option value="Error del sistema">Error del sistema</option>
-      <option value="Producto dañado / vencido">Producto dañado / vencido</option>
-      <option value="Otro">Otro</option>
     </select>
-  </div>
-
-  <div class="input-group">
-    <label>Observaciones (Opcional)</label>
-    <input type="text" id="obs" maxlength="200" placeholder="Ej: Faltaron 3 por error...">
   </div>
 
   <button class="btn-primario" id="btnGuardar">Guardar Cambios</button>
 </div>
 
 <script>
-// --- CONFIGURACIÓN DIRECTA (Sin comun.js) ---
+// --- CONEXIÓN CON APPS SCRIPT ---
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxJTtF1dkIdS21iiDer0mYOoykbRKMs6yEqZlL8uxNMNVmvY6jr0dMrWbD_He7kO5GU/exec';
 
 async function apiGet(params) {
@@ -142,179 +118,106 @@ function mostrar(msg, tipo) {
   el.textContent = msg;
   el.className = 'estado-' + (tipo || 'aviso');
   el.style.display = 'block';
-  if(tipo === 'ok') setTimeout(() => { el.style.display = 'none'; }, 3000);
 }
 
-// --- LÓGICA DE LA APP ---
 let productos = [];
 let elegido = null;
 let modo = 'inicial';
 
+// --- CARGA INICIAL ---
 (async function () {
+  mostrar('Cargando productos de la base de datos...', 'aviso');
   try {
     const r = await apiGet({ accion: 'inventario' });
     if (!r.ok) throw new Error(r.error);
     productos = r.items;
-    mostrar('Elige un producto para continuar', 'ok');
-    pintarResultados();
+    mostrar('¡Catálogo cargado! Busca un producto.', 'ok');
+    setTimeout(() => { document.getElementById('estado').style.display = 'none'; }, 3000);
   } catch (err) {
-    mostrar('Error al cargar: ' + err.message, 'error');
+    mostrar('ERROR al conectar con Google: ' + err.message, 'error');
   }
 })();
 
 function norm(s) { return String(s || '').toLowerCase().trim(); }
 
-function pintarResultados() {
-  const q = norm(document.getElementById('buscar').value);
-  const soloPend = document.getElementById('soloPendientes').checked;
+document.getElementById('buscar').addEventListener('input', function() {
+  const q = norm(this.value);
   const cont = document.getElementById('resultados');
   cont.innerHTML = '';
+  if (q.length < 2) return;
 
-  if (q.length < 2 && !soloPend) return;
+  const items = productos.filter(p => norm(p.id + ' ' + p.nombre).indexOf(q) >= 0).slice(0, 15);
 
-  let items = productos.slice();
-  if (soloPend) items = items.filter(p => p.stock_actual === 0);
-  if (q) items = items.filter(p => norm(p.id + ' ' + p.nombre).indexOf(q) >= 0);
-
-  items = items.slice(0, 20);
-
-  if (!items.length) {
-    cont.innerHTML = '<div style="text-align:center; padding:20px; color:var(--texto-suave);">Sin resultados.</div>';
+  if (items.length === 0) {
+    cont.innerHTML = '<div style="text-align:center; padding:20px; color:var(--texto-suave);">Producto no encontrado.</div>';
     return;
   }
 
   items.forEach(p => {
     const d = document.createElement('div');
     d.className = 'card-producto';
-
-    let fotoHTML = '';
-    if (p.imagen_url) {
-      fotoHTML = `<img src="${p.imagen_url}" alt="" loading="lazy">`;
-    } else {
-      fotoHTML = p.nombre.charAt(0).toUpperCase();
-    }
-
-    let stockClase = 'badge-ok';
-    if (p.stock_actual === 0) stockClase = 'badge-cero';
-
     d.innerHTML = `
-      <div class="foto-producto">${fotoHTML}</div>
+      <div class="foto-producto">${p.nombre.charAt(0)}</div>
       <div class="info-producto">
         <div class="nombre-producto">${p.nombre}</div>
-        <div class="meta-producto">
-          <span>${p.id}</span>
-          <span class="badge-stock ${stockClase}">${p.stock_actual} und</span>
-        </div>
+        <div class="meta-producto"><span>${p.id}</span> <span class="badge-stock badge-cero">${p.stock_actual} und</span></div>
       </div>
     `;
-
     d.addEventListener('click', () => {
       elegido = p;
-      mostrarPanel();
-      document.getElementById('resultados').innerHTML = '';
+      document.getElementById('panel').style.display = 'block';
+      document.getElementById('infoNombre').textContent = p.nombre;
+      document.getElementById('infoStock').textContent = p.stock_actual;
+      cont.innerHTML = '';
       document.getElementById('buscar').value = '';
+      document.getElementById('panel').scrollIntoView({ behavior: 'smooth' });
     });
-
     cont.appendChild(d);
   });
-}
+});
 
-function mostrarPanel() {
-  const panel = document.getElementById('panel');
-  panel.style.display = 'block';
-  document.getElementById('infoNombre').textContent = elegido.nombre;
-  document.getElementById('infoStock').textContent = elegido.stock_actual;
-  document.getElementById('conteo').value = '';
-  document.getElementById('obs').value = '';
-  document.getElementById('motivo').value = '';
-  panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
+document.getElementById('modoInicial').addEventListener('click', () => {
+  modo = 'inicial';
+  document.getElementById('modoInicial').classList.add('active');
+  document.getElementById('modoAjuste').classList.remove('active');
+  document.getElementById('bloqueMotivo').style.display = 'none';
+});
 
-function fijarModo(m) {
-  modo = m;
-  document.getElementById('modoInicial').classList.toggle('active', m === 'inicial');
-  document.getElementById('modoAjuste').classList.toggle('active', m === 'ajuste');
-  document.getElementById('bloqueMotivo').style.display = (m === 'ajuste') ? 'block' : 'none';
-}
-
-document.getElementById('modoInicial').addEventListener('click', () => fijarModo('inicial'));
-document.getElementById('modoAjuste').addEventListener('click', () => fijarModo('ajuste'));
-document.getElementById('buscar').addEventListener('input', pintarResultados);
-document.getElementById('soloPendientes').addEventListener('change', pintarResultados);
+document.getElementById('modoAjuste').addEventListener('click', () => {
+  modo = 'ajuste';
+  document.getElementById('modoAjuste').classList.add('active');
+  document.getElementById('modoInicial').classList.remove('active');
+  document.getElementById('bloqueMotivo').style.display = 'block';
+});
 
 document.getElementById('btnGuardar').addEventListener('click', async function () {
   if (!elegido) return;
   const conteo = Number(document.getElementById('conteo').value);
-  
-  if (isNaN(conteo) || conteo < 0) {
-    mostrar('El conteo debe ser un número válido', 'error'); return;
-  }
-
-  if (modo === 'ajuste' && !document.getElementById('motivo').value) {
-    mostrar('Elige un motivo para el ajuste', 'error'); return;
-  }
+  if (isNaN(conteo)) { mostrar('Escribe un número válido', 'error'); return; }
 
   this.disabled = true;
-  this.textContent = 'Guardando...';
+  this.textContent = 'Guardando en Google...';
 
   try {
     let r;
     if (modo === 'inicial') {
-      r = await apiGet({ accion: 'inventario_inicial', id_producto: elegido.id, conteo: conteo, id_usuario: 'Admin' });
+      r = await apiGet({ accion: 'inventario_inicial', id_producto: elegido.id, conteo: conteo });
     } else {
-      r = await apiGet({ accion: 'ajuste_inventario', id_producto: elegido.id, conteo_real: conteo, id_usuario: 'Admin', motivo: document.getElementById('motivo').value, observaciones: document.getElementById('obs').value });
+      r = await apiGet({ accion: 'ajuste_inventario', id_producto: elegido.id, conteo_real: conteo, motivo: document.getElementById('motivo').value });
     }
 
     if (r.ok) {
-      mostrar('Guardado exitosamente', 'ok');
-      elegido.stock_actual = (modo === 'inicial') ? r.stock_inicial : r.stock_nuevo;
+      mostrar('¡Guardado con éxito en Google Sheets!', 'ok');
       document.getElementById('panel').style.display = 'none';
-      pintarResultados();
     } else {
-      mostrar(r.error || 'Error al guardar', 'error');
+      mostrar(r.error, 'error');
     }
   } catch (err) {
-    mostrar('Error de conexión', 'error');
+    mostrar('Error de conexión al guardar', 'error');
   } finally {
     this.disabled = false;
     this.textContent = 'Guardar Cambios';
   }
-});
-
-// --- LÓGICA PARA SUBIR FOTOS ---
-document.getElementById('btnSubirFoto').addEventListener('click', function() {
-  document.getElementById('inputFoto').click();
-});
-
-document.getElementById('inputFoto').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = async function(event) {
-    const base64 = event.target.result;
-    document.getElementById('btnSubirFoto').textContent = 'Subiendo...';
-    document.getElementById('btnSubirFoto').disabled = true;
-
-    try {
-      const r = await apiGet({ accion: 'subir_foto', id_producto: elegido.id, base64: base64 });
-      if (r.ok) {
-        mostrar('Foto actualizada con éxito', 'ok');
-        elegido.imagen_url = r.url;
-        // Recargamos la lista para que se vea la foto
-        pintarResultados(); 
-      } else {
-        mostrar(r.error || 'Error al subir', 'error');
-      }
-    } catch (err) {
-      mostrar('Error de conexión al subir foto', 'error');
-    } finally {
-      document.getElementById('btnSubirFoto').textContent = '📷 Subir o cambiar foto';
-      document.getElementById('btnSubirFoto').disabled = false;
-      document.getElementById('inputFoto').value = '';
-    }
-  };
-  reader.readAsDataURL(file);
 });
 </script>
 </body>
