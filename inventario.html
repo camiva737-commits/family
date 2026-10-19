@@ -3,87 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Inventario · ACEII</title>
-<link rel="stylesheet" href="estilos.css">
-<script src="comun.js"></script>
+<title>Inventario · ArquiDulces</title>
 <style>
-  /* --- NUEVO DISEÑO: "Dark Professional" --- */
   :root {
-    --bg-app: #0F111A;          /* Fondo principal muy oscuro */
-    --bg-card: #1A1D2D;         /* Fondo de las tarjetas */
-    --bg-input: #25293D;        /* Fondo de los inputs */
-    --texto: #F8FAFC;           /* Texto principal */
-    --texto-suave: #94A3B8;     /* Texto secundario */
-    --borde: #334155;           /* Bordes sutiles */
-    --acento: #6366F1;          /* Índigo eléctrico */
-    --acento-bg: rgba(99, 102, 241, 0.15);
+    --bg-app: #0F111A;
+    --bg-card: #1A1D2D;
+    --bg-input: #25293D;
+    --texto: #F8FAFC;
+    --texto-suave: #94A3B8;
+    --borde: #334155;
+    --acento: #F59E0B; /* Naranja dulce para ArquiDulces */
+    --acento-bg: rgba(245, 158, 11, 0.15);
     --peligro: #EF4444;
     --exito: #10B981;
     --radio-tarjeta: 20px;
   }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-
-  body {
-    background-color: var(--bg-app);
-    color: var(--texto);
-    padding: 20px;
-    padding-bottom: 100px; /* Espacio para el nav inferior */
-  }
-
-  /* Header */
-  .header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    padding-top: 10px;
-  }
-  .header-top h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background-color: var(--bg-app); color: var(--texto); padding: 20px; padding-bottom: 100px; }
+  
+  .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-top: 10px; }
+  .header-top h1 { font-size: 28px; font-weight: 800; color: var(--acento); letter-spacing: -0.5px; }
   .header-top p { font-size: 14px; color: var(--texto-suave); font-weight: 500; margin-top: 4px; }
-  .btn-icono {
-    background: var(--bg-card); border: 1px solid var(--borde); color: var(--texto);
-    width: 44px; height: 44px; border-radius: 50%; font-size: 20px;
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-  }
+  
+  .toggle-container { background: var(--bg-card); padding: 6px; border-radius: 16px; display: flex; gap: 6px; margin-bottom: 24px; border: 1px solid var(--borde); }
+  .toggle-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 14px; background: transparent; color: var(--texto-suave); cursor: pointer; transition: all 0.2s; }
+  .toggle-btn.active { background: var(--acento); color: #000; box-shadow: 0 4px 12px var(--acento-bg); }
 
-  /* Toggle Modo (Inventario / Ajuste) */
-  .toggle-container {
-    background: var(--bg-card);
-    padding: 6px; border-radius: 16px; display: flex; gap: 6px; margin-bottom: 24px;
-    border: 1px solid var(--borde);
-  }
-  .toggle-btn {
-    flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 14px;
-    background: transparent; color: var(--texto-suave); cursor: pointer; transition: all 0.2s;
-  }
-  .toggle-btn.active { background: var(--acento); color: #FFF; box-shadow: 0 4px 12px var(--acento-bg); }
-
-  /* Inputs */
   .input-group { margin-bottom: 20px; }
-  .input-group label { display: block; font-size: 13px; font-weight: 700; color: var(--texto-suave); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-  input[type="text"], input[type="number"], select {
-    width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--borde);
-    background: var(--bg-input); color: var(--texto); font-size: 16px; outline: none; transition: border 0.2s;
-  }
-  input:focus, select:focus { border-color: var(--acento); }
+  .input-group label { display: block; font-size: 13px; font-weight: 700; color: var(--texto-suave); margin-bottom: 8px; text-transform: uppercase; }
+  input[type="text"], input[type="number"], select { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--borde); background: var(--bg-input); color: var(--texto); font-size: 16px; outline: none; }
   input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--acento); }
 
-  /* Resultados (Tarjetas) */
   #resultados { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-  .card-producto {
-    background: var(--bg-card); padding: 16px; border-radius: var(--radio-tarjeta);
-    display: flex; align-items: center; gap: 16px; border: 1px solid var(--borde);
-    cursor: pointer; transition: transform 0.1s, border-color 0.2s;
-  }
+  .card-producto { background: var(--bg-card); padding: 16px; border-radius: var(--radio-tarjeta); display: flex; align-items: center; gap: 16px; border: 1px solid var(--borde); cursor: pointer; transition: transform 0.1s; }
   .card-producto:active { transform: scale(0.98); }
-  .card-producto:hover { border-color: var(--acento); }
-
-  .foto-producto {
-    width: 56px; height: 56px; border-radius: 14px; background: var(--bg-input);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; font-weight: 800; color: var(--acento); flex-shrink: 0; overflow: hidden;
-  }
+  
+  .foto-producto { width: 56px; height: 56px; border-radius: 14px; background: var(--bg-input); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--acento); flex-shrink: 0; overflow: hidden; }
   .foto-producto img { width: 100%; height: 100%; object-fit: cover; }
 
   .info-producto { flex: 1; min-width: 0; }
@@ -91,45 +46,29 @@
   .meta-producto { font-size: 13px; color: var(--texto-suave); margin-top: 4px; display: flex; align-items: center; gap: 8px; }
   .badge-stock { padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 13px; }
   .badge-ok { background: rgba(16, 185, 129, 0.2); color: var(--exito); }
-  .badge-bajo { background: rgba(245, 158, 11, 0.2); color: #F59E0B; }
   .badge-cero { background: rgba(239, 68, 68, 0.2); color: var(--peligro); }
 
-  /* Panel de edición */
-  .panel-edicion {
-    background: var(--bg-card); padding: 24px; border-radius: var(--radio-tarjeta);
-    border: 1px solid var(--borde); margin-top: 24px; display: none;
-  }
+  .panel-edicion { background: var(--bg-card); padding: 24px; border-radius: var(--radio-tarjeta); border: 1px solid var(--borde); margin-top: 24px; display: none; }
   .panel-edicion h2 { font-size: 20px; margin-bottom: 4px; }
-  .panel-edicion .stock-actual { font-size: 14px; color: var(--texto-suave); margin-bottom: 24px; }
-  .panel-edicion .stock-num { font-size: 24px; font-weight: 800; color: var(--acento); }
+  .stock-actual { font-size: 14px; color: var(--texto-suave); margin-bottom: 24px; }
+  .stock-num { font-size: 24px; font-weight: 800; color: var(--acento); }
 
-  .btn-primario {
-    width: 100%; padding: 18px; border-radius: 16px; border: none;
-    background: var(--acento); color: #FFF; font-size: 16px; font-weight: 800;
-    cursor: pointer; margin-top: 24px; transition: opacity 0.2s;
-  }
+  .btn-primario { width: 100%; padding: 18px; border-radius: 16px; border: none; background: var(--acento); color: #000; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 24px; }
   .btn-primario:active { opacity: 0.8; }
 
-  /* Alertas / Mensajes */
-  #estado {
-    padding: 16px; border-radius: 16px; font-weight: 600; font-size: 14px;
-    text-align: center; margin-bottom: 20px; display: none;
-  }
+  #estado { padding: 16px; border-radius: 16px; font-weight: 600; font-size: 14px; text-align: center; margin-bottom: 20px; display: none; }
   .estado-ok { background: rgba(16, 185, 129, 0.15); color: var(--exito); border: 1px solid var(--exito); }
   .estado-error { background: rgba(239, 68, 68, 0.15); color: var(--peligro); border: 1px solid var(--peligro); }
   .estado-aviso { background: var(--acento-bg); color: var(--acento); border: 1px solid var(--acento); }
-
 </style>
 </head>
 <body>
 
 <header class="header-top">
   <div>
-    <h1>Inventario</h1>
-    <p>Stock y Ajustes</p>
+    <h1>ArquiDulces</h1>
+    <p>Control de Inventario</p>
   </div>
-  <!-- Botón para tema (opcional, lo dejamos por ahora) -->
-  <button class="btn-icono" id="btnTema">🌙</button>
 </header>
 
 <div id="estado" class="estado-aviso">Cargando inventario...</div>
@@ -152,15 +91,13 @@
 <div class="panel-edicion" id="panel">
   <h2 id="infoNombre">Producto</h2>
   <div class="stock-actual">Stock del sistema: <span class="stock-num" id="infoStock">0</span></div>
-    <div style="margin-bottom: 20px;">
+  
+  <div style="margin-bottom: 24px; margin-top: 16px;">
     <button id="btnSubirFoto" style="background: var(--bg-input); color: var(--acento); border: 1px dashed var(--acento); padding: 12px; border-radius: 12px; width: 100%; font-weight: 700; cursor: pointer;">
       📷 Subir o cambiar foto
     </button>
     <input type="file" id="inputFoto" accept="image/*" style="display: none;">
   </div>
-
-
-
 
   <div class="input-group">
     <label>Conteo Físico Real (Unidades)</label>
@@ -172,7 +109,7 @@
     <select id="motivo">
       <option value="">Elige el motivo...</option>
       <option value="Venta no registrada">Venta no registrada</option>
-      <option value="Consumo interno">Consumo interno (sin pago)</option>
+      <option value="Consumo interno">Consumo interno</option>
       <option value="Error del sistema">Error del sistema</option>
       <option value="Producto dañado / vencido">Producto dañado / vencido</option>
       <option value="Otro">Otro</option>
@@ -188,23 +125,31 @@
 </div>
 
 <script>
-// --- LÓGICA DE LA INTERFAZ ---
+// --- CONFIGURACIÓN DIRECTA (Sin comun.js) ---
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxJTtF1dkIdS21iiDer0mYOoykbRKMs6yEqZlL8uxNMNVmvY6jr0dMrWbD_He7kO5GU/exec';
 
+async function apiGet(params) {
+  const url = new URL(WEB_APP_URL);
+  Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
+  url.searchParams.append('_t', Date.now());
+  const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+  if (!res.ok) throw new Error('Error de red: ' + res.status);
+  return await res.json();
+}
+
+function mostrar(msg, tipo) {
+  const el = document.getElementById('estado');
+  el.textContent = msg;
+  el.className = 'estado-' + (tipo || 'aviso');
+  el.style.display = 'block';
+  if(tipo === 'ok') setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+// --- LÓGICA DE LA APP ---
 let productos = [];
 let elegido = null;
 let modo = 'inicial';
 
-// Botón de tema (simple toggle visual)
-document.getElementById('btnTema').addEventListener('click', function() {
-  const body = document.body;
-  if(body.style.backgroundColor === 'white') {
-    body.style.backgroundColor = '#0F111A'; body.style.color = '#F8FAFC';
-  } else {
-    body.style.backgroundColor = 'white'; body.style.color = '#0F111A';
-  }
-});
-
-// Carga inicial
 (async function () {
   try {
     const r = await apiGet({ accion: 'inventario' });
@@ -231,7 +176,7 @@ function pintarResultados() {
   if (soloPend) items = items.filter(p => p.stock_actual === 0);
   if (q) items = items.filter(p => norm(p.id + ' ' + p.nombre).indexOf(q) >= 0);
 
-  items = items.slice(0, 20); // Mostrar hasta 20
+  items = items.slice(0, 20);
 
   if (!items.length) {
     cont.innerHTML = '<div style="text-align:center; padding:20px; color:var(--texto-suave);">Sin resultados.</div>';
@@ -242,10 +187,8 @@ function pintarResultados() {
     const d = document.createElement('div');
     d.className = 'card-producto';
 
-    // Lógica de la imagen (si tiene URL de Drive)
     let fotoHTML = '';
     if (p.imagen_url) {
-      // Usamos un endpoint de Google Drive para incrustar la imagen directamente
       fotoHTML = `<img src="${p.imagen_url}" alt="" loading="lazy">`;
     } else {
       fotoHTML = p.nombre.charAt(0).toUpperCase();
@@ -253,7 +196,6 @@ function pintarResultados() {
 
     let stockClase = 'badge-ok';
     if (p.stock_actual === 0) stockClase = 'badge-cero';
-    else if (p.stock_actual <= 5) stockClase = 'badge-bajo';
 
     d.innerHTML = `
       <div class="foto-producto">${fotoHTML}</div>
@@ -339,16 +281,6 @@ document.getElementById('btnGuardar').addEventListener('click', async function (
   }
 });
 
-// Funciones auxiliares
-function mostrar(msg, tipo) {
-  const el = document.getElementById('estado');
-  el.textContent = msg;
-  el.className = 'estado-' + (tipo || 'aviso');
-  el.style.display = 'block';
-  setTimeout(() => { el.style.display = 'none'; }, 4000);
-}
-
-
 // --- LÓGICA PARA SUBIR FOTOS ---
 document.getElementById('btnSubirFoto').addEventListener('click', function() {
   document.getElementById('inputFoto').click();
@@ -361,22 +293,16 @@ document.getElementById('inputFoto').addEventListener('change', function(e) {
   const reader = new FileReader();
   reader.onload = async function(event) {
     const base64 = event.target.result;
-    
-    // Mostrar estado de carga
     document.getElementById('btnSubirFoto').textContent = 'Subiendo...';
     document.getElementById('btnSubirFoto').disabled = true;
 
     try {
-      const r = await apiGet({ 
-        accion: 'subir_foto', 
-        id_producto: elegido.id, 
-        base64: base64 
-      });
-
+      const r = await apiGet({ accion: 'subir_foto', id_producto: elegido.id, base64: base64 });
       if (r.ok) {
         mostrar('Foto actualizada con éxito', 'ok');
-        // Actualizamos la imagen en el objeto del producto para que se vea al instante
         elegido.imagen_url = r.url;
+        // Recargamos la lista para que se vea la foto
+        pintarResultados(); 
       } else {
         mostrar(r.error || 'Error al subir', 'error');
       }
@@ -385,13 +311,11 @@ document.getElementById('inputFoto').addEventListener('change', function(e) {
     } finally {
       document.getElementById('btnSubirFoto').textContent = '📷 Subir o cambiar foto';
       document.getElementById('btnSubirFoto').disabled = false;
-      // Limpiamos el input para poder subir otra foto del mismo archivo si se quiere
       document.getElementById('inputFoto').value = '';
     }
   };
   reader.readAsDataURL(file);
 });
 </script>
-<script src="nav.js"></script>
 </body>
 </html>
