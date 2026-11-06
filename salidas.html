@@ -67,6 +67,7 @@
       <input type="text" id="documento" placeholder="Número de factura / pedido" oninput="guardarBorrador()">
       <button class="btn-camara" onclick="document.getElementById('fotoCamara').click()">📷</button>
       <button class="btn-camara" onclick="document.getElementById('fotoGaleria').click()">🖼️</button>
+      <button class="btn-camara" id="btn-microfono" title="Dictar por voz" onclick="iniciarDictado()">🎤</button>
     </div>
     <input type="file" id="fotoCamara" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoIA(this)">
     <input type="file" id="fotoGaleria" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
@@ -359,6 +360,96 @@ async function guardarSalida() {
     btn.textContent = 'Guardar Salida';
     btn.disabled = false;
   }
+}
+// --- MÓDULO DE VOZ: DICTADO POR MICRÓFONO ---
+let reconocimientoVoz = null;
+let dictadoActivo = false;
+
+function iniciarDictado() {
+  // Verificar que el navegador soporte reconocimiento de voz
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert('Tu navegador no soporta dictado por voz. Usa Chrome en Android o computador.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-microfono');
+  const estado = document.getElementById('estado');
+
+  // Si ya está activo, detenerlo
+  if (dictadoActivo && reconocimientoVoz) {
+    reconocimientoVoz.stop();
+    return;
+  }
+
+  reconocimientoVoz = new SpeechRecognition();
+  reconocimientoVoz.lang = 'es-CO'; // Español Colombia
+  reconocimientoVoz.continuous = false;
+  reconocimientoVoz.interimResults = false;
+
+  reconocimientoVoz.onstart = function() {
+    dictadoActivo = true;
+    btn.style.background = '#EF4444'; // Rojo mientras graba
+    btn.textContent = '⏹️';
+    estado.className = 'ok';
+    estado.textContent = '🎤 Escuchando... Habla claro y luego espera.';
+    estado.style.display = 'block';
+  };
+
+  reconocimientoVoz.onresult = async function(event) {
+    const textoDictado = event.results[0][0].transcript;
+    estado.className = 'ok';
+    estado.textContent = '📝 Dijiste: "' + textoDictado + '"\nProcesando...';
+    
+    // Enviar al backend para que Gemini lo interprete
+    try {
+      const proveedor = document.getElementById('proveedor').value;
+      const r = await apiPost({ 
+        accion: 'parsear_texto', 
+        texto: textoDictado,
+        id_proveedor: proveedor
+      }, 60);
+
+      if (!r.ok) throw new Error(r.error || 'No se pudo interpretar');
+
+      // Agregar líneas reconocidas
+      (r.lineas || []).forEach(l => {
+        const match = productos.find(p => p.id === l.id_producto);
+        lineasAgregadas.push({
+          id_producto: l.id_producto,
+          nombre: l.nombre,
+          unidad: match ? (match.unidad_base || l.unidad || 'Unidad') : (l.unidad || 'Unidad'),
+          cantidad: l.cantidad,
+          precio: l.precio || ''
+        });
+      });
+
+      renderizarLineas();
+
+      let msg = '✅ Se agregaron ' + (r.lineas || []).length + ' producto(s) del dictado.';
+      if (r.sin_coincidencia && r.sin_coincidencia.length) {
+        msg += '\n\nNo reconocí: ' + r.sin_coincidencia.join(', ');
+      }
+      alert(msg);
+      estado.style.display = 'none';
+    } catch (err) {
+      estado.className = 'error';
+      estado.textContent = 'Error: ' + err.message;
+    }
+  };
+
+  reconocimientoVoz.onerror = function(event) {
+    estado.className = 'error';
+    estado.textContent = 'Error de micrófono: ' + event.error + '. Intenta de nuevo.';
+  };
+
+  reconocimientoVoz.onend = function() {
+    dictadoActivo = false;
+    btn.style.background = '';
+    btn.textContent = '🎤';
+  };
+
+  reconocimientoVoz.start();
 }
 </script>
 </body>
