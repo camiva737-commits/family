@@ -107,24 +107,39 @@ function filtrar() {
   const cont = document.getElementById('lista');
   cont.innerHTML = '';
 
-  // Si no hay búsqueda, mostramos todos los productos (limitado a 100)
+  // Filtrar por búsqueda
   let resultados = productos;
   if (q.length > 0) {
     resultados = productos.filter(p => (p.id + ' ' + p.nombre).toLowerCase().includes(q));
   }
 
-  // Ordenar por nombre
-  resultados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+  // Ordenar por stock de mayor a menor
+  resultados.sort((a, b) => {
+  const stockA = a.stock_actual || 0;
+  const stockB = b.stock_actual || 0;
+  // Si ambos tienen stock o ambos no tienen, ordenar por stock
+  if (stockA > 0 && stockB > 0) return stockB - stockA;
+  if (stockA <= 0 && stockB <= 0) return a.nombre.localeCompare(b.nombre);
+  // Los que tienen stock van primero
+  return stockB - stockA;
+});
 
-  // Mostrar hasta 100
-  resultados.slice(0, 100).forEach(p => {
+  // Mostrar todos los resultados
+  resultados.forEach(p => {
     const d = document.createElement('div');
     d.className = 'card';
     let foto = p.imagen_url ? `<img src="${p.imagen_url}">` : `<div class="inicial">${p.nombre.charAt(0)}</div>`;
+
+    // Color del stock según cantidad
+    let colorStock = '#94A3B8'; // Gris por defecto
+    if (p.stock_actual > 0) colorStock = '#10B981'; // Verde si hay
+    if (p.stock_actual === 0) colorStock = '#EF4444'; // Rojo si no hay
+    if (p.stock_actual < 0) colorStock = '#DC2626'; // Rojo oscuro si está negativo
+
     d.innerHTML = `${foto}
       <div class="card-info">
         <h3>${p.nombre}</h3>
-        <p>${p.id} · Stock: <strong>${p.stock_actual}</strong> ${p.unidad_base || ''}</p>
+        <p>${p.id} · Stock: <strong style="color:${colorStock}; font-size:16px;">${p.stock_actual}</strong> ${p.unidad_base || ''}</p>
       </div>`;
 
     d.onclick = () => {
@@ -141,10 +156,15 @@ function filtrar() {
   });
 
   if (resultados.length === 0) {
-    cont.innerHTML = '<p style="text-align:center;color:var(--suave);">No se encontraron productos.</p>';
+    cont.innerHTML = '<p style="text-align:center;color:var(--suave); padding:20px;">No se encontraron productos.</p>';
   }
-}
 
+  // Mostrar contador arriba de la lista
+  const contador = document.createElement('p');
+  contador.style.cssText = 'text-align:center; color: var(--suave); font-size: 13px; margin: 10px 0;';
+  contador.textContent = 'Mostrando ' + resultados.length + ' producto(s)';
+  cont.insertBefore(contador, cont.firstChild);
+}
 async function guardarCambios() {
   if (!elegido) return;
   const cant = Number(document.getElementById('conteo').value);
