@@ -426,11 +426,17 @@ function iniciarDictado() {
 
       renderizarLineas();
 
-      let msg = '✅ Se agregaron ' + (r.lineas || []).length + ' producto(s) del dictado.';
-      if (r.sin_coincidencia && r.sin_coincidencia.length) {
-        msg += '\n\nNo reconocí: ' + r.sin_coincidencia.join(', ');
-      }
-      alert(msg);
+      let msg = '📝 Tú dijiste: "' + (r.texto_recibido || '') + '"\n\n';
+msg += '🤖 Gemini entendió:\n';
+(r.gemini_dijo && r.gemini_dijo.lineas ? r.gemini_dijo.lineas : []).forEach(function(l) {
+  msg += '  • ' + l.descripcion + ' (' + l.cantidad + ' ' + l.unidad + ')\n';
+});
+msg += '\n🔍 Resultado del matching:\n';
+(r.diagnostico || []).forEach(function(d) {
+  msg += '  ' + d + '\n';
+});
+msg += '\n✅ Se agregaron ' + (r.lineas || []).length + ' producto(s).';
+alert(msg);
       estado.style.display = 'none';
     } catch (err) {
       estado.className = 'error';
