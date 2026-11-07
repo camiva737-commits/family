@@ -89,6 +89,7 @@ let modo = 'inicial';
     productos = r.items;
     mostrarMensaje('¡Catálogo cargado!', 'ok');
     setTimeout(() => { document.getElementById('estado').style.display = 'none'; }, 3000);
+    filtrar(); // Mostrar la lista completa al entrar
   } catch (err) {
     mostrarMensaje('Error de conexión: ' + err.message, 'error');
   }
@@ -101,36 +102,42 @@ function mostrarMensaje(msg, tipo) {
   el.style.display = 'block';
 }
 
-function cambiarModo(m) {
-  modo = m;
-  document.getElementById('btn-inicial').className = (m === 'inicial') ? 'active' : '';
-  document.getElementById('btn-ajuste').className = (m === 'ajuste') ? 'active' : '';
-  document.getElementById('div-motivo').style.display = (m === 'ajuste') ? 'block' : 'none';
-}
-
 function filtrar() {
-  const q = document.getElementById('buscar').value.toLowerCase();
+  const q = document.getElementById('buscar').value.toLowerCase().trim();
   const cont = document.getElementById('lista');
   cont.innerHTML = '';
-  if (q.length < 2) return;
 
-  productos.filter(p => (p.id + ' ' + p.nombre).toLowerCase().includes(q)).slice(0, 15).forEach(p => {
+  // Si no hay búsqueda, mostramos todos (limitado a 100 para no saturar)
+  // Si hay búsqueda, filtramos
+  let resultados = productos;
+  if (q.length > 0) {
+    resultados = productos.filter(p => (p.id + ' ' + p.nombre).toLowerCase().includes(q));
+  }
+
+  // Mostrar hasta 100 productos
+  resultados.slice(0, 100).forEach(p => {
     const d = document.createElement('div');
     d.className = 'card';
     let foto = p.imagen_url ? `<img src="${p.imagen_url}">` : `<div class="inicial">${p.nombre.charAt(0)}</div>`;
-    d.innerHTML = `${foto}<div class="card-info"><h3>${p.nombre}</h3><p>${p.id} · Stock: <strong>${p.stock_actual}</strong></p></div>`;
-    
+    d.innerHTML = `${foto}<div class="card-info"><h3>${p.nombre}</h3><p>${p.id} · Stock: <strong>${p.stock_actual}</strong> ${p.unidad_base || ''}</p></div>`;
+
     d.onclick = () => {
       elegido = p;
       document.getElementById('panel').style.display = 'block';
       document.getElementById('p-nombre').textContent = p.nombre;
       document.getElementById('p-stock').textContent = p.stock_actual;
       document.getElementById('conteo').value = '';
-      cont.innerHTML = ''; document.getElementById('buscar').value = '';
+      cont.innerHTML = '';
+      document.getElementById('buscar').value = '';
       document.getElementById('panel').scrollIntoView({ behavior: 'smooth' });
     };
     cont.appendChild(d);
   });
+
+  // Si no hay resultados, mostrar mensaje
+  if (resultados.length === 0) {
+    cont.innerHTML = '<p style="text-align:center;color:var(--suave);">No se encontraron productos.</p>';
+  }
 }
 
 async function guardarCambios() {
