@@ -113,16 +113,20 @@ function filtrar() {
     resultados = productos.filter(p => (p.id + ' ' + p.nombre).toLowerCase().includes(q));
   }
 
-  // Ordenar por stock de mayor a menor
+  // Orden: Mayor stock primero, con stock <= 0 al final en orden alfabético
   resultados.sort((a, b) => {
-  const stockA = a.stock_actual || 0;
-  const stockB = b.stock_actual || 0;
-  // Si ambos tienen stock o ambos no tienen, ordenar por stock
-  if (stockA > 0 && stockB > 0) return stockB - stockA;
-  if (stockA <= 0 && stockB <= 0) return a.nombre.localeCompare(b.nombre);
-  // Los que tienen stock van primero
-  return stockB - stockA;
-});
+    const stockA = a.stock_actual || 0;
+    const stockB = b.stock_actual || 0;
+
+    // Si ambos tienen stock > 0, ordenar por mayor stock
+    if (stockA > 0 && stockB > 0) return stockB - stockA;
+
+    // Si ambos no tienen stock (<= 0), ordenar alfabéticamente
+    if (stockA <= 0 && stockB <= 0) return a.nombre.localeCompare(b.nombre);
+
+    // Los que tienen stock van primero
+    return stockB - stockA;
+  });
 
   // Mostrar todos los resultados
   resultados.forEach(p => {
@@ -130,11 +134,11 @@ function filtrar() {
     d.className = 'card';
     let foto = p.imagen_url ? `<img src="${p.imagen_url}">` : `<div class="inicial">${p.nombre.charAt(0)}</div>`;
 
-    // Color del stock según cantidad
-    let colorStock = '#94A3B8'; // Gris por defecto
-    if (p.stock_actual > 0) colorStock = '#10B981'; // Verde si hay
-    if (p.stock_actual === 0) colorStock = '#EF4444'; // Rojo si no hay
-    if (p.stock_actual < 0) colorStock = '#DC2626'; // Rojo oscuro si está negativo
+    // Color del stock
+    let colorStock = '#94A3B8';
+    if (p.stock_actual > 0) colorStock = '#10B981';
+    if (p.stock_actual === 0) colorStock = '#EF4444';
+    if (p.stock_actual < 0) colorStock = '#DC2626';
 
     d.innerHTML = `${foto}
       <div class="card-info">
@@ -159,7 +163,7 @@ function filtrar() {
     cont.innerHTML = '<p style="text-align:center;color:var(--suave); padding:20px;">No se encontraron productos.</p>';
   }
 
-  // Mostrar contador arriba de la lista
+  // Contador visible
   const contador = document.createElement('p');
   contador.style.cssText = 'text-align:center; color: var(--suave); font-size: 13px; margin: 10px 0;';
   contador.textContent = 'Mostrando ' + resultados.length + ' producto(s)';
