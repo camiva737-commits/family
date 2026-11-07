@@ -281,8 +281,12 @@ async function guardarEntrada() {
 let reconocimientoVoz = null;
 let dictadoActivo = false;
 
+// --- MÓDULO DE VOZ: DICTADO POR MICRÓFONO ---
+let reconocimientoVoz = null;
+let dictadoActivo = false;
+let textoCapturado = '';
+
 function iniciarDictado() {
-  // Verificar que el navegador soporte reconocimiento de voz
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     alert('Tu navegador no soporta dictado por voz. Usa Chrome en Android o computador.');
@@ -292,43 +296,68 @@ function iniciarDictado() {
   const btn = document.getElementById('btn-microfono');
   const estado = document.getElementById('estado');
 
-  // Si ya está activo, detenerlo
   if (dictadoActivo && reconocimientoVoz) {
     reconocimientoVoz.stop();
     return;
   }
 
+  textoCapturado = ''; // Limpiar antes de empezar
   reconocimientoVoz = new SpeechRecognition();
-  reconocimientoVoz.lang = 'es-CO'; // Español Colombia
+  reconocimientoVoz.lang = 'es-CO';
   reconocimientoVoz.continuous = false;
   reconocimientoVoz.interimResults = false;
+  reconocimientoVoz.maxAlternatives = 1;
 
   reconocimientoVoz.onstart = function() {
     dictadoActivo = true;
-    btn.style.background = '#EF4444'; // Rojo mientras graba
+    btn.style.background = '#EF4444';
     btn.textContent = '⏹️';
     estado.className = 'ok';
-    estado.textContent = '🎤 Escuchando... Habla claro y luego espera.';
+    estado.textContent = '🎤 Escuchando... Habla claro y espera a que se detenga.';
     estado.style.display = 'block';
   };
 
-  reconocimientoVoz.onresult = async function(event) {
-    const textoDictado = event.results[0][0].transcript;
+  reconocimientoVoz.onresult = function(event) {
+    // Guardar el texto, pero NO procesarlo todavía
+    if (event.results && event.results[0] && event.results[0][0]) {
+      textoCapturado = event.results[0][0].transcript || '';
+      estado.textContent = '📝 Capturado: "' + textoCapturado + '"\nProcesando...';
+    }
+  };
+
+  reconocimientoVoz.onerror = function(event) {
+    dictadoActivo = false;
+    btn.style.background = '';
+    btn.textContent = '🎤';
+    estado.className = 'error';
+    estado.textContent = 'Error de micrófono: ' + event.error + '. Intenta de nuevo.';
+  };
+
+  reconocimientoVoz.onend = async function() {
+    dictadoActivo = false;
+    btn.style.background = '';
+    btn.textContent = '🎤';
+
+    // Aquí ya terminó de escuchar, ahora sí procesamos
+    if (!textoCapturado || textoCapturado.trim() === '') {
+      estado.className = 'error';
+      estado.textContent = '⚠️ No se captó audio. Intenta hablar más fuerte o más cerca del micrófono.';
+      return;
+    }
+
     estado.className = 'ok';
-    estado.textContent = '📝 Dijiste: "' + textoDictado + '"\nProcesando...';
-    
-    // Enviar al backend para que Gemini lo interprete
+    estado.textContent = '📝 Dijiste: "' + textoCapturado + '"\nProcesando...';
+
     try {
       const proveedor = document.getElementById('proveedor').value;
-      const r = await apiPost({ 
-        accion: 'parsear_texto', 
-        texto: textoDictado,
+      const r = await apiPost({
+        accion: 'parsear_texto',
+        texto: textoCapturado,
         id_proveedor: proveedor
       }, 60);
 
       if (!r.ok) throw new Error(r.error || 'No se pudo interpretar');
 
-      // Agregar líneas reconocidas
       (r.lineas || []).forEach(l => {
         const match = productos.find(p => p.id === l.id_producto);
         lineasAgregadas.push({
@@ -342,33 +371,23 @@ function iniciarDictado() {
 
       renderizarLineas();
 
-      let msg = '📝 Tú dijiste: "' + (r.texto_recibido || '') + '"\n\n';
-msg += '🤖 Gemini entendió:\n';
-(r.gemini_dijo && r.gemini_dijo.lineas ? r.gemini_dijo.lineas : []).forEach(function(l) {
-  msg += '  • ' + l.descripcion + ' (' + l.cantidad + ' ' + l.unidad + ')\n';
-});
-msg += '\n🔍 Resultado del matching:\n';
-(r.diagnostico || []).forEach(function(d) {
-  msg += '  ' + d + '\n';
-});
-msg += '\n✅ Se agregaron ' + (r.lineas || []).length + ' producto(s).';
-alert(msg);
+      // Mostrar diagnóstico completo
+      let msg = '📝 Tú dijiste: "' + (r.texto_recibido || textoCapturado) + '"\n\n';
+      msg += '🤖 Gemini entendió:\n';
+      (r.gemini_dijo && r.gemini_dijo.lineas ? r.gemini_dijo.lineas : []).forEach(function(l) {
+        msg += '  • ' + l.descripcion + ' (' + l.cantidad + ' ' + l.unidad + ')\n';
+      });
+      msg += '\n🔍 Resultado del matching:\n';
+      (r.diagnostico || []).forEach(function(d) {
+        msg += '  ' + d + '\n';
+      });
+      msg += '\n✅ Se agregaron ' + (r.lineas || []).length + ' producto(s).';
+      alert(msg);
       estado.style.display = 'none';
     } catch (err) {
       estado.className = 'error';
       estado.textContent = 'Error: ' + err.message;
     }
-  };
-
-  reconocimientoVoz.onerror = function(event) {
-    estado.className = 'error';
-    estado.textContent = 'Error de micrófono: ' + event.error + '. Intenta de nuevo.';
-  };
-
-  reconocimientoVoz.onend = function() {
-    dictadoActivo = false;
-    btn.style.background = '';
-    btn.textContent = '🎤';
   };
 
   reconocimientoVoz.start();
