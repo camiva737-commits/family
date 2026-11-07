@@ -277,9 +277,6 @@ async function guardarEntrada() {
     btn.disabled = false;
   }
 }
-// --- MÓDULO DE VOZ: DICTADO POR MICRÓFONO ---
-let reconocimientoVoz = null;
-let dictadoActivo = false;
 
 // --- MÓDULO DE VOZ: DICTADO POR MICRÓFONO ---
 let reconocimientoVoz = null;
@@ -289,7 +286,7 @@ let textoCapturado = '';
 function iniciarDictado() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    alert('Tu navegador no soporta dictado por voz. Usa Chrome en Android o computador.');
+    alert('Tu navegador no soporta dictado por voz. Usa Chrome.');
     return;
   }
 
@@ -301,7 +298,7 @@ function iniciarDictado() {
     return;
   }
 
-  textoCapturado = ''; // Limpiar antes de empezar
+  textoCapturado = '';
   reconocimientoVoz = new SpeechRecognition();
   reconocimientoVoz.lang = 'es-CO';
   reconocimientoVoz.continuous = false;
@@ -313,15 +310,14 @@ function iniciarDictado() {
     btn.style.background = '#EF4444';
     btn.textContent = '⏹️';
     estado.className = 'ok';
-    estado.textContent = '🎤 Escuchando... Habla claro y espera a que se detenga.';
+    estado.textContent = '🎤 Escuchando... Habla claro y espera.';
     estado.style.display = 'block';
   };
 
   reconocimientoVoz.onresult = function(event) {
-    // Guardar el texto, pero NO procesarlo todavía
     if (event.results && event.results[0] && event.results[0][0]) {
       textoCapturado = event.results[0][0].transcript || '';
-      estado.textContent = '📝 Capturado: "' + textoCapturado + '"\nProcesando...';
+      estado.textContent = '📝 Capturado: "' + textoCapturado + '"';
     }
   };
 
@@ -330,7 +326,7 @@ function iniciarDictado() {
     btn.style.background = '';
     btn.textContent = '🎤';
     estado.className = 'error';
-    estado.textContent = 'Error de micrófono: ' + event.error + '. Intenta de nuevo.';
+    estado.textContent = 'Error de micrófono: ' + event.error;
   };
 
   reconocimientoVoz.onend = async function() {
@@ -338,10 +334,9 @@ function iniciarDictado() {
     btn.style.background = '';
     btn.textContent = '🎤';
 
-    // Aquí ya terminó de escuchar, ahora sí procesamos
     if (!textoCapturado || textoCapturado.trim() === '') {
       estado.className = 'error';
-      estado.textContent = '⚠️ No se captó audio. Intenta hablar más fuerte o más cerca del micrófono.';
+      estado.textContent = '⚠️ No se captó audio. Intenta de nuevo.';
       return;
     }
 
@@ -371,16 +366,13 @@ function iniciarDictado() {
 
       renderizarLineas();
 
-      // Mostrar diagnóstico completo
       let msg = '📝 Tú dijiste: "' + (r.texto_recibido || textoCapturado) + '"\n\n';
       msg += '🤖 Gemini entendió:\n';
       (r.gemini_dijo && r.gemini_dijo.lineas ? r.gemini_dijo.lineas : []).forEach(function(l) {
         msg += '  • ' + l.descripcion + ' (' + l.cantidad + ' ' + l.unidad + ')\n';
       });
-      msg += '\n🔍 Resultado del matching:\n';
-      (r.diagnostico || []).forEach(function(d) {
-        msg += '  ' + d + '\n';
-      });
+      msg += '\n🔍 Resultado:\n';
+      (r.diagnostico || []).forEach(function(d) { msg += '  ' + d + '\n'; });
       msg += '\n✅ Se agregaron ' + (r.lineas || []).length + ' producto(s).';
       alert(msg);
       estado.style.display = 'none';
