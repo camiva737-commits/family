@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Entradas · ArquiDulces</title>
 <script src="comun.js?v=8"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css">
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
 <style>
   :root {
     --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
@@ -110,40 +112,122 @@ let lineasAgregadas = [];
 })();
 
 // --- LECTURA DE FACTURA CON IA (FOTO POR POST) ---
+// --- PROCESAR FOTO CON RECORTE ---
+let cropper = null;
+let inputFotoActual = null;
+
 async function procesarFotoIA(input) {
   const file = input.files[0];
   if (!file) return;
+  
+  inputFotoActual = input;
+  
+  // Mostrar modal de recorte
+  const modal = document.getElementById('modal-recorte');
+  const img = document.getElementById('imagen-a-recortar');
+  
+  const url = URL.createObjectURL(file);
+  img.src = url;
+  modal.style.display = 'flex';
+  
+  // Esperar a que la imagen cargue para inicializar cropper
+  img.onload = function() {
+    if (cropper) cropper.destroy();
+    cropper = new Cropper(img, {
+      viewMode: 1,
+      autoCropArea: 0.9,
+      background: false,
+      responsive: true,
+      guides: true,
+      movable: true,
+      zoomable: true,
+      scalable: false,
+      rotatable: false
+    });
+  };
+}
 
+function cancelarRecorte() {
+  const modal = document.getElementById('modal-recorte');
+  modal.style.display = 'none';
+  if (cropper) { cropper.destroy(); cropper = null; }
+  if (inputFotoActual) { inputFotoActual.value = ''; }
+}
+
+async function usarImagenCompleta() {
+  const modal = document.getElementById('modal-recorte');
+  const img = document.getElementById('imagen-a-recortar');
+  
+  modal.style.display = 'none';
+  if (cropper) { cropper.destroy(); cropper = null; }
+  
+  // Enviar la imagen completa (sin recortar)
+  await enviarFotoIA(img.src, true);
+  if (inputFotoActual) { inputFotoActual.value = ''; }
+}
+
+async function aplicarRecorte() {
+  if (!cropper) return;
+  
+  const modal = document.getElementById('modal-recorte');
+  const canvas = cropper.getCroppedCanvas({
+    maxWidth: 1600,
+    maxHeight: 1600,
+    imageSmoothingQuality: 'high'
+  });
+  
+  modal.style.display = 'none';
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+  if (cropper) { cropper.destroy(); cropper = null; }
+  
+  await enviarFotoIA(dataUrl, false);
+  if (inputFotoActual) { inputFotoActual.value = ''; }
+}
+
+async function enviarFotoIA(dataUrl, esCompleta) {
   const botones = document.querySelectorAll('.btn-camara');
   botones.forEach(b => { b.disabled = true; });
-
+  
   const estado = document.getElementById('estado');
   estado.className = 'ok';
-  estado.textContent = 'Leyendo factura con IA... (puede tardar unos segundos)';
+  estado.textContent = (esCompleta ? 'Enviando imagen completa' : 'Enviando recorte') + ' a la IA... (puede tardar unos segundos)';
   estado.style.display = 'block';
-
+  
   try {
-    const base64 = await comprimirImagen(file, 1200, 0.7);
-    const r = await apiPost({ accion: 'escanear_ia', base64: base64 }, 90);
-
+    const r = await apiPost({ accion: 'escanear_ia', base64: dataUrl }, 90);
+    
     if (!r.ok) throw new Error(r.error || 'No se pudo leer la factura');
-
-    if (r.factura) document.getElementById('factura').value = r.factura;
-
+    
+    if (r.factura) document.getElementById('factura') && (document.getElementById('factura').value = r.factura);
+    if (r.factura) document.getElementById('documento') && (document.getElementById('documento').value = r.factura);
+    
+    // Agregar líneas reconocidas
     (r.lineas || []).forEach(l => {
-      // Buscamos la info del catálogo para mostrarla en la lista
       const match = productos.find(p => p.id === l.id_producto);
-      
       lineasAgregadas.push({
         id_producto: l.id_producto,
         nombre: l.nombre,
-        unidad: match ? (match.unidad_base || 'Unidad') : 'Unidad', // Etiqueta verde
+        unidad: match ? (match.unidad_base || l.unidad || 'Unidad') : (l.unidad || 'Unidad'),
         cantidad: l.cantidad,
-        precio: l.precio || ''
+        precio: l.precio || '',
+        stock_sistema: match ? (match.stock_actual || 0) : 0
       });
     });
-    renderizarLineas();
-
+    
+    // Pendientes (no reconocidos)
+    (r.sin_coincidencia || []).forEach(nombreOriginal => {
+      lineasAgregadas.push({
+        id_producto: null,
+        nombre: nombreOriginal,
+        unidad: 'Pendiente',
+        cantidad: 1,
+        stock_sistema: 0
+      });
+    });
+    
+    if (typeof renderizarLineas === 'function') renderizarLineas();
+    if (typeof guardarBorrador === 'function') guardarBorrador();
+    
     let msg = 'Factura leída. Productos agregados: ' + (r.lineas || []).length + '.';
     if (r.sin_coincidencia && r.sin_coincidencia.length) {
       msg += '\n\nNo reconocí estos, agrégalos manualmente:\n- ' + r.sin_coincidencia.join('\n- ');
@@ -155,10 +239,8 @@ async function procesarFotoIA(input) {
     estado.textContent = 'Error: ' + err.message;
   } finally {
     botones.forEach(b => { b.disabled = false; });
-    input.value = '';
   }
 }
-
 // --- BUSCADOR MANUAL ---
 function abrirBuscador() {
   document.getElementById('buscador-wrapper').style.display = 'block';
@@ -428,5 +510,25 @@ function confirmarVolverEntrada() {
   return true;
 }
 </script>
+<!-- Modal de recorte de imagen -->
+<div id="modal-recorte" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+  <p style="color:#FFF; font-size:16px; font-weight:bold; margin-bottom:10px; text-align:center;">
+    Ajusta el recuadro para que solo quede la factura
+  </p>
+  <div style="width:100%; max-width:600px; height:60vh; background:#000; border-radius:12px; overflow:hidden;">
+    <img id="imagen-a-recortar" style="max-width:100%; display:block;">
+  </div>
+  <div style="display:flex; gap:10px; margin-top:20px; width:100%; max-width:600px;">
+    <button onclick="cancelarRecorte()" style="flex:1; padding:14px; border-radius:12px; border:1px solid #94A3B8; background:transparent; color:#94A3B8; font-weight:bold; font-size:14px; cursor:pointer;">
+      Cancelar
+    </button>
+    <button onclick="usarImagenCompleta()" style="flex:1; padding:14px; border-radius:12px; border:1px solid #F59E0B; background:transparent; color:#F59E0B; font-weight:bold; font-size:14px; cursor:pointer;">
+      Enviar completa
+    </button>
+    <button onclick="aplicarRecorte()" style="flex:1; padding:14px; border-radius:12px; border:none; background:#10B981; color:#000; font-weight:bold; font-size:14px; cursor:pointer;">
+      Usar esta área
+    </button>
+  </div>
+</div>
 </body>
 </html>
