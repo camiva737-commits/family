@@ -336,7 +336,9 @@ async function guardarSalida() {
   const btn = document.getElementById('btn-guardar');
   btn.textContent = 'Guardando...';
   btn.disabled = true;
-
+  console.log('🔍 Líneas a guardar:', JSON.stringify(lineasAgregadas, null, 2));
+  console.log('📄 Documento:', documento);
+  console.log('👤 Cliente:', cliente);
   const datos = {
     documento: documento,
     cliente: cliente,
@@ -344,20 +346,24 @@ async function guardarSalida() {
     lineas: lineasAgregadas
   };
 
-  try {
+    try {
+    console.log('📤 Enviando salida al backend:', datos);
+    
     const r = await apiPost({ accion: 'guardar_salida', datos: datos });
+    
+    console.log('📥 Respuesta del backend:', r);
 
     if (r.ok) {
-      alert('¡Salida guardada con éxito! ID: ' + r.id_salida);
-      localStorage.removeItem('arqui_borrador_salida'); // Limpiar borrador
+      alert('¡Salida guardada con éxito!\nID: ' + r.id_salida + '\nLíneas guardadas: ' + (r.lineas || 0));
+      localStorage.removeItem('arqui_borrador_salida');
       location.reload();
     } else {
-      alert('Error: ' + r.error);
+      alert('❌ Error del backend:\n' + r.error);
     }
   } catch (err) {
-  alert('Error de conexión: ' + err.message);
-  console.error('Detalle:', err);
-} finally {
+    alert('❌ Error de conexión:\n' + err.message + '\n\nMira la consola (F12) para más detalles.');
+    console.error('Error completo:', err);
+  } finally {
     btn.textContent = 'Guardar Salida';
     btn.disabled = false;
   }
