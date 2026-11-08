@@ -198,9 +198,9 @@ async function enviarFotoIA(dataUrl, esCompleta) {
     
     if (!r.ok) throw new Error(r.error || 'No se pudo leer la factura');
     
-    if (r.factura) document.getElementById('factura') && (document.getElementById('factura').value = r.factura);
-    if (r.factura) document.getElementById('documento') && (document.getElementById('documento').value = r.factura);
-    
+   if (r.factura && document.getElementById('factura')) {
+  document.getElementById('factura').value = r.factura;
+}
     // Agregar líneas reconocidas
     (r.lineas || []).forEach(l => {
       const match = productos.find(p => p.id === l.id_producto);
@@ -509,7 +509,6 @@ function confirmarVolverEntrada() {
   }
   return true;
 }
-</script>
 <!-- Modal de recorte de imagen -->
 <div id="modal-recorte" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
   <p style="color:#FFF; font-size:16px; font-weight:bold; margin-bottom:10px; text-align:center;">
@@ -530,5 +529,6 @@ function confirmarVolverEntrada() {
     </button>
   </div>
 </div>
+</script>
 </body>
 </html>
