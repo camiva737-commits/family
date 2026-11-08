@@ -42,7 +42,7 @@
 
   <div class="header">
     <h1>Inventario</h1>
-    <a href="index.html" class="btn-volver">← Volver</a>
+    <a href="index.html" class="btn-volver" id="btn-volver">← Volver</a>
   </div>
 
   <div id="estado" class="aviso" style="display: block;">Conectando con Google Sheets...</div>
@@ -198,6 +198,26 @@ async function guardarCambios() {
     document.getElementById('btn-guardar').textContent = 'Guardar Cambios';
   }
 }
+// --- AVISO AL VOLVER CON CONTEO SIN GUARDAR ---
+document.addEventListener('DOMContentLoaded', function() {
+  const btnVolver = document.getElementById('btn-volver');
+  if (btnVolver) {
+    btnVolver.addEventListener('click', function(e) {
+      const panel = document.getElementById('panel');
+      const panelAbierto = panel && panel.style.display === 'block';
+      const conteo = document.getElementById('conteo');
+      const hayConteo = conteo && conteo.value.trim() !== '';
+      
+      if (panelAbierto && hayConteo) {
+        const salir = confirm('⚠️ Tienes un conteo sin guardar.\n\n¿Deseas salir sin guardar?');
+        if (!salir) {
+          e.preventDefault();
+          return false;
+        }
+      }
+    });
+  }
+});
 </script>
 </body>
 </html>

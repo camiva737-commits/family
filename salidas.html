@@ -57,7 +57,7 @@
 
   <div class="header">
     <h1>Salidas / Ventas</h1>
-    <a href="index.html" class="btn-volver">← Volver</a>
+    <a href="index.html" class="btn-volver" id="btn-volver">← Volver</a>
   </div>
 
   <div id="estado" class="ok" style="display: block;">Cargando productos...</div>
@@ -83,6 +83,8 @@
 
   <button class="btn-secundario" onclick="abrirBuscador(-1)">+ Agregar Producto Manualmente</button>
   <button class="btn-primario" id="btn-guardar" onclick="guardarSalida()">Guardar Salida</button>
+  <button class="btn-primario" id="btn-guardar" onclick="guardarSalida()">Guardar Salida</button>
+<button class="btn-secundario" onclick="limpiarSalida()" style="margin-top: 10px;">🗑️ Limpiar lista</button>
   <button class="btn-limpiar" onclick="limpiarTodo()">Vaciar lista y borrador</button>
 
   <div id="buscador-wrapper">
@@ -478,6 +480,42 @@ function iniciarDictado() {
   };
 
   reconocimientoVoz.start();
+}
+// --- AVISO AL VOLVER CON DATOS SIN GUARDAR ---
+document.addEventListener('DOMContentLoaded', function() {
+  const btnVolver = document.getElementById('btn-volver');
+  if (btnVolver) {
+    btnVolver.addEventListener('click', function(e) {
+      // Verificar si hay datos sin guardar
+      const hayLineas = lineasAgregadas && lineasAgregadas.length > 0;
+      const hayDocumento = document.getElementById('documento') && document.getElementById('documento').value.trim() !== '';
+      
+      if (hayLineas || hayDocumento) {
+        const guardar = confirm('⚠️ Tienes datos sin guardar en esta salida.\n\n¿Deseas salir sin guardar?');
+        if (!guardar) {
+          e.preventDefault();
+          return false;
+        }
+        // Si confirma, limpiar el borrador
+        localStorage.removeItem('arqui_borrador_salida');
+      }
+    });
+  }
+});
+
+// --- BOTÓN PARA LIMPIAR LISTA (opcional) ---
+function limpiarSalida() {
+  if (lineasAgregadas.length === 0 && !document.getElementById('documento').value) {
+    return alert('No hay datos para limpiar.');
+  }
+  if (confirm('¿Seguro que quieres borrar todos los productos de la lista?\n\nEsta acción no se puede deshacer.')) {
+    lineasAgregadas = [];
+    document.getElementById('documento').value = '';
+    localStorage.removeItem('arqui_borrador_salida');
+    renderizarLineas();
+    guardarBorrador();
+    alert('✅ Lista limpiada. Puedes empezar de nuevo.');
+  }
 }
 </script>
 </body>

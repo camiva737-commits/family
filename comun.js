@@ -104,3 +104,18 @@ function comprimirImagen(file, anchoMax, calidad) {
     img.src = url;
   });
 }
+// Advierte al usuario si tiene datos sin guardar
+function configurarAvisoSalida(selectorBotonVolver, hayDatosSinGuardar) {
+  const btn = document.querySelector(selectorBotonVolver);
+  if (!btn) return;
+  
+  btn.addEventListener('click', function(e) {
+    if (hayDatosSinGuardar()) {
+      const guardar = confirm('⚠️ Tienes datos sin guardar.\n\n¿Deseas salir sin guardar?');
+      if (!guardar) {
+        e.preventDefault();
+        return false;
+      }
+    }
+  });
+}

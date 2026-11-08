@@ -53,7 +53,7 @@
 
   <div class="header">
     <h1>Recepción</h1>
-    <a href="index.html" class="btn-volver">← Volver</a>
+    <a href="index.html" class="btn-volver" id="btn-volver">← Volver</a>
   </div>
 
   <div id="estado" class="ok" style="display: block;">Cargando productos...</div>
@@ -383,6 +383,38 @@ function iniciarDictado() {
   };
 
   reconocimientoVoz.start();
+}
+// --- AVISO AL VOLVER CON DATOS SIN GUARDAR ---
+document.addEventListener('DOMContentLoaded', function() {
+  const btnVolver = document.getElementById('btn-volver');
+  if (btnVolver) {
+    btnVolver.addEventListener('click', function(e) {
+      const hayLineas = lineasAgregadas && lineasAgregadas.length > 0;
+      const hayFactura = document.getElementById('factura') && document.getElementById('factura').value.trim() !== '';
+      
+      if (hayLineas || hayFactura) {
+        const guardar = confirm('⚠️ Tienes datos sin guardar en esta recepción.\n\n¿Deseas salir sin guardar?');
+        if (!guardar) {
+          e.preventDefault();
+          return false;
+        }
+      }
+    });
+  }
+});
+
+// --- BOTÓN PARA LIMPIAR LISTA ---
+function limpiarEntrada() {
+  if (lineasAgregadas.length === 0 && !document.getElementById('factura').value) {
+    return alert('No hay datos para limpiar.');
+  }
+  if (confirm('¿Seguro que quieres borrar todos los productos de la lista?\n\nEsta acción no se puede deshacer.')) {
+    lineasAgregadas = [];
+    document.getElementById('factura').value = '';
+    document.getElementById('proveedor').value = '';
+    renderizarLineas();
+    alert('✅ Lista limpiada. Puedes empezar de nuevo.');
+  }
 }
 </script>
 </body>
