@@ -53,7 +53,7 @@
 
   <div class="header">
     <h1>Recepción</h1>
-    <a href="index.html" class="btn-volver" id="btn-volver">← Volver</a>
+    <a href="index.html" class="btn-volver" onclick="return confirmarVolverEntrada()">← Volver</a>
   </div>
 
   <div id="estado" class="ok" style="display: block;">Cargando productos...</div>
@@ -415,6 +415,17 @@ function limpiarEntrada() {
     renderizarLineas();
     alert('✅ Lista limpiada. Puedes empezar de nuevo.');
   }
+}
+function confirmarVolverEntrada() {
+  const hayLineas = (typeof lineasAgregadas !== 'undefined') && lineasAgregadas.length > 0;
+  const factura = document.getElementById('factura');
+  const hayFactura = factura && factura.value.trim() !== '';
+  
+  if (hayLineas || hayFactura) {
+    const salir = confirm('⚠️ Tienes datos sin guardar en esta recepción.\n\n¿Deseas salir sin guardar?');
+    if (!salir) return false;
+  }
+  return true;
 }
 </script>
 </body>

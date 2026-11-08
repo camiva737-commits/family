@@ -42,7 +42,7 @@
 
   <div class="header">
     <h1>Inventario</h1>
-    <a href="index.html" class="btn-volver" id="btn-volver">← Volver</a>
+    <a href="index.html" class="btn-volver" onclick="return confirmarVolverInventario()">← Volver</a>
   </div>
 
   <div id="estado" class="aviso" style="display: block;">Conectando con Google Sheets...</div>
@@ -218,6 +218,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+function confirmarVolverInventario() {
+  const panel = document.getElementById('panel');
+  const panelAbierto = panel && panel.style.display === 'block';
+  const conteo = document.getElementById('conteo');
+  const hayConteo = conteo && conteo.value.trim() !== '';
+  
+  if (panelAbierto && hayConteo) {
+    const salir = confirm('⚠️ Tienes un conteo sin guardar.\n\n¿Deseas salir sin guardar?');
+    if (!salir) return false;
+  }
+  return true;
+}
 </script>
 </body>
 </html>

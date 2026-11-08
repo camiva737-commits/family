@@ -57,7 +57,7 @@
 
   <div class="header">
     <h1>Salidas / Ventas</h1>
-    <a href="index.html" class="btn-volver" id="btn-volver">← Volver</a>
+    <a href="index.html" class="btn-volver" onclick="return confirmarVolverSalida()">← Volver</a>
   </div>
 
   <div id="estado" class="ok" style="display: block;">Cargando productos...</div>
@@ -82,10 +82,8 @@
   </div>
 
   <button class="btn-secundario" onclick="abrirBuscador(-1)">+ Agregar Producto Manualmente</button>
-  <button class="btn-primario" id="btn-guardar" onclick="guardarSalida()">Guardar Salida</button>
-  <button class="btn-primario" id="btn-guardar" onclick="guardarSalida()">Guardar Salida</button>
+<button class="btn-primario" id="btn-guardar" onclick="guardarSalida()">Guardar Salida</button>
 <button class="btn-secundario" onclick="limpiarSalida()" style="margin-top: 10px;">🗑️ Limpiar lista</button>
-  <button class="btn-limpiar" onclick="limpiarTodo()">Vaciar lista y borrador</button>
 
   <div id="buscador-wrapper">
     <input type="text" id="input-buscar" placeholder="Buscar producto..." oninput="filtrar()">
@@ -482,26 +480,20 @@ function iniciarDictado() {
   reconocimientoVoz.start();
 }
 // --- AVISO AL VOLVER CON DATOS SIN GUARDAR ---
-document.addEventListener('DOMContentLoaded', function() {
-  const btnVolver = document.getElementById('btn-volver');
-  if (btnVolver) {
-    btnVolver.addEventListener('click', function(e) {
-      // Verificar si hay datos sin guardar
-      const hayLineas = lineasAgregadas && lineasAgregadas.length > 0;
-      const hayDocumento = document.getElementById('documento') && document.getElementById('documento').value.trim() !== '';
-      
-      if (hayLineas || hayDocumento) {
-        const guardar = confirm('⚠️ Tienes datos sin guardar en esta salida.\n\n¿Deseas salir sin guardar?');
-        if (!guardar) {
-          e.preventDefault();
-          return false;
-        }
-        // Si confirma, limpiar el borrador
-        localStorage.removeItem('arqui_borrador_salida');
-      }
-    });
+function confirmarVolverSalida() {
+  const hayLineas = (typeof lineasAgregadas !== 'undefined') && lineasAgregadas.length > 0;
+  const documento = document.getElementById('documento');
+  const hayDocumento = documento && documento.value.trim() !== '';
+  
+  if (hayLineas || hayDocumento) {
+    const salir = confirm('⚠️ Tienes datos sin guardar en esta salida.\n\n¿Deseas salir sin guardar?');
+    if (!salir) {
+      return false;
+    }
+    localStorage.removeItem('arqui_borrador_salida');
   }
-});
+  return true;
+}
 
 // --- BOTÓN PARA LIMPIAR LISTA (opcional) ---
 function limpiarSalida() {
