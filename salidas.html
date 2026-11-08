@@ -355,8 +355,9 @@ async function guardarSalida() {
       alert('Error: ' + r.error);
     }
   } catch (err) {
-    alert('Error de conexión');
-  } finally {
+  alert('Error de conexión: ' + err.message);
+  console.error('Detalle:', err);
+} finally {
     btn.textContent = 'Guardar Salida';
     btn.disabled = false;
   }
@@ -440,16 +441,16 @@ function iniciarDictado() {
       if (!r.ok) throw new Error(r.error || 'No se pudo interpretar');
 
       (r.lineas || []).forEach(l => {
-        const match = productos.find(p => p.id === l.id_producto);
-        lineasAgregadas.push({
-          id_producto: l.id_producto,
-          nombre: l.nombre,
-          unidad: match ? (match.unidad_base || l.unidad || 'Unidad') : (l.unidad || 'Unidad'),
-          cantidad: l.cantidad,
-          precio: l.precio || '',
-          stock_sistema: match ? match.stock_actual : 0
-        });
-      });
+  const match = productos.find(p => p.id === l.id_producto);
+  lineasAgregadas.push({
+    id_producto: l.id_producto,
+    nombre: l.nombre,
+    unidad: match ? (match.unidad_base || l.unidad || 'Unidad') : (l.unidad || 'Unidad'),
+    cantidad: l.cantidad,
+    precio: l.precio || '',
+    stock_sistema: match ? (match.stock_actual || 0) : 0  // <-- AGREGAR
+  });
+});
 
       renderizarLineas();
       guardarBorrador();
