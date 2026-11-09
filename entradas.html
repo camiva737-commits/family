@@ -115,6 +115,7 @@
 <script>
 let productos = [];
 let lineasAgregadas = [];
+let indexEditando = -1; // -1 = agregar nuevo; >= 0 = reemplazar pendiente
 
 // --- CARGA INICIAL DEL CATÁLOGO ---
 (async function () {
@@ -255,9 +256,14 @@ async function enviarFotoIA(dataUrl, esCompleta) {
 }
 
 // --- BUSCADOR MANUAL ---
-function abrirBuscador() {
+function abrirBuscador(index) {
+  indexEditando = (typeof index === 'number') ? index : -1;
   document.getElementById('buscador-wrapper').style.display = 'block';
   document.getElementById('input-buscar').focus();
+}
+
+function abrirBuscadorParaReemplazar(index) {
+  abrirBuscador(index);
 }
 
 function cerrarBuscador() {
@@ -283,15 +289,37 @@ function filtrar() {
 
 function agregarLinea(p) {
   cerrarBuscador();
-  const cant = prompt(`¿Cuántas unidades de ${p.nombre} llegaron?`);
-  if (!cant || isNaN(cant)) return;
 
-  lineasAgregadas.push({
-    id_producto: p.id,
-    nombre: p.nombre,
-    unidad: p.unidad_base || 'Unidad',
-    cantidad: Number(cant)
-  });
+  if (indexEditando === -1) {
+    // Agregar nuevo manual
+    const cant = prompt(`¿Cuántas unidades de ${p.nombre} llegaron?`);
+    if (!cant || isNaN(cant)) return;
+    lineasAgregadas.push({
+      id_producto: p.id,
+      nombre: p.nombre,
+      unidad: p.unidad_base || 'Unidad',
+      cantidad: Number(cant)
+    });
+  } else {
+    // Reemplazar un pendiente
+    const anterior = lineasAgregadas[indexEditando];
+
+    // Si el anterior era pendiente, guardamos el alias en el backend
+    if (!anterior.id_producto) {
+      apiPost({ accion: 'guardar_alias', alias: anterior.nombre, id_producto: p.id });
+    }
+
+    const cant = prompt(`¿Cuántas unidades de ${p.nombre}?`, anterior.cantidad || 1);
+    if (!cant || isNaN(cant)) return;
+
+    lineasAgregadas[indexEditando] = {
+      id_producto: p.id,
+      nombre: p.nombre,
+      unidad: p.unidad_base || 'Unidad',
+      cantidad: Number(cant),
+      stock_sistema: p.stock_actual || 0
+    };
+  }
 
   renderizarLineas();
 }
@@ -307,13 +335,31 @@ function renderizarLineas() {
   lineasAgregadas.forEach((l, index) => {
     const div = document.createElement('div');
     div.className = 'linea';
-    div.innerHTML = `
-      <div class="linea-info" onclick="editarCantidad(${index})">
-        <h4>${l.nombre} <span class="badge-unidad">${l.unidad}</span></h4>
-        <p>${l.cantidad} ${l.unidad.toLowerCase()}(s) (Toca para editar)</p>
-      </div>
-      <button class="btn-eliminar" onclick="eliminarLinea(${index})">×</button>
-    `;
+
+    if (!l.id_producto) {
+      // PENDIENTE: se puede tocar para asignar
+      div.style.borderLeft = '4px solid #EF4444';
+      div.style.paddingLeft = '12px';
+      div.style.background = 'rgba(239, 68, 68, 0.05)';
+      div.style.borderRadius = '4px';
+      div.onclick = () => abrirBuscadorParaReemplazar(index);
+      div.innerHTML = `
+        <div class="linea-info">
+          <h4 style="color:#EF4444;">${l.nombre} (No reconocido)</h4>
+          <p>Toca aquí para asignarle un producto del catálogo</p>
+        </div>
+        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>
+      `;
+    } else {
+      // RECONOCIDO
+      div.innerHTML = `
+        <div class="linea-info" onclick="editarCantidad(${index})">
+          <h4>${l.nombre} <span class="badge-unidad">${l.unidad}</span></h4>
+          <p>${l.cantidad} ${l.unidad.toLowerCase()}(s) (Toca para editar)</p>
+        </div>
+        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>
+      `;
+    }
     cont.appendChild(div);
   });
 }
