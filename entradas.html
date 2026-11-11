@@ -377,7 +377,8 @@ function filtrar() {
 function agregarLinea(p) {
   cerrarBuscador();
   
-  const controlaVenc = p.controla_vencimiento === true || normalizar(p.controla_vencimiento || '') === 'si';
+  // controla_vencimiento ya viene como booleano del backend
+  const controlaVenc = p.controla_vencimiento === true;
   
   if (indexEditando === -1) {
     // Agregar nuevo manual
@@ -395,7 +396,6 @@ function agregarLinea(p) {
         `Este producto controla vencimiento.\n\n¿Cuál es la FECHA DE VENCIMIENTO del lote?\n\nFormato: AAAA-MM-DD (ej: 2027-03-15)\n\n(Deja vacío si no la sabes)`
       );
       if (fecha && fecha.trim()) {
-        // Validar formato
         const fechaObj = new Date(fecha);
         if (!isNaN(fechaObj.getTime())) {
           fechaVenc = fecha.trim();
@@ -552,7 +552,7 @@ function editarLinea(index) {
   // Editar fecha de vencimiento si aplica
   let nuevaFecha = l.vencimiento || '';
   const productoOriginal = productos.find(function(p) { return p.id === l.id_producto; });
-  const controlaVenc = productoOriginal && (productoOriginal.controla_vencimiento === true || normalizar(productoOriginal.controla_vencimiento || '') === 'si');
+  const controlaVenc = productoOriginal && productoOriginal.controla_vencimiento === true;
   
   if (controlaVenc) {
     const fecha = prompt(
