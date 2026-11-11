@@ -94,7 +94,13 @@
     <div id="resultados-busqueda" style="max-height: 300px; overflow-y: auto; border-radius: 12px; overflow: hidden;"></div>
     <button class="btn-volver" style="margin-top: 10px; color: var(--peligro);" onclick="cerrarBuscador()">Cancelar</button>
   </div>
-
+<div id="modal-recorte" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+  <p style="color:#FFF; font-size:16px; font-weight:bold; margin-bottom:10px; text-align:center;">
+    Ajusta el recuadro para que solo quede la factura
+  </p>
+  <div style="width:100%; max-width:600px; height:60vh; background:#000; border-radius:12px; overflow:hidden;">
+    <img id="imagen-a-recortar" style="max-width:100%; display:block;">
+  </div>
 <script>
 let productos = [];
 let lineasAgregadas = [];
@@ -106,7 +112,7 @@ let indexEditando = -1; // -1 = agregar nuevo; >= 0 = reemplazar pendiente
 let clientesCache = [];
 
 (async function () {
- const borrador = localStorage.getItem('Distribuidora TAT_borrador_salida');
+ const borrador = localStorage.getItem('arqui_borrador_salida');
 if (borrador) {
   try {
     const parsed = JSON.parse(borrador);
@@ -195,7 +201,7 @@ document.addEventListener('click', function(e) {
 });
 
 function guardarBorrador() {
-  localStorage.setItem('Distribuidora TAT_borrador_salida', JSON.stringify({
+  localStorage.setItem('arqui_borrador_salida', JSON.stringify({
     documento: document.getElementById('documento').value,
     cliente: document.getElementById('cliente').value,
     clienteNombre: document.getElementById('cliente-input').value,
@@ -207,7 +213,7 @@ function limpiarTodo() {
   if(confirm('¿Seguro que quieres borrar la lista actual?')) {
     lineasAgregadas = [];
     document.getElementById('documento').value = '';
-    localStorage.removeItem('Distribuidora TAT_borrador_salida');
+    localStorage.removeItem('arqui_borrador_salida');
     renderizarLineas();
   }
 }
@@ -312,8 +318,9 @@ async function enviarFotoIA(dataUrl, esCompleta) {
     
     if (!r.ok) throw new Error(r.error || 'No se pudo leer la factura');
     
-    if (r.factura) document.getElementById('factura') && (document.getElementById('factura').value = r.factura);
-    if (r.factura) document.getElementById('documento') && (document.getElementById('documento').value = r.factura);
+    if (r.factura && document.getElementById('documento')) {
+  document.getElementById('documento').value = r.factura;
+}
     
     // Agregar líneas reconocidas
     (r.lineas || []).forEach(l => {
@@ -584,7 +591,7 @@ const datos = {
 
     if (r.ok) {
       alert('¡Salida guardada con éxito!\nID: ' + r.id_salida + '\nLíneas guardadas: ' + (r.lineas || 0));
-      localStorage.removeItem('Distribuidora TAT_borrador_salida');
+      localStorage.removeItem('arqui_borrador_salida');
       location.reload();
     } else {
       alert('❌ Error del backend:\n' + r.error);
@@ -719,7 +726,7 @@ function confirmarVolverSalida() {
     if (!salir) {
       return false;
     }
-    localStorage.removeItem('Distribuidora TAT_borrador_salida');
+    localStorage.removeItem('arqui_borrador_salida');
   }
   return true;
 }
@@ -732,7 +739,7 @@ function limpiarSalida() {
   if (confirm('¿Seguro que quieres borrar todos los productos de la lista?\n\nEsta acción no se puede deshacer.')) {
     lineasAgregadas = [];
     document.getElementById('documento').value = '';
-    localStorage.removeItem('Distribuidora TAT_borrador_salida');
+    localStorage.removeItem('arqui_borrador_salida');
     renderizarLineas();
     guardarBorrador();
     alert('✅ Lista limpiada. Puedes empezar de nuevo.');
@@ -740,13 +747,7 @@ function limpiarSalida() {
 }
 </script>
 <!-- Modal de recorte de imagen -->
-<div id="modal-recorte" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
-  <p style="color:#FFF; font-size:16px; font-weight:bold; margin-bottom:10px; text-align:center;">
-    Ajusta el recuadro para que solo quede la factura
-  </p>
-  <div style="width:100%; max-width:600px; height:60vh; background:#000; border-radius:12px; overflow:hidden;">
-    <img id="imagen-a-recortar" style="max-width:100%; display:block;">
-  </div>
+
   <div style="display:flex; gap:10px; margin-top:20px; width:100%; max-width:600px;">
     <button onclick="cancelarRecorte()" style="flex:1; padding:14px; border-radius:12px; border:1px solid #94A3B8; background:transparent; color:#94A3B8; font-weight:bold; font-size:14px; cursor:pointer;">
       Cancelar
