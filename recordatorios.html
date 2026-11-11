@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Recordatorios · Distribuidora TAT</title>
+<script src="comun.js?v=10"></script>
+<style>
+  :root {
+    --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
+    --suave: #94A3B8; --borde: #334155; --acento: #F59E0B; --peligro: #EF4444; --ok: #10B981;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: var(--bg); color: var(--texto); padding: 20px; padding-bottom: 50px; }
+  
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .header h1 { font-size: 24px; color: var(--acento); font-weight: 800; }
+  .btn-volver { background: none; border: none; color: var(--suave); font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
+  
+  #estado { padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: none; }
+  .ok { background: rgba(16, 185, 129, 0.2); color: var(--ok); border: 1px solid var(--ok); }
+  .error { background: rgba(239, 68, 68, 0.2); color: var(--peligro); border: 1px solid var(--peligro); }
+  
+  .filtros { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--borde); background: var(--input); color: var(--texto); font-size: 14px; outline: none; }
+  
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+  .stat { background: var(--card); border: 1px solid var(--borde); border-radius: 12px; padding: 10px; text-align: center; }
+  .stat .num { font-size: 20px; font-weight: bold; }
+  .stat .lbl { font-size: 10px; color: var(--suave); margin-top: 2px; }
+  .stat.stock { border-color: #EF4444; }
+  .stat.venc { border-color: #F59E0B; }
+  .stat.precio { border-color: #3B82F6; }
+  .stat.dev { border-color: #A855F7; }
+  
+  .rec-item { background: var(--card); border: 1px solid var(--borde); border-radius: 12px; padding: 14px; margin-bottom: 10px; border-left: 4px solid var(--borde); }
+  .rec-item.stock_bajo { border-left-color: #EF4444; }
+  .rec-item.vencimiento_proximo { border-left-color: #F59E0B; }
+  .rec-item.incremento_precio { border-left-color: #3B82F6; }
+  .rec-item.devolucion_pendiente { border-left-color: #A855F7; }
+  .rec-item.completado { opacity: 0.5; border-left-color: var(--borde); }
+  
+  .rec-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px; gap: 8px; }
+  .rec-header .msg { flex: 1; font-size: 14px; }
+  .rec-header .tipo-badge { font-size: 10px; padding: 2px 8px; border-radius: 6px; font-weight: bold; text-transform: uppercase; white-space: nowrap; }
+  .rec-header .tipo-badge.stock_bajo { background: rgba(239, 68, 68, 0.2); color: #EF4444; }
+  .rec-header .tipo-badge.vencimiento_proximo { background: rgba(245, 158, 11, 0.2); color: #F59E0B; }
+  .rec-header .tipo-badge.incremento_precio { background: rgba(59, 130, 246, 0.2); color: #3B82F6; }
+  .rec-header .tipo-badge.devolucion_pendiente { background: rgba(168, 85, 247, 0.2); color: #A855F7; }
+  
+  .rec-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 11px; color: var(--suave); }
+  .btn-completar { background: var(--ok); color: #000; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
+  .btn-completar:hover { opacity: 0.9; }
+  
+  .empty { text-align: center; padding: 40px 20px; color: var(--suave); font-size: 14px; }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>🔔 Recordatorios</h1>
+    <a href="index.html" class="btn-volver">← Volver</a>
+  </div>
+
+  <div id="estado" style="display: none;"></div>
+
+  <div class="stats" id="stats">
+    <div class="stat stock"><div class="num" id="stat-stock">-</div><div class="lbl">Stock bajo</div></div>
+    <div class="stat venc"><div class="num" id="stat-venc">-</div><div class="lbl">Por vencer</div></div>
+    <div class="stat precio"><div class="num" id="stat-precio">-</div><div class="lbl">Subieron</div></div>
+    <div class="stat dev"><div class="num" id="stat-dev">-</div><div class="lbl">Devoluciones</div></div>
+  </div>
+
+  <div class="filtros">
+    <select id="filtro-estado" onchange="cargarRecordatorios()">
+      <option value="pendiente">Pendientes</option>
+      <option value="completado">Completados</option>
+      <option value="">Todos</option>
+    </select>
+    <select id="filtro-tipo" onchange="cargarRecordatorios()">
+      <option value="">Todos los tipos</option>
+      <option value="stock_bajo">Stock bajo</option>
+      <option value="vencimiento_proximo">Por vencer</option>
+      <option value="incremento_precio">Subieron de precio</option>
+      <option value="devolucion_pendiente">Devoluciones</option>
+    </select>
+  </div>
+
+  <div id="lista-recordatorios">
+    <p class="empty">Cargando...</p>
+  </div>
+
+<script>
+let recordatorios = [];
+
+const TIPO_LABELS = {
+  stock_bajo: 'Stock bajo',
+  vencimiento_proximo: 'Por vencer',
+  incremento_precio: 'Subió precio',
+  devolucion_pendiente: 'Devolución'
+};
+
+(async function init() {
+  await cargarRecordatorios();
+  await cargarStats();
+})();
+
+async function cargarRecordatorios() {
+  const lista = document.getElementById('lista-recordatorios');
+  lista.innerHTML = '<p class="empty">Cargando...</p>';
+  
+  const filtros = {
+    estado: document.getElementById('filtro-estado').value,
+    tipo: document.getElementById('filtro-tipo').value
+  };
+  
+  try {
+    const r = await apiPost({ accion: 'listar_recordatorios', filtros: filtros }, 30);
+    if (!r.ok) throw new Error(r.error);
+    
+    recordatorios = r.items || [];
+    
+    if (recordatorios.length === 0) {
+      lista.innerHTML = '<p class="empty">🎉 No hay recordatorios en este filtro.</p>';
+      return;
+    }
+    
+    let html = '';
+    recordatorios.forEach(function(rec) {
+      const tipoLabel = TIPO_LABELS[rec.tipo] || rec.tipo;
+      const fecha = rec.fecha_creacion ? formatearFecha(rec.fecha_creacion) : '';
+      const esCompletado = rec.estado === 'completado';
+      
+      html += '<div class="rec-item ' + rec.tipo + (esCompletado ? ' completado' : '') + '">' +
+        '<div class="rec-header">' +
+          '<div class="msg">' + rec.mensaje + '</div>' +
+          '<span class="tipo-badge ' + rec.tipo + '">' + tipoLabel + '</span>' +
+        '</div>' +
+        '<div class="rec-footer">' +
+          '<span>' + rec.id + ' · ' + fecha + '</span>' +
+          (esCompletado ? '<span style="color: var(--ok);">✓ Completado</span>' : '<button class="btn-completar" onclick="marcarCompletado(\'' + rec.id + '\')">Marcar completado</button>') +
+        '</div>' +
+      '</div>';
+    });
+    lista.innerHTML = html;
+  } catch (e) {
+    lista.innerHTML = '<p class="empty" style="color: var(--peligro);">Error: ' + e.message + '</p>';
+  }
+}
+
+async function cargarStats() {
+  try {
+    const r = await apiPost({ accion: 'listar_recordatorios', filtros: { estado: 'pendiente' } }, 30);
+    if (!r.ok) return;
+    
+    const items = r.items || [];
+    const conteo = { stock_bajo: 0, vencimiento_proximo: 0, incremento_precio: 0, devolucion_pendiente: 0 };
+    items.forEach(function(rec) {
+      if (conteo[rec.tipo] !== undefined) conteo[rec.tipo]++;
+    });
+    
+    document.getElementById('stat-stock').textContent = conteo.stock_bajo;
+    document.getElementById('stat-venc').textContent = conteo.vencimiento_proximo;
+    document.getElementById('stat-precio').textContent = conteo.incremento_precio;
+    document.getElementById('stat-dev').textContent = conteo.devolucion_pendiente;
+  } catch (e) { console.error(e); }
+}
+
+async function marcarCompletado(id) {
+  if (!confirm('¿Marcar este recordatorio como completado?')) return;
+  
+  try {
+    const r = await apiPost({ accion: 'marcar_recordatorio', id_recordatorio: id }, 30);
+    if (r.ok) {
+      mostrarEstado('✅ Recordatorio completado', 'ok');
+      await cargarRecordatorios();
+      await cargarStats();
+      setTimeout(function() { document.getElementById('estado').style.display = 'none'; }, 2000);
+    } else {
+      mostrarEstado('❌ Error: ' + r.error, 'error');
+    }
+  } catch (e) {
+    mostrarEstado('❌ Error de conexión: ' + e.message, 'error');
+  }
+}
+
+function mostrarEstado(msg, tipo) {
+  const el = document.getElementById('estado');
+  el.textContent = msg;
+  el.className = tipo;
+  el.style.display = 'block';
+}
+
+function formatearFecha(fecha) {
+  if (!fecha) return '';
+  const d = new Date(fecha);
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const año = d.getFullYear();
+  const hora = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return dia + '/' + mes + '/' + año + ' ' + hora + ':' + min;
+}
+</script>
+</body>
+</html>
