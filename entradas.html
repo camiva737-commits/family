@@ -302,7 +302,7 @@ function filtrar() {
 
 function agregarLinea(p) {
   cerrarBuscador();
-
+  
   if (indexEditando === -1) {
     // Agregar nuevo manual
     const cant = prompt(`¿Cuántas unidades de ${p.nombre} llegaron?`);
@@ -314,26 +314,53 @@ function agregarLinea(p) {
       cantidad: Number(cant)
     });
   } else {
-    // Reemplazar un pendiente
+    // Reemplazar pendiente
     const anterior = lineasAgregadas[indexEditando];
-
-    // Si el anterior era pendiente, guardamos el alias en el backend
+    
     if (!anterior.id_producto) {
-      apiPost({ accion: 'guardar_alias', alias: anterior.nombre, id_producto: p.id });
+      // Preguntar si el texto que leyó la IA era correcto
+      const confirmarTexto = confirm(
+        `La IA leyó: "${anterior.nombre}"\n\n` +
+        `¿Es correcto este texto en la factura?\n\n` +
+        `• Aceptar = Sí, es correcto\n` +
+        `• Cancelar = No, era otro texto`
+      );
+      
+      if (confirmarTexto) {
+        // Guardar el alias con el texto original
+        apiPost({
+          accion: 'guardar_alias',
+          alias: anterior.nombre,
+          id_producto: p.id
+        }).then(r => console.log('✅ Alias guardado:', r));
+      } else {
+        // Preguntar el texto correcto
+        const textoReal = prompt(
+          `¿Cuál era el texto REAL en la factura? (escríbelo tal cual aparecía)`,
+          ''
+        );
+        if (textoReal && textoReal.trim()) {
+          apiPost({
+            accion: 'guardar_alias',
+            alias: textoReal.trim(),
+            id_producto: p.id
+          }).then(r => console.log('✅ Alias correcto guardado:', r));
+        }
+      }
     }
-
+    
     const cant = prompt(`¿Cuántas unidades de ${p.nombre}?`, anterior.cantidad || 1);
     if (!cant || isNaN(cant)) return;
-
+    
     lineasAgregadas[indexEditando] = {
       id_producto: p.id,
       nombre: p.nombre,
       unidad: p.unidad_base || 'Unidad',
-      cantidad: Number(cant),
-      stock_sistema: p.stock_actual || 0
+      cantidad: Number(cant)
     };
   }
-
+  
+  indexEditando = -1;
   renderizarLineas();
 }
 
