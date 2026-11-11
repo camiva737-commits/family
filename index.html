@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>ArquiDulces · Menú Principal</title>
+<script src="comun.js?v=10"></script>
 <style>
   :root {
     --bg: #0F111A; --card: #1A1D2D; --texto: #F8FAFC; --suave: #94A3B8; --borde: #334155; --acento: #F59E0B;
@@ -56,5 +57,99 @@
       <p>Descontar mercancía</p>
     </div>
   </a>
+  <!-- ========================================== -->
+<!-- ASISTENTE VIRTUAL (MASCOTA + CHAT)         -->
+<!-- ========================================== -->
+<div id="asistente-mascota" onclick="toggleAsistente()" style="position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:50%; background:#F59E0B; display:flex; align-items:center; justify-content:center; font-size:32px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.4); z-index:9998; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+  🦉
+</div>
+
+<div id="asistente-chat" style="display:none; position:fixed; bottom:90px; right:20px; width:340px; max-width:calc(100vw - 40px); background:#1A1D2D; border:1px solid #334155; border-radius:16px; overflow:hidden; z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,0.6);">
+  <div style="padding:14px; background:#25293D; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
+    <span style="color:#F8FAFC; font-weight:bold; font-size:15px;">🦉 Asistente ArquiDulces</span>
+    <button onclick="toggleAsistente()" style="background:none; border:none; color:#94A3B8; font-size:20px; cursor:pointer; padding:0 6px;">×</button>
+  </div>
+  
+  <div id="asistente-mensajes" style="padding:14px; max-height:350px; overflow-y:auto; font-size:14px; color:#F8FAFC; background:#0F111A;">
+    <div style="background:#25293D; padding:10px; border-radius:12px; margin-bottom:8px; line-height:1.5;">
+      ¡Hola! Soy tu asistente. Puedes preguntarme:
+      <br>• "¿Cuánto queda de Doritos?"
+      <br>• "¿Cómo nos fue este mes?"
+      <br>• "¿Qué productos están por acabarse?"
+      <br>• "¿Cuál es el producto más vendido?"
+      <br>• "¿Cuánto vale el inventario?"
+    </div>
+  </div>
+  
+  <div style="padding:10px; border-top:1px solid #334155; display:flex; gap:8px; background:#1A1D2D;">
+    <input type="text" id="asistente-input" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter')enviarPreguntaAsistente()" style="flex:1; padding:10px; border-radius:10px; border:1px solid #334155; background:#25293D; color:#F8FAFC; font-size:14px; outline:none;">
+    <button onclick="enviarPreguntaAsistente()" style="padding:0 14px; border-radius:10px; border:none; background:#F59E0B; color:#000; font-weight:bold; cursor:pointer; font-size:16px;">→</button>
+  </div>
+</div>
+
+<script>
+function toggleAsistente() {
+  const chat = document.getElementById('asistente-chat');
+  if (!chat) return;
+  chat.style.display = chat.style.display === 'none' ? 'block' : 'none';
+  if (chat.style.display === 'block') {
+    setTimeout(function() {
+      document.getElementById('asistente-input').focus();
+    }, 100);
+  }
+}
+
+async function enviarPreguntaAsistente() {
+  const input = document.getElementById('asistente-input');
+  const pregunta = input.value.trim();
+  if (!pregunta) return;
+  
+  agregarMensajeAsistente(pregunta, 'usuario');
+  input.value = '';
+  
+  const typing = agregarMensajeAsistente('🤔 Pensando...', 'asistente');
+  
+  try {
+    const r = await apiPost({ accion: 'consultar_asistente', pregunta: pregunta }, 30);
+    typing.remove();
+    if (r.ok) {
+      agregarMensajeAsistente(r.respuesta, 'asistente');
+    } else {
+      agregarMensajeAsistente('❌ Error: ' + r.error, 'asistente');
+    }
+  } catch (err) {
+    typing.remove();
+    agregarMensajeAsistente('❌ Error de conexión: ' + err.message, 'asistente');
+  }
+}
+
+function agregarMensajeAsistente(texto, tipo) {
+  const cont = document.getElementById('asistente-mensajes');
+  if (!cont) return null;
+  
+  const div = document.createElement('div');
+  div.style.marginBottom = '8px';
+  div.style.padding = '10px';
+  div.style.borderRadius = '12px';
+  div.style.whiteSpace = 'pre-line';
+  div.style.lineHeight = '1.5';
+  
+  if (tipo === 'usuario') {
+    div.style.background = '#10B981';
+    div.style.color = '#000';
+    div.style.marginLeft = '40px';
+    div.textContent = texto;
+  } else {
+    div.style.background = '#25293D';
+    div.style.color = '#F8FAFC';
+    div.style.marginRight = '40px';
+    div.textContent = texto;
+  }
+  
+  cont.appendChild(div);
+  cont.scrollTop = cont.scrollHeight;
+  return div;
+}
+</script>
 </body>
 </html>
