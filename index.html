@@ -172,52 +172,114 @@ async function cargarDashboard() {
 
 function renderizarDashboard(datos) {
   const cont = document.getElementById('dashboard-contenido');
+  
   function tarjeta(titulo, valor, color, icono) {
     return '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px;">' +
       '<div style="font-size:11px; color:#94A3B8; margin-bottom:4px;">' + icono + ' ' + titulo + '</div>' +
-      '<div style="font-size:20px; font-weight:bold; color:' + color + ';">' + valor + '</div></div>';
+      '<div style="font-size:18px; font-weight:bold; color:' + color + ';">' + valor + '</div>' +
+      '</div>';
   }
+  
+  function formatoDinero(n) {
+    return '$' + Math.round(n || 0).toLocaleString('es-CO');
+  }
+  
   let html = '';
+  
+  // ============ VENTAS HOY ============
   html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">💰 VENTAS HOY</div>';
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
   html += tarjeta('Unidades', datos.ventasHoy.unidades, '#10B981', '📦');
-  html += tarjeta('Monto', '$' + datos.ventasHoy.monto.toLocaleString('es-CO'), '#10B981', '💵');
+  html += tarjeta('Monto', formatoDinero(datos.ventasHoy.monto), '#10B981', '💵');
   html += '</div>';
+  
+  // ============ GANANCIAS HOY ============
+  if (datos.gananciasHoy) {
+    html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">💎 GANANCIAS HOY</div>';
+    html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
+    html += tarjeta('Ganancia', formatoDinero(datos.gananciasHoy.ganancia), '#A855F7', '💎');
+    html += tarjeta('Margen', Math.round(datos.margenHoy || 0) + '%', '#A855F7', '📈');
+    html += '</div>';
+  }
+  
+  // ============ VENTAS MES ============
   html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">📊 VENTAS MES</div>';
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
   html += tarjeta('Unidades', datos.ventasMes.unidades, '#F59E0B', '📦');
-  html += tarjeta('Monto', '$' + datos.ventasMes.monto.toLocaleString('es-CO'), '#F59E0B', '💵');
+  html += tarjeta('Monto', formatoDinero(datos.ventasMes.monto), '#F59E0B', '💵');
   html += '</div>';
+  
+  // ============ GANANCIAS MES ============
+  if (datos.gananciasMes) {
+    html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">💎 GANANCIAS MES</div>';
+    html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
+    html += tarjeta('Ganancia', formatoDinero(datos.gananciasMes.ganancia), '#A855F7', '💎');
+    html += tarjeta('Margen', Math.round(datos.margenMes || 0) + '%', '#A855F7', '📈');
+    html += '</div>';
+  }
+  
+  // ============ ENTRADAS ============
   html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">📥 ENTRADAS</div>';
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
   html += tarjeta('Hoy', datos.entradasHoy.unidades + ' und', '#3B82F6', '📥');
   html += tarjeta('Mes', datos.entradasMes.unidades + ' und', '#3B82F6', '📦');
   html += '</div>';
-  html += tarjeta('Valor del inventario', '$' + datos.valorInventario.toLocaleString('es-CO'), '#A855F7', '🏦');
+  
+  // ============ VALOR INVENTARIO ============
+  html += tarjeta('Valor del inventario', formatoDinero(datos.valorInventario), '#10B981', '🏦');
+  
+  // ============ TOP RENTABLES ============
+  if (datos.topRentables && datos.topRentables.length > 0) {
+    html += '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px; margin-top:12px;">';
+    html += '<div style="font-size:12px; color:#94A3B8; margin-bottom:8px; font-weight:bold;">💎 Top 5 más rentables del mes</div>';
+    datos.topRentables.forEach(function(t, i) {
+      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:#F8FAFC; font-size:13px;">' +
+        '<span>' + (i+1) + '. ' + t.nombre + '</span>' +
+        '<span style="color:#A855F7; font-weight:bold;">' + formatoDinero(t.ganancia) + ' <span style="font-size:11px; color:#94A3B8;">(' + Math.round(t.margen) + '%)</span></span>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+  
+  // ============ TOP VENTAS HOY ============
   if (datos.topHoy.length > 0) {
     html += '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px; margin-top:12px;">';
     html += '<div style="font-size:12px; color:#94A3B8; margin-bottom:8px; font-weight:bold;">🏆 Top ventas hoy</div>';
     datos.topHoy.forEach(function(t, i) {
-      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:#F8FAFC; font-size:13px;"><span>' + (i+1) + '. ' + t.nombre + '</span><span style="color:#10B981;">' + t.cantidad + ' und</span></div>';
+      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:#F8FAFC; font-size:13px;">' +
+        '<span>' + (i+1) + '. ' + t.nombre + '</span>' +
+        '<span style="color:#10B981;">' + t.cantidad + ' und</span>' +
+      '</div>';
     });
     html += '</div>';
   }
+  
+  // ============ TOP VENTAS MES ============
   if (datos.topMes.length > 0) {
     html += '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px; margin-top:12px;">';
     html += '<div style="font-size:12px; color:#94A3B8; margin-bottom:8px; font-weight:bold;">🏆 Top ventas mes</div>';
     datos.topMes.forEach(function(t, i) {
-      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:#F8FAFC; font-size:13px;"><span>' + (i+1) + '. ' + t.nombre + '</span><span style="color:#F59E0B;">' + t.cantidad + ' und</span></div>';
+      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:#F8FAFC; font-size:13px;">' +
+        '<span>' + (i+1) + '. ' + t.nombre + '</span>' +
+        '<span style="color:#F59E0B;">' + t.cantidad + ' und</span>' +
+      '</div>';
     });
     html += '</div>';
   }
+  
+  // ============ POR ACABARSE ============
   if (datos.porAcabarse.length > 0) {
     html += '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px; margin-top:12px;">';
     html += '<div style="font-size:12px; color:#94A3B8; margin-bottom:8px; font-weight:bold;">⚠️ Por acabarse</div>';
     datos.porAcabarse.forEach(function(p) {
-      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:#F8FAFC; font-size:13px;"><span>' + p.nombre + '</span><span style="color:#EF4444;">' + p.stock_actual + ' ' + (p.unidad_base || '') + '</span></div>';
+      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:#F8FAFC; font-size:13px;">' +
+        '<span>' + p.nombre + '</span>' +
+        '<span style="color:#EF4444;">' + p.stock_actual + ' ' + (p.unidad_base || '') + '</span>' +
+      '</div>';
     });
     html += '</div>';
   }
+  
   cont.innerHTML = html;
 }
 </script>
