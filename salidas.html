@@ -633,7 +633,6 @@ async function guardarSalida() {
 
   if (!documento) return alert('Escribe el número de factura');
   
-  // Validar que no haya pendientes
   const hayPendientes = lineasAgregadas.some(l => !l.id_producto);
   if (hayPendientes) return alert('Tienes productos "No reconocidos" en rojo. Tócalos y asígnalos a tu catálogo antes de guardar.');
 
@@ -647,39 +646,51 @@ async function guardarSalida() {
   const btn = document.getElementById('btn-guardar');
   btn.textContent = 'Guardando...';
   btn.disabled = true;
-  console.log('🔍 Líneas a guardar:', JSON.stringify(lineasAgregadas, null, 2));
-  console.log('📄 Documento:', documento);
-  console.log('👤 Cliente:', cliente);
-const datos = {
-  documento: documento,
-  cliente: document.getElementById('cliente').value, // El ID, no el nombre
-  fecha: new Date().toISOString().split('T')[0],
-  lineas: lineasAgregadas
-};
 
-    try {
-    console.log('📤 Enviando salida al backend:', datos);
-    
+  const datos = {
+    documento: documento,
+    cliente: document.getElementById('cliente').value,
+    fecha: new Date().toISOString().split('T')[0],
+    lineas: lineasAgregadas
+  };
+
+  try {
     const r = await apiPost({ accion: 'guardar_salida', datos: datos });
-    
-    console.log('📥 Respuesta del backend:', r);
 
     if (r.ok) {
-      alert('¡Salida guardada con éxito!\nID: ' + r.id_salida + '\nLíneas guardadas: ' + (r.lineas || 0));
+      let mensaje = '¡Salida guardada con éxito!\nID: ' + r.id_salida + '\nLíneas: ' + (r.lineas || 0);
+      
+      // Alertas de stock bajo
+      if (r.alertas_stock_bajo && r.alertas_stock_bajo.length > 0) {
+        mensaje += '\n\n⚠️ ¡ATENCIÓN! Productos con stock bajo:';
+        r.alertas_stock_bajo.forEach(function(a) {
+          mensaje += '\n\n📦 ' + a.nombre;
+          mensaje += '\n   • Stock actual: ' + a.stock_actual + ' ' + a.unidad.toLowerCase() + '(s)';
+          mensaje += '\n   • Stock mínimo: ' + a.stock_minimo;
+          mensaje += '\n\n👉 Considera reabastecer este producto.';
+        });
+      }
+      
+      alert(mensaje);
       localStorage.removeItem('arqui_borrador_salida');
-      location.reload();
+      
+      // Actualizar badge del búho si estamos en la misma ventana
+      if (typeof actualizarBadgeRecordatorios === 'function') {
+        actualizarBadgeRecordatorios();
+      }
+      
+      // Redirigir al menú principal para que se actualice el badge
+      window.location.href = 'index.html';
     } else {
       alert('❌ Error del backend:\n' + r.error);
     }
   } catch (err) {
-    alert('❌ Error de conexión:\n' + err.message + '\n\nMira la consola (F12) para más detalles.');
-    console.error('Error completo:', err);
+    alert('❌ Error de conexión:\n' + err.message);
   } finally {
     btn.textContent = 'Guardar Salida';
     btn.disabled = false;
   }
 }
-
 
 
 // --- MÓDULO DE VOZ: DICTADO POR MICRÓFONO ---

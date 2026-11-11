@@ -605,20 +605,16 @@ async function guardarEntrada() {
     if (r.ok) {
       let mensaje = '¡Recepción guardada con éxito!\nID: ' + r.id_entrada;
       
-      // Alertas de devoluciones pendientes
       if (r.alertas_devolucion && r.alertas_devolucion.length > 0) {
         mensaje += '\n\n🔄 ¡ATENCIÓN! Devoluciones pendientes:';
         r.alertas_devolucion.forEach(function(a) {
           mensaje += '\n\n📦 ' + a.nombre_producto;
           mensaje += '\n   • Devolución: ' + a.id_devolucion;
-          mensaje += '\n   • Cantidad que acabas de recibir: ' + a.cantidad_entrada;
-          mensaje += '\n   • Cantidad pendiente de cambio: ' + a.cantidad_pendiente;
-          if (a.observacion) mensaje += '\n   • Obs: ' + a.observacion;
-          mensaje += '\n\n👉 Verifica si este ingreso corresponde al cambio solicitado.';
+          mensaje += '\n   • Cantidad recibida: ' + a.cantidad_entrada;
+          mensaje += '\n   • Cantidad pendiente: ' + a.cantidad_pendiente;
         });
       }
       
-      // Alertas de vencimiento
       if (r.alertas_vencimiento && r.alertas_vencimiento.length > 0) {
         mensaje += '\n\n⏰ Productos próximos a vencer:';
         r.alertas_vencimiento.forEach(function(a) {
@@ -627,7 +623,7 @@ async function guardarEntrada() {
       }
       
       alert(mensaje);
-      location.reload();
+      window.location.href = 'index.html';
     } else {
       alert('Error: ' + r.error);
     }
@@ -638,7 +634,6 @@ async function guardarEntrada() {
     btn.disabled = false;
   }
 }
-
 // --- MÓDULO DE VOZ ---
 let reconocimientoVoz = null;
 let dictadoActivo = false;

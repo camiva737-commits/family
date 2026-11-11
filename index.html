@@ -351,6 +351,12 @@ async function actualizarBadgeRecordatorios() {
     if (total > 0) {
       badge.textContent = total > 99 ? '99+' : total;
       badge.style.display = 'flex';
+      
+      // Si hay pendientes y es la primera vez que carga, mostrar mensaje en el chat
+      if (!window._resumenMostrado) {
+        window._resumenMostrado = true;
+        mostrarResumenPendientes();
+      }
     } else {
       badge.style.display = 'none';
     }
@@ -359,6 +365,42 @@ async function actualizarBadgeRecordatorios() {
   }
 }
 
+async function mostrarResumenPendientes() {
+  const cont = document.getElementById('asistente-mensajes');
+  if (!cont) return;
+  
+  try {
+    const r = await apiPost({ accion: 'listar_recordatorios', filtros: { estado: 'pendiente' } }, 15);
+    if (!r.ok) return;
+    const items = r.items || [];
+    if (items.length === 0) return;
+    
+    const porTipo = { stock_bajo: 0, vencimiento_proximo: 0, incremento_precio: 0, devolucion_pendiente: 0 };
+    items.forEach(function(rec) {
+      if (porTipo[rec.tipo] !== undefined) porTipo[rec.tipo]++;
+    });
+    
+    let msg = '🔔 ¡Hola! Tienes ' + items.length + ' recordatorio(s) pendiente(s):';
+    if (porTipo.stock_bajo > 0) msg += '\n• ⚠️ ' + porTipo.stock_bajo + ' producto(s) con stock bajo';
+    if (porTipo.vencimiento_proximo > 0) msg += '\n• ⏰ ' + porTipo.vencimiento_proximo + ' lote(s) por vencer';
+    if (porTipo.incremento_precio > 0) msg += '\n• 💸 ' + porTipo.incremento_precio + ' producto(s) subieron de precio';
+    if (porTipo.devolucion_pendiente > 0) msg += '\n• 🔄 ' + porTipo.devolucion_pendiente + ' devolución(es) pendiente(s)';
+    msg += '\n\nEntra a Recordatorios para más detalles.';
+    
+    const div = document.createElement('div');
+    div.style.marginBottom = '8px';
+    div.style.padding = '10px';
+    div.style.borderRadius = '12px';
+    div.style.background = '#F59E0B';
+    div.style.color = '#000';
+    div.style.fontWeight = 'bold';
+    div.style.whiteSpace = 'pre-line';
+    div.style.lineHeight = '1.5';
+    div.textContent = msg;
+    cont.appendChild(div);
+    cont.scrollTop = cont.scrollHeight;
+  } catch (e) { console.error(e); }
+}
 // Cargar el badge al abrir la app
 document.addEventListener('DOMContentLoaded', function() {
   actualizarBadgeRecordatorios();
