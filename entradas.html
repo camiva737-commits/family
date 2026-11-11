@@ -378,21 +378,30 @@ function agregarLinea(p) {
   cerrarBuscador();
   
   if (indexEditando === -1) {
-    // Agregar nuevo manual
+    // Agregar nuevo manual: pedir cantidad
     const cant = prompt(`¿Cuántas unidades de ${p.nombre} llegaron?`);
     if (!cant || isNaN(cant)) return;
+    
+    // Pedir precio de compra
+    const precio = prompt(`¿A qué precio de compra llegó cada ${(p.unidad_base || 'Unidad').toLowerCase()} de ${p.nombre}?\n\n(Ej: 1811)`);
+    if (precio === null) return; // Canceló
+    if (precio !== '' && isNaN(precio)) {
+      alert('Precio inválido. Se guardará sin precio.');
+    }
+    const precioNum = precio && !isNaN(precio) ? Number(precio) : '';
+    
     lineasAgregadas.push({
       id_producto: p.id,
       nombre: p.nombre,
       unidad: p.unidad_base || 'Unidad',
-      cantidad: Number(cant)
+      cantidad: Number(cant),
+      precio: precioNum
     });
   } else {
     // Reemplazar pendiente
     const anterior = lineasAgregadas[indexEditando];
     
     if (!anterior.id_producto) {
-      // Preguntar si el texto que leyó la IA era correcto
       const confirmarTexto = confirm(
         `La IA leyó: "${anterior.nombre}"\n\n` +
         `¿Es correcto este texto en la factura?\n\n` +
@@ -401,14 +410,12 @@ function agregarLinea(p) {
       );
       
       if (confirmarTexto) {
-        // Guardar el alias con el texto original
         apiPost({
           accion: 'guardar_alias',
           alias: anterior.nombre,
           id_producto: p.id
         }).then(r => console.log('✅ Alias guardado:', r));
       } else {
-        // Preguntar el texto correcto
         const textoReal = prompt(
           `¿Cuál era el texto REAL en la factura? (escríbelo tal cual aparecía)`,
           ''
@@ -426,11 +433,17 @@ function agregarLinea(p) {
     const cant = prompt(`¿Cuántas unidades de ${p.nombre}?`, anterior.cantidad || 1);
     if (!cant || isNaN(cant)) return;
     
+    // Pedir precio de compra
+    const precio = prompt(`¿A qué precio de compra llegó cada ${(p.unidad_base || 'Unidad').toLowerCase()} de ${p.nombre}?`, anterior.precio || '');
+    if (precio === null) return; // Canceló
+    const precioNum = precio && !isNaN(precio) ? Number(precio) : '';
+    
     lineasAgregadas[indexEditando] = {
       id_producto: p.id,
       nombre: p.nombre,
       unidad: p.unidad_base || 'Unidad',
-      cantidad: Number(cant)
+      cantidad: Number(cant),
+      precio: precioNum
     };
   }
   
@@ -464,12 +477,13 @@ function renderizarLineas() {
         </div>
         <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>
       `;
-    } else {
+        } else {
       // RECONOCIDO
+      const precioTexto = l.precio ? ' · $' + Number(l.precio).toLocaleString('es-CO') + ' c/u' : ' · Sin precio';
       div.innerHTML = `
-        <div class="linea-info" onclick="editarCantidad(${index})">
+        <div class="linea-info" onclick="editarLinea(${index})">
           <h4>${l.nombre} <span class="badge-unidad">${l.unidad}</span></h4>
-          <p>${l.cantidad} ${l.unidad.toLowerCase()}(s) (Toca para editar)</p>
+          <p>${l.cantidad} ${l.unidad.toLowerCase()}(s)${precioTexto} (Toca para editar)</p>
         </div>
         <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>
       `;
@@ -486,7 +500,25 @@ function editarCantidad(index) {
     renderizarLineas();
   }
 }
-
+function editarLinea(index) {
+  const l = lineasAgregadas[index];
+  
+  // Editar cantidad
+  const nuevaCant = prompt(`Cantidad de ${l.nombre}:`, l.cantidad);
+  if (nuevaCant === null || nuevaCant === '' || isNaN(nuevaCant)) return;
+  
+  // Editar precio
+  const nuevoPrecio = prompt(
+    `Precio de compra unitario de ${l.nombre}:\n\n(Deja vacío si no lo sabes)`,
+    l.precio || ''
+  );
+  if (nuevoPrecio === null) return;
+  
+  lineasAgregadas[index].cantidad = Number(nuevaCant);
+  lineasAgregadas[index].precio = nuevoPrecio && !isNaN(nuevoPrecio) ? Number(nuevoPrecio) : '';
+  
+  renderizarLineas();
+}
 function eliminarLinea(index) {
   lineasAgregadas.splice(index, 1);
   renderizarLineas();
