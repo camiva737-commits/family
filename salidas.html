@@ -75,8 +75,9 @@
     <input type="file" id="fotoGaleria" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
     
     <select id="cliente" onchange="guardarBorrador()">
-      <option value="esporadico">Cliente Esporádico / Mostrador</option>
-    </select>
+  <option value="esporadico">Cliente Esporádico / Mostrador</option>
+  <!-- Los clientes se cargan dinámicamente -->
+</select>
   </div>
 
   <div id="lista-lineas" class="card">
@@ -99,6 +100,7 @@ let lineasAgregadas = [];
 let indexEditando = -1; // -1 = agregar nuevo; >= 0 = reemplazar pendiente
 
 // --- 1. CARGAR BORRADOR Y CATÁLOGO ---
+// --- CARGA INICIAL DEL CATÁLOGO Y CLIENTES ---
 (async function () {
   const borrador = localStorage.getItem('arqui_borrador_salida');
   if (borrador) {
@@ -118,7 +120,40 @@ let indexEditando = -1; // -1 = agregar nuevo; >= 0 = reemplazar pendiente
   } catch (err) {
     document.getElementById('estado').textContent = 'Error al cargar: ' + err.message;
   }
+  
+  // Cargar clientes
+  cargarClientes();  // <-- AGREGAR ESTO
 })();
+
+// --- CARGAR CLIENTES EN EL SELECT ---
+async function cargarClientes() {
+  const select = document.getElementById('cliente');
+  if (!select) return;
+  
+  try {
+    const r = await apiGet('accion=clientes');
+    if (!r.ok) throw new Error(r.error);
+    
+    // Limpiar opciones existentes excepto "Esporádico"
+    const valorActual = select.value;
+    select.innerHTML = '<option value="esporadico">Cliente Esporádico / Mostrador</option>';
+    
+    // Agregar clientes
+    (r.items || []).forEach(function(c) {
+      const option = document.createElement('option');
+      option.value = c.id;
+      option.textContent = c.nombre + (c.direccion ? ' (' + c.direccion + ')' : '');
+      select.appendChild(option);
+    });
+    
+    // Restaurar el valor si había uno seleccionado
+    if (valorActual) {
+      select.value = valorActual;
+    }
+  } catch (err) {
+    console.error('Error cargando clientes:', err);
+  }
+}
 
 function guardarBorrador() {
   localStorage.setItem('arqui_borrador_salida', JSON.stringify({
