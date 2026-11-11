@@ -279,7 +279,41 @@ function renderizarDashboard(datos) {
     });
     html += '</div>';
   }
-  
+    // ============ LOTES POR VENCER ============
+  if (datos.lotesPorVencer && datos.lotesPorVencer.length > 0) {
+    html += '<div style="background:#0F111A; border:1px solid #EF4444; border-radius:12px; padding:12px; margin-top:12px;">';
+    html += '<div style="font-size:12px; color:#EF4444; margin-bottom:8px; font-weight:bold;">⏰ Próximos a vencer (' + datos.lotesPorVencer.length + ')</div>';
+    
+    datos.lotesPorVencer.slice(0, 10).forEach(function(l) {
+      let color = '#F59E0B';
+      let icono = '📅';
+      if (l.vencido) { color = '#EF4444'; icono = '❌'; }
+      else if (l.urgente) { color = '#EF4444'; icono = '⚠️'; }
+      else if (l.proximo) { color = '#F59E0B'; icono = '📅'; }
+      
+      let textoDias = '';
+      if (l.vencido) textoDias = 'VENCIDO hace ' + Math.abs(l.dias_restantes) + ' días';
+      else if (l.dias_restantes === 0) textoDias = 'Vence HOY';
+      else if (l.dias_restantes === 1) textoDias = 'Vence mañana';
+      else textoDias = 'Vence en ' + l.dias_restantes + ' días';
+      
+      html += '<div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #334155; font-size:12px;">' +
+        '<div style="flex:1;">' +
+          '<div style="color:#F8FAFC; font-weight:bold;">' + l.nombre + '</div>' +
+          '<div style="color:#94A3B8; font-size:11px;">' + l.cantidad + ' ' + l.unidad.toLowerCase() + '(s) · Lote ' + l.id_lote + '</div>' +
+        '</div>' +
+        '<div style="text-align:right;">' +
+          '<div style="color:' + color + '; font-weight:bold; font-size:11px;">' + icono + ' ' + textoDias + '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    
+    if (datos.lotesPorVencer.length > 10) {
+      html += '<div style="text-align:center; color:#94A3B8; font-size:11px; margin-top:8px;">... y ' + (datos.lotesPorVencer.length - 10) + ' más</div>';
+    }
+    
+    html += '</div>';
+  }
   cont.innerHTML = html;
 }
 </script>
