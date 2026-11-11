@@ -230,6 +230,13 @@ function confirmarVolverInventario() {
   }
   return true;
 }
+function cambiarModo(m) {
+  modo = m;
+  document.getElementById('btn-inicial').className = (m === 'inicial') ? 'active' : '';
+  document.getElementById('btn-ajuste').className = (m === 'ajuste') ? 'active' : '';
+  document.getElementById('div-motivo').style.display = (m === 'ajuste') ? 'block' : 'none';
+  document.getElementById('conteo').value = '';
+}
 </script>
 </body>
 </html>
