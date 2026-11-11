@@ -657,6 +657,151 @@ function limpiarEntrada() {
     alert('✅ Lista limpiada.');
   }
 }
+// ============================================
+// PESTAÑAS
+// ============================================
+
+function cambiarTabRecepcion(tab) {
+  document.getElementById('tab-nueva-btn').classList.remove('active');
+  document.getElementById('tab-hist-btn').classList.remove('active');
+  document.getElementById('tab-nueva').classList.remove('active');
+  document.getElementById('tab-historial').classList.remove('active');
+  
+  if (tab === 'nueva') {
+    document.getElementById('tab-nueva-btn').classList.add('active');
+    document.getElementById('tab-nueva').classList.add('active');
+  } else {
+    document.getElementById('tab-hist-btn').classList.add('active');
+    document.getElementById('tab-historial').classList.add('active');
+    cargarHistorial();
+  }
+}
+
+// ============================================
+// HISTORIAL
+// ============================================
+
+let proveedoresCargados = false;
+
+async function cargarHistorial() {
+  const lista = document.getElementById('hist-lista');
+  if (!lista) return;
+  lista.innerHTML = '<p style="text-align: center; color: var(--suave); font-size: 14px;">Cargando historial...</p>';
+  
+  if (!proveedoresCargados) {
+    try {
+      const r = await apiPost({ accion: 'listar_proveedores' }, 30);
+      if (r.ok && r.items) {
+        const select = document.getElementById('hist-proveedor');
+        r.items.forEach(function(p) {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = p.nombre;
+          select.appendChild(opt);
+        });
+      }
+      proveedoresCargados = true;
+    } catch (e) { console.error('Error cargando proveedores:', e); }
+  }
+  
+  const filtros = {
+    busqueda: document.getElementById('hist-busqueda') ? document.getElementById('hist-busqueda').value : '',
+    fecha_desde: document.getElementById('hist-fecha-desde') ? document.getElementById('hist-fecha-desde').value : '',
+    fecha_hasta: document.getElementById('hist-fecha-hasta') ? document.getElementById('hist-fecha-hasta').value : '',
+    proveedor: document.getElementById('hist-proveedor') ? document.getElementById('hist-proveedor').value : ''
+  };
+  
+  try {
+    const r = await apiPost({ accion: 'listar_recepciones', filtros: filtros }, 60);
+    if (!r.ok) throw new Error(r.error || 'Error al cargar');
+    
+    if (!r.recepciones || r.recepciones.length === 0) {
+      lista.innerHTML = '<p style="text-align: center; color: var(--suave); font-size: 14px; padding: 20px;">No hay recepciones registradas.</p>';
+      return;
+    }
+    
+    let html = '<p style="text-align: center; color: var(--suave); font-size: 12px; margin-bottom: 8px;">' + r.recepciones.length + ' recepción(es)</p>';
+    
+    r.recepciones.forEach(function(rec) {
+      const fecha = rec.fecha ? formatearFecha(rec.fecha) : 'Sin fecha';
+      const proveedor = rec.proveedor_nombre || 'Sin proveedor';
+      const factura = rec.factura || 'Sin factura';
+      const total = '$' + rec.total.toLocaleString('es-CO');
+      
+      html += '<div class="hist-item" onclick="verDetalleRecepcion(\'' + rec.id + '\')">' +
+        '<div class="hist-item-header">' +
+          '<h4>' + fecha + '</h4>' +
+          '<span class="total">' + total + '</span>' +
+        '</div>' +
+        '<p>' + proveedor + ' · ' + factura + '</p>' +
+        '<p><span class="badge">' + rec.numProductos + ' producto(s)</span></p>' +
+      '</div>';
+    });
+    
+    lista.innerHTML = html;
+  } catch (err) {
+    lista.innerHTML = '<p style="text-align: center; color: var(--peligro); font-size: 14px;">Error: ' + err.message + '</p>';
+  }
+}
+
+function formatearFecha(fecha) {
+  if (!fecha) return '';
+  const d = new Date(fecha);
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const año = d.getFullYear();
+  const hora = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return dia + '/' + mes + '/' + año + ' ' + hora + ':' + min;
+}
+
+async function verDetalleRecepcion(idEntrada) {
+  const modal = document.getElementById('modal-detalle');
+  const contenido = document.getElementById('detalle-contenido');
+  contenido.innerHTML = '<p style="text-align: center; color: var(--suave);">Cargando...</p>';
+  modal.classList.add('open');
+  
+  try {
+    const r = await apiPost({ accion: 'detalle_recepcion', id_entrada: idEntrada }, 30);
+    if (!r.ok) throw new Error(r.error);
+    
+    const rec = r.recepcion;
+    const fecha = rec.fecha ? formatearFecha(rec.fecha) : 'Sin fecha';
+    
+    let html = '<div style="margin-bottom: 16px;">' +
+      '<p style="font-size: 13px; color: var(--suave);">Fecha: <strong style="color: var(--texto);">' + fecha + '</strong></p>' +
+      '<p style="font-size: 13px; color: var(--suave);">Proveedor: <strong style="color: var(--texto);">' + (rec.proveedor_nombre || '—') + '</strong></p>' +
+      '<p style="font-size: 13px; color: var(--suave);">Factura: <strong style="color: var(--texto);">' + (rec.factura || '—') + '</strong></p>' +
+    '</div>' +
+    '<div style="border-top: 1px solid var(--borde); padding-top: 12px;">';
+    
+    rec.productos.forEach(function(p) {
+      html += '<div class="detalle-producto">' +
+        '<div class="detalle-producto-info">' +
+          '<h5>' + p.nombre + '</h5>' +
+          '<p>' + p.cantidad + ' ' + p.unidad.toLowerCase() + ' × $' + p.precio_unitario.toLocaleString('es-CO') + '</p>' +
+        '</div>' +
+        '<div class="detalle-producto-total">' +
+          '<strong>$' + p.subtotal.toLocaleString('es-CO') + '</strong>' +
+        '</div>' +
+      '</div>';
+    });
+    
+    html += '</div>' +
+      '<div style="border-top: 2px solid var(--acento); margin-top: 12px; padding-top: 12px; display: flex; justify-content: space-between; font-size: 16px; font-weight: bold;">' +
+        '<span>Total</span>' +
+        '<span style="color: var(--acento);">$' + rec.total.toLocaleString('es-CO') + '</span>' +
+      '</div>';
+    
+    contenido.innerHTML = html;
+  } catch (err) {
+    contenido.innerHTML = '<p style="color: var(--peligro);">Error: ' + err.message + '</p>';
+  }
+}
+
+function cerrarDetalle() {
+  document.getElementById('modal-detalle').classList.remove('open');
+}
 </script>
 </body>
 </html>
