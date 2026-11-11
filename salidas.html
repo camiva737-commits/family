@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Salidas · ArquiDulces</title>
+<title>Salidas · Distribuidora TAT</title>
 <script src="comun.js?v=10"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css">
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
@@ -106,7 +106,7 @@ let indexEditando = -1; // -1 = agregar nuevo; >= 0 = reemplazar pendiente
 let clientesCache = [];
 
 (async function () {
- const borrador = localStorage.getItem('arqui_borrador_salida');
+ const borrador = localStorage.getItem('Distribuidora TAT_borrador_salida');
 if (borrador) {
   try {
     const parsed = JSON.parse(borrador);
@@ -195,7 +195,7 @@ document.addEventListener('click', function(e) {
 });
 
 function guardarBorrador() {
-  localStorage.setItem('arqui_borrador_salida', JSON.stringify({
+  localStorage.setItem('Distribuidora TAT_borrador_salida', JSON.stringify({
     documento: document.getElementById('documento').value,
     cliente: document.getElementById('cliente').value,
     clienteNombre: document.getElementById('cliente-input').value,
@@ -207,7 +207,7 @@ function limpiarTodo() {
   if(confirm('¿Seguro que quieres borrar la lista actual?')) {
     lineasAgregadas = [];
     document.getElementById('documento').value = '';
-    localStorage.removeItem('arqui_borrador_salida');
+    localStorage.removeItem('Distribuidora TAT_borrador_salida');
     renderizarLineas();
   }
 }
@@ -584,7 +584,7 @@ const datos = {
 
     if (r.ok) {
       alert('¡Salida guardada con éxito!\nID: ' + r.id_salida + '\nLíneas guardadas: ' + (r.lineas || 0));
-      localStorage.removeItem('arqui_borrador_salida');
+      localStorage.removeItem('Distribuidora TAT_borrador_salida');
       location.reload();
     } else {
       alert('❌ Error del backend:\n' + r.error);
@@ -719,7 +719,7 @@ function confirmarVolverSalida() {
     if (!salir) {
       return false;
     }
-    localStorage.removeItem('arqui_borrador_salida');
+    localStorage.removeItem('Distribuidora TAT_borrador_salida');
   }
   return true;
 }
@@ -732,7 +732,7 @@ function limpiarSalida() {
   if (confirm('¿Seguro que quieres borrar todos los productos de la lista?\n\nEsta acción no se puede deshacer.')) {
     lineasAgregadas = [];
     document.getElementById('documento').value = '';
-    localStorage.removeItem('arqui_borrador_salida');
+    localStorage.removeItem('Distribuidora TAT_borrador_salida');
     renderizarLineas();
     guardarBorrador();
     alert('✅ Lista limpiada. Puedes empezar de nuevo.');
