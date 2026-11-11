@@ -399,34 +399,84 @@ function seleccionarProducto(p) {
   cerrarBuscador();
   
   if (indexEditando === -1) {
-    // Agregar nuevo manual
+    // Pedir cantidad
+    const cant = prompt(`¿Cuántas unidades de ${p.nombre} se venden?`, '1');
+    if (!cant || isNaN(cant)) return;
+    
+    // Pedir precio de venta
+    const precioSugerido = p.precio_venta || '';
+    const precio = prompt(
+      `¿A qué precio de venta cada ${(p.unidad_base || 'Unidad').toLowerCase()} de ${p.nombre}?${precioSugerido ? '\n\n(Sugerido: $' + precioSugerido + ')' : ''}`,
+      precioSugerido
+    );
+    if (precio === null) return;
+    const precioNum = precio && !isNaN(precio) ? Number(precio) : '';
+    
     lineasAgregadas.push({
       id_producto: p.id,
       nombre: p.nombre,
       unidad: p.unidad_base || 'Unidad',
-      cantidad: 1,
+      cantidad: Number(cant),
+      precio: precioNum,
       stock_sistema: p.stock_actual
     });
   } else {
-    // Reemplazar un pendiente
+    // Reemplazar pendiente
     const anterior = lineasAgregadas[indexEditando];
     
-    // Si el anterior era pendiente, guardamos el Alias en el backend
     if (!anterior.id_producto) {
-      // Llamada en segundo plano para guardar el alias
-      apiPost({ accion: 'guardar_alias', alias: anterior.nombre, id_producto: p.id });
+      const confirmarTexto = confirm(
+        `La IA leyó: "${anterior.nombre}"\n\n` +
+        `¿Es correcto este texto en la factura?\n\n` +
+        `• Aceptar = Sí, es correcto\n` +
+        `• Cancelar = No, era otro texto`
+      );
+      
+      if (confirmarTexto) {
+        apiPost({
+          accion: 'guardar_alias',
+          alias: anterior.nombre,
+          id_producto: p.id
+        }).then(r => console.log('✅ Alias guardado:', r));
+      } else {
+        const textoReal = prompt(
+          `¿Cuál era el texto REAL en la factura?`,
+          ''
+        );
+        if (textoReal && textoReal.trim()) {
+          apiPost({
+            accion: 'guardar_alias',
+            alias: textoReal.trim(),
+            id_producto: p.id
+          }).then(r => console.log('✅ Alias correcto guardado:', r));
+        }
+      }
     }
-
-    // Reemplazamos en la lista
+    
+    // Pedir cantidad
+    const cant = prompt(`¿Cuántas unidades de ${p.nombre}?`, anterior.cantidad || 1);
+    if (!cant || isNaN(cant)) return;
+    
+    // Pedir precio
+    const precioSugerido = p.precio_venta || '';
+    const precio = prompt(
+      `¿A qué precio de venta cada ${(p.unidad_base || 'Unidad').toLowerCase()} de ${p.nombre}?${precioSugerido ? '\n\n(Sugerido: $' + precioSugerido + ')' : ''}`,
+      precioSugerido
+    );
+    if (precio === null) return;
+    const precioNum = precio && !isNaN(precio) ? Number(precio) : '';
+    
     lineasAgregadas[indexEditando] = {
       id_producto: p.id,
       nombre: p.nombre,
       unidad: p.unidad_base || 'Unidad',
-      cantidad: anterior.cantidad,
+      cantidad: Number(cant),
+      precio: precioNum,
       stock_sistema: p.stock_actual
     };
   }
   
+  indexEditando = -1;
   renderizarLineas();
   guardarBorrador();
 }
@@ -523,10 +573,17 @@ function renderizarLineas() {
       `;
     } else {
       // RECONOCIDO
+      let alerta = '';
+      if (l.cantidad > l.stock_sistema) {
+        alerta = `<span class="alerta-stock">⚠️ ¡No hay suficiente! (Stock: ${l.stock_sistema})</span>`;
+      }
+      const precioTexto = l.precio ? ' · $' + Number(l.precio).toLocaleString('es-CO') + ' c/u' : ' · Sin precio';
+      div.onclick = () => editarLineaSalida(index);
       div.innerHTML = `
-        <div class="linea-info" onclick="editarCantidad(${index})">
+        <div class="linea-info">
           <h4>${l.nombre} <span class="badge-unidad">${l.unidad}</span></h4>
-          <p>${l.cantidad} ${l.unidad.toLowerCase()}(s) (Toca para editar)</p>
+          <p>${l.cantidad} ${l.unidad.toLowerCase()}(s)${precioTexto}</p>
+          ${alerta}
         </div>
         <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>
       `;
@@ -543,6 +600,24 @@ function editarCantidad(index) {
     renderizarLineas();
     guardarBorrador();
   }
+}
+function editarLineaSalida(index) {
+  const l = lineasAgregadas[index];
+  
+  const nuevaCant = prompt(`Cantidad de ${l.nombre}:`, l.cantidad);
+  if (nuevaCant === null || nuevaCant === '' || isNaN(nuevaCant)) return;
+  
+  const nuevoPrecio = prompt(
+    `Precio de venta unitario de ${l.nombre}:\n\n(Deja vacío si no lo sabes)`,
+    l.precio || ''
+  );
+  if (nuevoPrecio === null) return;
+  
+  lineasAgregadas[index].cantidad = Number(nuevaCant);
+  lineasAgregadas[index].precio = nuevoPrecio && !isNaN(nuevoPrecio) ? Number(nuevoPrecio) : '';
+  
+  renderizarLineas();
+  guardarBorrador();
 }
 
 function eliminarLinea(index) {
