@@ -110,7 +110,7 @@ async function enviarPreguntaAsistente() {
   const typing = agregarMensajeAsistente('🤔 Pensando...', 'asistente');
   
   try {
-    const r = await apiPost({ accion: 'consultar_asistente', pregunta: pregunta }, 90);
+    const r = await apiPost({ accion: 'consultar_asistente', pregunta: pregunta }, 120);
     typing.remove();
     if (r.ok) {
       agregarMensajeAsistente(r.respuesta, 'asistente');
