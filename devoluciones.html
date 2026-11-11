@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Devoluciones · Distribuidora TAT</title>
+<script src="comun.js?v=10"></script>
+<style>
+  :root {
+    --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
+    --suave: #94A3B8; --borde: #334155; --acento: #EF4444; --peligro: #DC2626; --ok: #10B981;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: var(--bg); color: var(--texto); padding: 20px; padding-bottom: 50px; }
+  
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .header h1 { font-size: 24px; color: var(--acento); font-weight: 800; }
+  .btn-volver { background: none; border: none; color: var(--suave); font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
+  
+  .tabs { display: flex; background: var(--card); border-radius: 14px; padding: 4px; margin-bottom: 16px; border: 1px solid var(--borde); }
+  .tabs button { flex: 1; padding: 12px; border: none; border-radius: 10px; background: transparent; color: var(--suave); font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
+  .tabs button.active { background: var(--acento); color: #FFF; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  
+  #estado { padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: none; white-space: pre-line; }
+  .ok { background: rgba(16, 185, 129, 0.2); color: var(--ok); border: 1px solid var(--ok); }
+  .error { background: rgba(239, 68, 68, 0.2); color: var(--peligro); border: 1px solid var(--peligro); }
+  
+  input, select, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--borde); background: var(--input); color: var(--texto); font-size: 15px; margin-bottom: 12px; outline: none; font-family: inherit; }
+  textarea { min-height: 80px; resize: vertical; }
+  
+  .card { background: var(--card); padding: 16px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--borde); }
+  
+  .btn-primario { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--acento); color: #FFF; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+  .btn-primario:disabled { opacity: 0.6; }
+  .btn-secundario { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--acento); background: transparent; color: var(--acento); font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+  
+  .fotos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .foto-item { position: relative; aspect-ratio: 1; background: var(--input); border-radius: 10px; overflow: hidden; }
+  .foto-item img { width: 100%; height: 100%; object-fit: cover; }
+  .foto-item .btn-x { position: absolute; top: 4px; right: 4px; background: rgba(239, 68, 68, 0.9); color: #FFF; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; cursor: pointer; }
+  .foto-vacia { aspect-ratio: 1; background: var(--input); border: 2px dashed var(--borde); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--suave); font-size: 28px; cursor: pointer; }
+  
+  .dev-item { background: var(--card); border: 1px solid var(--borde); border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer; border-left: 4px solid var(--borde); }
+  .dev-item.pendiente { border-left-color: #EF4444; }
+  .dev-item.en_proceso { border-left-color: #F59E0B; }
+  .dev-item.cambio_recibido { border-left-color: #3B82F6; }
+  .dev-item.cerrada { border-left-color: #10B981; opacity: 0.7; }
+  .dev-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px; }
+  .dev-header h4 { font-size: 14px; margin: 0; }
+  .dev-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+  .dev-badge.pendiente { background: rgba(239, 68, 68, 0.2); color: #EF4444; }
+  .dev-badge.en_proceso { background: rgba(245, 158, 11, 0.2); color: #F59E0B; }
+  .dev-badge.cambio_recibido { background: rgba(59, 130, 246, 0.2); color: #3B82F6; }
+  .dev-badge.cerrada { background: rgba(16, 185, 129, 0.2); color: #10B981; }
+  .dev-item p { font-size: 12px; color: var(--suave); margin: 2px 0; }
+  .dev-fotos { display: flex; gap: 4px; margin-top: 8px; }
+  .dev-fotos img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
+  
+  /* Modal */
+  .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal.open { display: flex; }
+  .modal-content { background: var(--card); border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+  .modal-header { padding: 16px; background: var(--input); border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; }
+  .modal-body { padding: 16px; overflow-y: auto; }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>🔄 Devoluciones</h1>
+    <a href="index.html" class="btn-volver">← Volver</a>
+  </div>
+
+  <div class="tabs">
+    <button id="tab-nueva-btn" class="active" onclick="cambiarTab('nueva')">➕ Nueva devolución</button>
+    <button id="tab-lista-btn" onclick="cambiarTab('lista')">📋 Listado</button>
+  </div>
+
+  <div id="estado" style="display: none;"></div>
+
+  <!-- TAB NUEVA -->
+  <div id="tab-nueva" class="tab-content active">
+    <div class="card">
+      <input type="text" id="dev-buscar" placeholder="🔍 Buscar producto..." oninput="buscarProducto()" autocomplete="off">
+      <div id="dev-resultados" style="max-height: 250px; overflow-y: auto; border-radius: 12px; overflow: hidden; margin-bottom: 12px; display: none;"></div>
+      <div id="dev-producto-sel" style="display: none; background: var(--input); padding: 12px; border-radius: 12px; margin-bottom: 12px;">
+        <p style="font-size: 13px; color: var(--suave);">Producto seleccionado:</p>
+        <p id="dev-producto-nombre" style="font-size: 15px; font-weight: bold;"></p>
+      </div>
+    </div>
+    
+    <div class="card">
+      <input type="number" id="dev-cantidad" placeholder="Cantidad a devolver" min="1">
+      <select id="dev-proveedor">
+        <option value="">Seleccione proveedor (opcional)...</option>
+      </select>
+      <input type="date" id="dev-fecha">
+      <textarea id="dev-observacion" placeholder="Observaciones (opcional): describe el problema..."></textarea>
+      
+      <p style="font-size: 13px; color: var(--suave); margin-bottom: 8px;">Fotos de evidencia (hasta 3):</p>
+      <div class="fotos-grid" id="fotos-grid">
+        <div class="foto-vacia" onclick="document.getElementById('foto-input').click()">📷</div>
+      </div>
+      <input type="file" id="foto-input" accept="image/*" capture="environment" style="display: none;" onchange="agregarFoto(this)">
+    </div>
+    
+    <button class="btn-primario" id="btn-crear" onclick="crearDevolucion()">Registrar Devolución</button>
+  </div>
+
+  <!-- TAB LISTA -->
+  <div id="tab-lista" class="tab-content">
+    <div class="card">
+      <select id="filtro-estado" onchange="cargarListado()">
+        <option value="">Todos los estados</option>
+        <option value="Pendiente">Pendiente</option>
+        <option value="En_proceso">En proceso</option>
+        <option value="Cambio_recibido">Cambio recibido</option>
+        <option value="Cerrada">Cerrada</option>
+      </select>
+      <input type="text" id="filtro-busqueda" placeholder="🔍 Buscar por producto..." oninput="cargarListado()">
+    </div>
+    <div id="lista-devoluciones">
+      <p style="text-align: center; color: var(--suave); font-size: 14px;">Cargando...</p>
+    </div>
+  </div>
+
+  <!-- MODAL DETALLE -->
+  <div id="modal-detalle" class="modal" onclick="if(event.target.id==='modal-detalle')cerrarDetalle()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 16px;">Detalle de devolución</h3>
+        <button onclick="cerrarDetalle()" style="background:none;border:none;color:var(--suave);font-size:22px;cursor:pointer;">×</button>
+      </div>
+      <div class="modal-body" id="detalle-contenido">Cargando...</div>
+    </div>
+  </div>
+
+<script>
+let productos = [];
+let proveedores = [];
+let productoSeleccionado = null;
+let fotosSubidas = [];
+let devolucionesActuales = [];
+let devActual = null;
+
+// ============================================
+// INICIALIZACIÓN
+// ============================================
+(async function init() {
+  document.getElementById('dev-fecha').value = new Date().toISOString().split('T')[0];
+  
+  try {
+    const r = await apiGet('accion=inventario');
+    if (r.ok) productos = r.items;
+  } catch (e) { console.error('Error productos:', e); }
+  
+  try {
+    const r = await apiPost({ accion: 'listar_proveedores' }, 30);
+    if (r.ok && r.items) {
+      proveedores = r.items;
+      const select = document.getElementById('dev-proveedor');
+      r.items.forEach(function(p) {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.nombre;
+        select.appendChild(opt);
+      });
+    }
+  } catch (e) { console.error('Error proveedores:', e); }
+})();
+
+// ============================================
+// TABS
+// ============================================
+function cambiarTab(tab) {
+  document.getElementById('tab-nueva-btn').classList.remove('active');
+  document.getElementById('tab-lista-btn').classList.remove('active');
+  document.getElementById('tab-nueva').classList.remove('active');
+  document.getElementById('tab-lista').classList.remove('active');
+  
+  if (tab === 'nueva') {
+    document.getElementById('tab-nueva-btn').classList.add('active');
+    document.getElementById('tab-nueva').classList.add('active');
+  } else {
+    document.getElementById('tab-lista-btn').classList.add('active');
+    document.getElementById('tab-lista').classList.add('active');
+    cargarListado();
+  }
+}
+
+// ============================================
+// BUSCAR PRODUCTO
+// ============================================
+function buscarProducto() {
+  const q = document.getElementById('dev-buscar').value.toLowerCase().trim();
+  const cont = document.getElementById('dev-resultados');
+  
+  if (q.length < 2) {
+    cont.style.display = 'none';
+    return;
+  }
+  
+  const filtrados = productos.filter(function(p) {
+    return p.nombre.toLowerCase().includes(q) || p.id.toLowerCase().includes(q);
+  }).slice(0, 10);
+  
+  if (filtrados.length === 0) {
+    cont.innerHTML = '<div style="padding: 12px; color: var(--suave); text-align: center;">No encontrado</div>';
+    cont.style.display = 'block';
+    return;
+  }
+  
+  cont.innerHTML = '';
+  filtrados.forEach(function(p) {
+    const div = document.createElement('div');
+    div.style.padding = '12px';
+    div.style.background = 'var(--input)';
+    div.style.borderBottom = '1px solid var(--borde)';
+    div.style.cursor = 'pointer';
+    div.innerHTML = '<strong>' + p.nombre + '</strong> <span style="color: var(--suave); font-size: 12px;">(stock: ' + p.stock_actual + ' ' + p.unidad_base + ')</span>';
+    div.onclick = function() {
+      seleccionarProducto(p);
+    };
+    cont.appendChild(div);
+  });
+  cont.style.display = 'block';
+}
+
+function seleccionarProducto(p) {
+  productoSeleccionado = p;
+  document.getElementById('dev-producto-nombre').textContent = p.nombre + ' (' + p.id + ')';
+  document.getElementById('dev-producto-sel').style.display = 'block';
+  document.getElementById('dev-buscar').value = '';
+  document.getElementById('dev-resultados').style.display = 'none';
+}
+
+// ============================================
+// FOTOS
+// ============================================
+function agregarFoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (fotosSubidas.length >= 3) {
+    alert('Máximo 3 fotos');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    fotosSubidas.push({ base64: base64, url: '' });
+    renderizarFotos();
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function renderizarFotos() {
+  const grid = document.getElementById('fotos-grid');
+  grid.innerHTML = '';
+  
+  fotosSubidas.forEach(function(foto, i) {
+    const div = document.createElement('div');
+    div.className = 'foto-item';
+    div.innerHTML = '<img src="' + foto.base64 + '"><button class="btn-x" onclick="eliminarFoto(' + i + ')">×</button>';
+    grid.appendChild(div);
+  });
+  
+  if (fotosSubidas.length < 3) {
+    const div = document.createElement('div');
+    div.className = 'foto-vacia';
+    div.textContent = '📷';
+    div.onclick = function() { document.getElementById('foto-input').click(); };
+    grid.appendChild(div);
+  }
+}
+
+function eliminarFoto(index) {
+  fotosSubidas.splice(index, 1);
+  renderizarFotos();
+}
+
+// ============================================
+// CREAR DEVOLUCIÓN
+// ============================================
+async function crearDevolucion() {
+  if (!productoSeleccionado) return alert('Selecciona un producto');
+  const cantidad = Number(document.getElementById('dev-cantidad').value);
+  if (!cantidad || cantidad <= 0) return alert('Cantidad inválida');
+  
+  const btn = document.getElementById('btn-crear');
+  btn.textContent = 'Guardando...';
+  btn.disabled = true;
+  
+  try {
+    // 1. Primero subir fotos
+    const urlsFotos = [];
+    for (let i = 0; i < fotosSubidas.length; i++) {
+      const r = await apiPost({
+        accion: 'subir_foto_devolucion',
+        base64: fotosSubidas[i].base64,
+        id_devolucion: 'temp',
+        indice: i + 1
+      }, 60);
+      if (r.ok && r.url) urlsFotos.push(r.url);
+    }
+    
+    // 2. Crear la devolución
+    const datos = {
+      id_producto: productoSeleccionado.id,
+      cantidad: cantidad,
+      fecha: document.getElementById('dev-fecha').value,
+      id_proveedor: document.getElementById('dev-proveedor').value,
+      observacion: document.getElementById('dev-observacion').value.trim(),
+      foto_urls: urlsFotos
+    };
+    
+    const r = await apiPost({ accion: 'crear_devolucion', datos: datos }, 60);
+    if (r.ok) {
+      alert('✅ Devolución registrada: ' + r.id_devolucion);
+      // Limpiar formulario
+      productoSeleccionado = null;
+      document.getElementById('dev-producto-sel').style.display = 'none';
+      document.getElementById('dev-cantidad').value = '';
+      document.getElementById('dev-observacion').value = '';
+      document.getElementById('dev-fecha').value = new Date().toISOString().split('T')[0];
+      fotosSubidas = [];
+      renderizarFotos();
+      cambiarTab('lista');
+    } else {
+      alert('❌ Error: ' + r.error);
+    }
+  } catch (e) {
+    alert('❌ Error de conexión: ' + e.message);
+  } finally {
+    btn.textContent = 'Registrar Devolución';
+    btn.disabled = false;
+  }
+}
+
+// ============================================
+// LISTADO
+// ============================================
+async function cargarListado() {
+  const cont = document.getElementById('lista-devoluciones');
+  cont.innerHTML = '<p style="text-align: center; color: var(--suave); font-size: 14px;">Cargando...</p>';
+  
+  const filtros = {
+    estado: document.getElementById('filtro-estado').value,
+    busqueda: document.getElementById('filtro-busqueda').value
+  };
+  
+  try {
+    const r = await apiPost({ accion: 'listar_devoluciones', filtros: filtros }, 30);
+    if (!r.ok) throw new Error(r.error);
+    
+    devolucionesActuales = r.items || [];
+    
+    if (devolucionesActuales.length === 0) {
+      cont.innerHTML = '<p style="text-align: center; color: var(--suave); font-size: 14px; padding: 20px;">No hay devoluciones.</p>';
+      return;
+    }
+    
+    let html = '<p style="text-align: center; color: var(--suave); font-size: 12px; margin-bottom: 8px;">' + devolucionesActuales.length + ' devolución(es)</p>';
+    
+    devolucionesActuales.forEach(function(d) {
+      const estadoClass = d.estado.toLowerCase().replace(/_/g, '_');
+      const fecha = d.fecha ? formatFecha(d.fecha) : 'Sin fecha';
+      
+      let fotosHtml = '';
+      if (d.foto_urls.length > 0) {
+        fotosHtml = '<div class="dev-fotos">';
+        d.foto_urls.slice(0, 3).forEach(function(url) {
+          fotosHtml += '<img src="' + url + '">';
+        });
+        fotosHtml += '</div>';
+      }
+      
+      html += '<div class="dev-item ' + estadoClass + '" onclick="verDetalle(\'' + d.id + '\')">' +
+        '<div class="dev-header">' +
+          '<h4>' + d.nombre_producto + '</h4>' +
+          '<span class="dev-badge ' + estadoClass + '">' + d.estado + '</span>' +
+        '</div>' +
+        '<p>🎯 ' + d.id + ' · ' + fecha + '</p>' +
+        '<p>📦 ' + d.cantidad + ' ' + d.unidad.toLowerCase() + '(s) · Pendiente: ' + d.cantidad_pendiente + '</p>' +
+        (d.nombre_proveedor ? '<p>🏢 ' + d.nombre_proveedor + '</p>' : '') +
+        fotosHtml +
+      '</div>';
+    });
+    
+    cont.innerHTML = html;
+  } catch (e) {
+    cont.innerHTML = '<p style="text-align: center; color: var(--peligro); font-size: 14px;">Error: ' + e.message + '</p>';
+  }
+}
+
+function formatFecha(fecha) {
+  if (!fecha) return '';
+  const d = new Date(fecha);
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const año = d.getFullYear();
+  return dia + '/' + mes + '/' + año;
+}
+
+// ============================================
+// DETALLE Y CAMBIO DE ESTADO
+// ============================================
+function verDetalle(id) {
+  const dev = devolucionesActuales.find(function(d) { return d.id === id; });
+  if (!dev) return;
+  
+  devActual = dev;
+  const modal = document.getElementById('modal-detalle');
+  const contenido = document.getElementById('detalle-contenido');
+  
+  const estados = ['Pendiente', 'En_proceso', 'Cambio_recibido', 'Cerrada'];
+  let estadosHtml = '<select id="nuevo-estado" style="margin-bottom: 12px;">';
+  estados.forEach(function(e) {
+    estadosHtml += '<option value="' + e + '"' + (dev.estado === e ? ' selected' : '') + '>' + e + '</option>';
+  });
+  estadosHtml += '</select>';
+  
+  let fotosHtml = '';
+  if (dev.foto_urls.length > 0) {
+    fotosHtml = '<p style="font-size: 13px; color: var(--suave); margin-bottom: 8px;">Fotos:</p><div class="dev-fotos" style="flex-wrap: wrap;">';
+    dev.foto_urls.forEach(function(url) {
+      fotosHtml += '<a href="' + url + '" target="_blank"><img src="' + url + '" style="width: 80px; height: 80px;"></a>';
+    });
+    fotosHtml += '</div>';
+  }
+  
+  contenido.innerHTML = 
+    '<h3 style="font-size: 18px; margin-bottom: 8px;">' + dev.nombre_producto + '</h3>' +
+    '<p style="font-size: 12px; color: var(--suave); margin-bottom: 12px;">' + dev.id + '</p>' +
+    '<p style="margin-bottom: 6px;"><strong>Cantidad:</strong> ' + dev.cantidad + ' ' + dev.unidad.toLowerCase() + '(s)</p>' +
+    '<p style="margin-bottom: 6px;"><strong>Pendiente:</strong> ' + dev.cantidad_pendiente + '</p>' +
+    '<p style="margin-bottom: 6px;"><strong>Fecha:</strong> ' + (dev.fecha ? formatFecha(dev.fecha) : 'Sin fecha') + '</p>' +
+    (dev.nombre_proveedor ? '<p style="margin-bottom: 6px;"><strong>Proveedor:</strong> ' + dev.nombre_proveedor + '</p>' : '') +
+    (dev.observacion ? '<p style="margin-bottom: 12px;"><strong>Observación:</strong><br>' + dev.observacion + '</p>' : '') +
+    fotosHtml +
+    '<hr style="margin: 16px 0; border-color: var(--borde);">' +
+    '<p style="font-size: 13px; margin-bottom: 8px;"><strong>Cambiar estado:</strong></p>' +
+    estadosHtml +
+    '<input type="number" id="cantidad-recibida" placeholder="Cantidad recibida (si aplica)" min="0" style="margin-bottom: 12px;">' +
+    '<button class="btn-primario" onclick="actualizarEstado()">Guardar cambios</button>';
+  
+  modal.classList.add('open');
+}
+
+async function actualizarEstado() {
+  if (!devActual) return;
+  const nuevoEstado = document.getElementById('nuevo-estado').value;
+  const cantidadRecibida = document.getElementById('cantidad-recibida').value;
+  
+  try {
+    const r = await apiPost({
+      accion: 'actualizar_estado_devolucion',
+      id_devolucion: devActual.id,
+      estado: nuevoEstado,
+      cantidad_recibida: cantidadRecibida ? Number(cantidadRecibida) : null
+    }, 30);
+    
+    if (r.ok) {
+      alert('✅ Estado actualizado');
+      cerrarDetalle();
+      cargarListado();
+    } else {
+      alert('❌ Error: ' + r.error);
+    }
+  } catch (e) {
+    alert('❌ Error: ' + e.message);
+  }
+}
+
+function cerrarDetalle() {
+  document.getElementById('modal-detalle').classList.remove('open');
+  devActual = null;
+}
+</script>
+</body>
+</html>
