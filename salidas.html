@@ -74,10 +74,11 @@
     <input type="file" id="fotoCamara" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoIA(this)">
     <input type="file" id="fotoGaleria" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
     
-    <select id="cliente" onchange="guardarBorrador()">
-  <option value="esporadico">Cliente Esporádico / Mostrador</option>
-  <!-- Los clientes se cargan dinámicamente -->
-</select>
+    <div style="position:relative;">
+  <input type="text" id="cliente-input" placeholder="Buscar cliente..." oninput="buscarCliente(this.value)" onfocus="buscarCliente(this.value)" autocomplete="off">
+  <input type="hidden" id="cliente" value="esporadico" onchange="guardarBorrador()">
+  <div id="cliente-resultados" style="display:none; position:absolute; top:100%; left:0; right:0; background:#1A1D2D; border:1px solid #334155; border-radius:12px; max-height:250px; overflow-y:auto; z-index:100; margin-top:4px;"></div>
+</div>
   </div>
 
   <div id="lista-lineas" class="card">
@@ -101,16 +102,23 @@ let indexEditando = -1; // -1 = agregar nuevo; >= 0 = reemplazar pendiente
 
 // --- 1. CARGAR BORRADOR Y CATÁLOGO ---
 // --- CARGA INICIAL DEL CATÁLOGO Y CLIENTES ---
+// --- CARGAR CLIENTES (solo para tenerlos en memoria) ---
+let clientesCache = [];
+
 (async function () {
-  const borrador = localStorage.getItem('arqui_borrador_salida');
-  if (borrador) {
-    try {
-      const parsed = JSON.parse(borrador);
-      lineasAgregadas = parsed.lineas || [];
-      document.getElementById('documento').value = parsed.documento || '';
-      renderizarLineas();
-    } catch(e) {}
-  }
+ const borrador = localStorage.getItem('arqui_borrador_salida');
+if (borrador) {
+  try {
+    const parsed = JSON.parse(borrador);
+    lineasAgregadas = parsed.lineas || [];
+    document.getElementById('documento').value = parsed.documento || '';
+    if (parsed.cliente) {
+      document.getElementById('cliente').value = parsed.cliente;
+      document.getElementById('cliente-input').value = parsed.clienteNombre || '';
+    }
+    renderizarLineas();
+  } catch(e) {}
+}
 
   try {
     const r = await apiGet('accion=inventario');
@@ -121,43 +129,76 @@ let indexEditando = -1; // -1 = agregar nuevo; >= 0 = reemplazar pendiente
     document.getElementById('estado').textContent = 'Error al cargar: ' + err.message;
   }
   
-  // Cargar clientes
-  cargarClientes();  // <-- AGREGAR ESTO
-})();
-
-// --- CARGAR CLIENTES EN EL SELECT ---
-async function cargarClientes() {
-  const select = document.getElementById('cliente');
-  if (!select) return;
-  
+  // Cargar clientes en memoria
   try {
     const r = await apiGet('accion=clientes');
-    if (!r.ok) throw new Error(r.error);
-    
-    // Limpiar opciones existentes excepto "Esporádico"
-    const valorActual = select.value;
-    select.innerHTML = '<option value="esporadico">Cliente Esporádico / Mostrador</option>';
-    
-    // Agregar clientes
-    (r.items || []).forEach(function(c) {
-      const option = document.createElement('option');
-      option.value = c.id;
-      option.textContent = c.nombre + (c.direccion ? ' (' + c.direccion + ')' : '');
-      select.appendChild(option);
-    });
-    
-    // Restaurar el valor si había uno seleccionado
-    if (valorActual) {
-      select.value = valorActual;
+    if (r.ok) {
+      clientesCache = r.items || [];
+      console.log('✅ Clientes cargados:', clientesCache.length);
     }
   } catch (err) {
     console.error('Error cargando clientes:', err);
   }
+})();
+
+// --- BUSCADOR DE CLIENTES ---
+function buscarCliente(texto) {
+  const cont = document.getElementById('cliente-resultados');
+  const q = (texto || '').toLowerCase().trim();
+  
+  if (q.length === 0) {
+    // Mostrar "Esporádico" + los primeros 10 clientes
+    let html = '<div class="cliente-item" onclick="seleccionarCliente(\'esporadico\', \'Cliente Esporádico / Mostrador\')" style="padding:12px; border-bottom:1px solid #334155; cursor:pointer;">Cliente Esporádico / Mostrador</div>';
+    clientesCache.slice(0, 10).forEach(function(c) {
+      html += '<div class="cliente-item" onclick="seleccionarCliente(\'' + c.id + '\', \'' + c.nombre.replace(/'/g, "\\'") + '\')" style="padding:12px; border-bottom:1px solid #334155; cursor:pointer;">' + c.nombre + (c.direccion ? ' (' + c.direccion + ')' : '') + '</div>';
+    });
+    cont.innerHTML = html;
+    cont.style.display = 'block';
+    return;
+  }
+  
+  // Filtrar por nombre o ID
+  const filtrados = clientesCache.filter(function(c) {
+    return c.nombre.toLowerCase().indexOf(q) >= 0 || 
+           c.id.toLowerCase().indexOf(q) >= 0 ||
+           (c.numero && c.numero.indexOf(q) >= 0);
+  }).slice(0, 20);
+  
+  if (filtrados.length === 0) {
+    cont.innerHTML = '<div style="padding:12px; color:#94A3B8; text-align:center;">No se encontraron clientes</div>';
+    cont.style.display = 'block';
+    return;
+  }
+  
+  let html = '';
+  filtrados.forEach(function(c) {
+    html += '<div class="cliente-item" onclick="seleccionarCliente(\'' + c.id + '\', \'' + c.nombre.replace(/'/g, "\\'") + '\')" style="padding:12px; border-bottom:1px solid #334155; cursor:pointer;">' + c.nombre + (c.direccion ? ' (' + c.direccion + ')' : '') + '</div>';
+  });
+  cont.innerHTML = html;
+  cont.style.display = 'block';
 }
+
+function seleccionarCliente(id, nombre) {
+  document.getElementById('cliente-input').value = nombre;
+  document.getElementById('cliente').value = id;
+  document.getElementById('cliente-resultados').style.display = 'none';
+  guardarBorrador();
+}
+
+// Cerrar el dropdown al hacer clic fuera
+document.addEventListener('click', function(e) {
+  const input = document.getElementById('cliente-input');
+  const cont = document.getElementById('cliente-resultados');
+  if (input && cont && !input.contains(e.target) && !cont.contains(e.target)) {
+    cont.style.display = 'none';
+  }
+});
 
 function guardarBorrador() {
   localStorage.setItem('arqui_borrador_salida', JSON.stringify({
     documento: document.getElementById('documento').value,
+    cliente: document.getElementById('cliente').value,
+    clienteNombre: document.getElementById('cliente-input').value,
     lineas: lineasAgregadas
   }));
 }
@@ -527,12 +568,12 @@ async function guardarSalida() {
   console.log('🔍 Líneas a guardar:', JSON.stringify(lineasAgregadas, null, 2));
   console.log('📄 Documento:', documento);
   console.log('👤 Cliente:', cliente);
-  const datos = {
-    documento: documento,
-    cliente: cliente,
-    fecha: new Date().toISOString().split('T')[0],
-    lineas: lineasAgregadas
-  };
+const datos = {
+  documento: documento,
+  cliente: document.getElementById('cliente').value, // El ID, no el nombre
+  fecha: new Date().toISOString().split('T')[0],
+  lineas: lineasAgregadas
+};
 
     try {
     console.log('📤 Enviando salida al backend:', datos);
