@@ -40,7 +40,7 @@
     </div>
   </a>
 
-  <!-- Botón de Recepciones (Actualizado) -->
+  <!-- Botón de Recepciones -->
   <a href="entradas.html" class="card">
     <div class="icon">📥</div>
     <div class="card-text">
@@ -49,7 +49,7 @@
     </div>
   </a>
 
-    <!-- Botón de Salidas -->
+  <!-- Botón de Salidas -->
   <a href="salidas.html" class="card">
     <div class="icon" style="color: #EF4444; background: rgba(239, 68, 68, 0.15);">📤</div>
     <div class="card-text">
@@ -57,58 +57,51 @@
       <p>Descontar mercancía</p>
     </div>
   </a>
-  <!-- ========================================== -->
-<!-- ASISTENTE VIRTUAL (MASCOTA + CHAT)         -->
-<!-- ========================================== -->
-<!-- Círculo del Dashboard (arriba del de la mascota) -->
-<div id="dashboard-mascota" onclick="toggleDashboard()" style="position:fixed; bottom:90px; right:20px; width:60px; height:60px; border-radius:50%; background:#3B82F6; display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.4); z-index:9998; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Dashboard">
-  📊
-</div>
 
-<!-- Círculo del Dashboard -->
-<div id="dashboard-mascota" onclick="toggleDashboard()" style="position:fixed; bottom:90px; right:20px; width:60px; height:60px; border-radius:50%; background:#3B82F6; display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.4); z-index:9998; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Dashboard">
-  📊
-</div>
-
-<!-- Círculo del Asistente -->
-<div id="asistente-mascota" onclick="toggleAsistente()" style="position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:50%; background:#F59E0B; display:flex; align-items:center; justify-content:center; font-size:32px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.4); z-index:9998; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Asistente">
-  🦉
-</div>
-
-<!-- CHAT DEL ASISTENTE (completo y cerrado) -->
-<div id="asistente-chat" style="display:none; position:fixed; bottom:90px; right:20px; width:340px; max-width:calc(100vw - 40px); background:#1A1D2D; border:1px solid #334155; border-radius:16px; overflow:hidden; z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,0.6);">
-  <div style="padding:14px; background:#25293D; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
-    <span style="color:#F8FAFC; font-weight:bold; font-size:15px;">🦉 Asistente Distribuidora TAT</span>
-    <button onclick="toggleAsistente()" style="background:none; border:none; color:#94A3B8; font-size:20px; cursor:pointer; padding:0 6px;">×</button>
+  <!-- Círculo del Dashboard -->
+  <div id="dashboard-mascota" onclick="toggleDashboard()" style="position:fixed; bottom:90px; right:20px; width:60px; height:60px; border-radius:50%; background:#3B82F6; display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.4); z-index:9998; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Dashboard">
+    📊
   </div>
-  <div id="asistente-mensajes" style="padding:14px; max-height:350px; overflow-y:auto; font-size:14px; color:#F8FAFC; background:#0F111A;">
-    <div style="background:#25293D; padding:10px; border-radius:12px; margin-bottom:8px; line-height:1.5;">
-      ¡Hola! Soy tu asistente. Puedes preguntarme:
-      <br>• "¿Cuánto queda de Doritos?"
-      <br>• "¿Cómo nos fue este mes?"
-      <br>• "¿Qué productos están por acabarse?"
-      <br>• "¿Cuál es el producto más vendido?"
-      <br>• "¿Cuánto vale el inventario?"
-    </div>
-  </div>
-  <div style="padding:10px; border-top:1px solid #334155; display:flex; gap:8px; background:#1A1D2D;">
-    <input type="text" id="asistente-input" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter')enviarPreguntaAsistente()" style="flex:1; padding:10px; border-radius:10px; border:1px solid #334155; background:#25293D; color:#F8FAFC; font-size:14px; outline:none;">
-    <button onclick="enviarPreguntaAsistente()" style="padding:0 14px; border-radius:10px; border:none; background:#F59E0B; color:#000; font-weight:bold; cursor:pointer; font-size:16px;">→</button>
-  </div>
-</div>
 
-<!-- MODAL DEL DASHBOARD (completo y cerrado) -->
-<div id="modal-dashboard" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center; padding:20px;">
-  <div style="background:#1A1D2D; border:1px solid #334155; border-radius:16px; width:100%; max-width:500px; max-height:90vh; overflow:hidden; display:flex; flex-direction:column;">
+  <!-- Círculo del Asistente -->
+  <div id="asistente-mascota" onclick="toggleAsistente()" style="position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:50%; background:#F59E0B; display:flex; align-items:center; justify-content:center; font-size:32px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.4); z-index:9998; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Asistente">
+    🦉
+  </div>
+
+  <!-- CHAT DEL ASISTENTE -->
+  <div id="asistente-chat" style="display:none; position:fixed; bottom:90px; right:20px; width:340px; max-width:calc(100vw - 40px); background:#1A1D2D; border:1px solid #334155; border-radius:16px; overflow:hidden; z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,0.6);">
     <div style="padding:14px; background:#25293D; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
-      <span style="color:#F8FAFC; font-weight:bold; font-size:16px;">📊 Dashboard</span>
-      <button onclick="toggleDashboard()" style="background:none; border:none; color:#94A3B8; font-size:22px; cursor:pointer; padding:0 6px;">×</button>
+      <span style="color:#F8FAFC; font-weight:bold; font-size:15px;">🦉 Asistente Distribuidora TAT</span>
+      <button onclick="toggleAsistente()" style="background:none; border:none; color:#94A3B8; font-size:20px; cursor:pointer; padding:0 6px;">×</button>
     </div>
-    <div id="dashboard-contenido" style="padding:16px; overflow-y:auto; flex:1;">
-      <p style="text-align:center; color:#94A3B8; font-size:13px;">Cargando dashboard...</p>
+    <div id="asistente-mensajes" style="padding:14px; max-height:350px; overflow-y:auto; font-size:14px; color:#F8FAFC; background:#0F111A;">
+      <div style="background:#25293D; padding:10px; border-radius:12px; margin-bottom:8px; line-height:1.5;">
+        ¡Hola! Soy tu asistente. Puedes preguntarme:
+        <br>• "¿Cuánto queda de Doritos?"
+        <br>• "¿Cómo nos fue este mes?"
+        <br>• "¿Qué productos están por acabarse?"
+        <br>• "¿Cuál es el producto más vendido?"
+        <br>• "¿Cuánto vale el inventario?"
+      </div>
+    </div>
+    <div style="padding:10px; border-top:1px solid #334155; display:flex; gap:8px; background:#1A1D2D;">
+      <input type="text" id="asistente-input" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter')enviarPreguntaAsistente()" style="flex:1; padding:10px; border-radius:10px; border:1px solid #334155; background:#25293D; color:#F8FAFC; font-size:14px; outline:none;">
+      <button onclick="enviarPreguntaAsistente()" style="padding:0 14px; border-radius:10px; border:none; background:#F59E0B; color:#000; font-weight:bold; cursor:pointer; font-size:16px;">→</button>
     </div>
   </div>
-</div>
+
+  <!-- MODAL DEL DASHBOARD -->
+  <div id="modal-dashboard" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#1A1D2D; border:1px solid #334155; border-radius:16px; width:100%; max-width:500px; max-height:90vh; overflow:hidden; display:flex; flex-direction:column;">
+      <div style="padding:14px; background:#25293D; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
+        <span style="color:#F8FAFC; font-weight:bold; font-size:16px;">📊 Dashboard</span>
+        <button onclick="toggleDashboard()" style="background:none; border:none; color:#94A3B8; font-size:22px; cursor:pointer; padding:0 6px;">×</button>
+      </div>
+      <div id="dashboard-contenido" style="padding:16px; overflow-y:auto; flex:1;">
+        <p style="text-align:center; color:#94A3B8; font-size:13px;">Cargando dashboard...</p>
+      </div>
+    </div>
+  </div>
 
 <script>
 function toggleAsistente() {
@@ -134,14 +127,14 @@ async function enviarPreguntaAsistente() {
   
   try {
     const r = await apiPost({ accion: 'consultar_asistente', pregunta: pregunta }, 120);
-    typing.remove();
+    if (typing && typing.parentNode) typing.remove();
     if (r.ok) {
       agregarMensajeAsistente(r.respuesta, 'asistente');
     } else {
       agregarMensajeAsistente('❌ Error: ' + r.error, 'asistente');
     }
   } catch (err) {
-    typing.remove();
+    if (typing && typing.parentNode) typing.remove();
     agregarMensajeAsistente('❌ Error de conexión: ' + err.message, 'asistente');
   }
 }
@@ -173,7 +166,7 @@ function agregarMensajeAsistente(texto, tipo) {
   cont.scrollTop = cont.scrollHeight;
   return div;
 }
-// --- TOGGLE DASHBOARD ---
+
 function toggleDashboard() {
   const modal = document.getElementById('modal-dashboard');
   if (!modal) return;
@@ -186,7 +179,6 @@ function toggleDashboard() {
   }
 }
 
-// --- CARGAR DASHBOARD ---
 async function cargarDashboard() {
   const cont = document.getElementById('dashboard-contenido');
   cont.innerHTML = '<p style="text-align:center; color:#94A3B8; font-size:13px;">Cargando dashboard...</p>';
@@ -200,7 +192,6 @@ async function cargarDashboard() {
   }
 }
 
-// --- RENDERIZAR DASHBOARD ---
 function renderizarDashboard(datos) {
   const cont = document.getElementById('dashboard-contenido');
   
@@ -213,31 +204,26 @@ function renderizarDashboard(datos) {
   
   let html = '';
   
-  // Ventas hoy
   html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">💰 VENTAS HOY</div>';
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
   html += tarjeta('Unidades', datos.ventasHoy.unidades, '#10B981', '📦');
   html += tarjeta('Monto', '$' + datos.ventasHoy.monto.toLocaleString('es-CO'), '#10B981', '💵');
   html += '</div>';
   
-  // Ventas mes
   html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">📊 VENTAS MES</div>';
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
   html += tarjeta('Unidades', datos.ventasMes.unidades, '#F59E0B', '📦');
   html += tarjeta('Monto', '$' + datos.ventasMes.monto.toLocaleString('es-CO'), '#F59E0B', '💵');
   html += '</div>';
   
-  // Entradas
   html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">📥 ENTRADAS</div>';
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
   html += tarjeta('Hoy', datos.entradasHoy.unidades + ' und', '#3B82F6', '📥');
   html += tarjeta('Mes', datos.entradasMes.unidades + ' und', '#3B82F6', '📦');
   html += '</div>';
   
-  // Valor inventario
   html += tarjeta('Valor del inventario', '$' + datos.valorInventario.toLocaleString('es-CO'), '#A855F7', '🏦');
   
-  // Top ventas hoy
   if (datos.topHoy.length > 0) {
     html += '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px; margin-top:12px;">';
     html += '<div style="font-size:12px; color:#94A3B8; margin-bottom:8px; font-weight:bold;">🏆 Top ventas hoy</div>';
@@ -250,7 +236,6 @@ function renderizarDashboard(datos) {
     html += '</div>';
   }
   
-  // Top ventas mes
   if (datos.topMes.length > 0) {
     html += '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px; margin-top:12px;">';
     html += '<div style="font-size:12px; color:#94A3B8; margin-bottom:8px; font-weight:bold;">🏆 Top ventas mes</div>';
@@ -263,7 +248,6 @@ function renderizarDashboard(datos) {
     html += '</div>';
   }
   
-  // Por acabarse
   if (datos.porAcabarse.length > 0) {
     html += '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px; margin-top:12px;">';
     html += '<div style="font-size:12px; color:#94A3B8; margin-bottom:8px; font-weight:bold;">⚠️ Por acabarse</div>';
@@ -279,13 +263,5 @@ function renderizarDashboard(datos) {
   cont.innerHTML = html;
 }
 </script>
-
-    
-    <!-- Contenido -->
-    <div id="dashboard-contenido" style="padding:16px; overflow-y:auto; flex:1;">
-      <p style="text-align:center; color:#94A3B8; font-size:13px;">Cargando dashboard...</p>
-    </div>
-  </div>
-</div>
 </body>
 </html>
