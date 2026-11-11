@@ -377,25 +377,41 @@ function filtrar() {
 function agregarLinea(p) {
   cerrarBuscador();
   
+  const controlaVenc = p.controla_vencimiento === true || normalizar(p.controla_vencimiento || '') === 'si';
+  
   if (indexEditando === -1) {
-    // Agregar nuevo manual: pedir cantidad
+    // Agregar nuevo manual
     const cant = prompt(`¿Cuántas unidades de ${p.nombre} llegaron?`);
     if (!cant || isNaN(cant)) return;
     
-    // Pedir precio de compra
     const precio = prompt(`¿A qué precio de compra llegó cada ${(p.unidad_base || 'Unidad').toLowerCase()} de ${p.nombre}?\n\n(Ej: 1811)`);
-    if (precio === null) return; // Canceló
-    if (precio !== '' && isNaN(precio)) {
-      alert('Precio inválido. Se guardará sin precio.');
-    }
+    if (precio === null) return;
     const precioNum = precio && !isNaN(precio) ? Number(precio) : '';
+    
+    // Pedir fecha de vencimiento si el producto controla vencimiento
+    let fechaVenc = '';
+    if (controlaVenc) {
+      const fecha = prompt(
+        `Este producto controla vencimiento.\n\n¿Cuál es la FECHA DE VENCIMIENTO del lote?\n\nFormato: AAAA-MM-DD (ej: 2027-03-15)\n\n(Deja vacío si no la sabes)`
+      );
+      if (fecha && fecha.trim()) {
+        // Validar formato
+        const fechaObj = new Date(fecha);
+        if (!isNaN(fechaObj.getTime())) {
+          fechaVenc = fecha.trim();
+        } else {
+          alert('Fecha inválida. Se guardará sin fecha de vencimiento.');
+        }
+      }
+    }
     
     lineasAgregadas.push({
       id_producto: p.id,
       nombre: p.nombre,
       unidad: p.unidad_base || 'Unidad',
       cantidad: Number(cant),
-      precio: precioNum
+      precio: precioNum,
+      vencimiento: fechaVenc
     });
   } else {
     // Reemplazar pendiente
@@ -433,17 +449,35 @@ function agregarLinea(p) {
     const cant = prompt(`¿Cuántas unidades de ${p.nombre}?`, anterior.cantidad || 1);
     if (!cant || isNaN(cant)) return;
     
-    // Pedir precio de compra
     const precio = prompt(`¿A qué precio de compra llegó cada ${(p.unidad_base || 'Unidad').toLowerCase()} de ${p.nombre}?`, anterior.precio || '');
-    if (precio === null) return; // Canceló
+    if (precio === null) return;
     const precioNum = precio && !isNaN(precio) ? Number(precio) : '';
+    
+    // Pedir fecha de vencimiento si controla
+    let fechaVenc = anterior.vencimiento || '';
+    if (controlaVenc) {
+      const fecha = prompt(
+        `Fecha de vencimiento del lote de ${p.nombre}:\n\nFormato: AAAA-MM-DD`,
+        fechaVenc || ''
+      );
+      if (fecha === null) return;
+      if (fecha.trim()) {
+        const fechaObj = new Date(fecha);
+        if (!isNaN(fechaObj.getTime())) {
+          fechaVenc = fecha.trim();
+        }
+      } else {
+        fechaVenc = '';
+      }
+    }
     
     lineasAgregadas[indexEditando] = {
       id_producto: p.id,
       nombre: p.nombre,
       unidad: p.unidad_base || 'Unidad',
       cantidad: Number(cant),
-      precio: precioNum
+      precio: precioNum,
+      vencimiento: fechaVenc
     };
   }
   
@@ -464,7 +498,7 @@ function renderizarLineas() {
     div.className = 'linea';
 
     if (!l.id_producto) {
-      // PENDIENTE: se puede tocar para asignar
+      // PENDIENTE
       div.style.borderLeft = '4px solid #EF4444';
       div.style.paddingLeft = '12px';
       div.style.background = 'rgba(239, 68, 68, 0.05)';
@@ -477,13 +511,14 @@ function renderizarLineas() {
         </div>
         <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>
       `;
-        } else {
+    } else {
       // RECONOCIDO
       const precioTexto = l.precio ? ' · $' + Number(l.precio).toLocaleString('es-CO') + ' c/u' : ' · Sin precio';
+      const vencTexto = l.vencimiento ? ' · 📅 Vence: ' + l.vencimiento : '';
       div.innerHTML = `
         <div class="linea-info" onclick="editarLinea(${index})">
           <h4>${l.nombre} <span class="badge-unidad">${l.unidad}</span></h4>
-          <p>${l.cantidad} ${l.unidad.toLowerCase()}(s)${precioTexto} (Toca para editar)</p>
+          <p>${l.cantidad} ${l.unidad.toLowerCase()}(s)${precioTexto}${vencTexto} (Toca para editar)</p>
         </div>
         <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>
       `;
@@ -514,8 +549,30 @@ function editarLinea(index) {
   );
   if (nuevoPrecio === null) return;
   
+  // Editar fecha de vencimiento si aplica
+  let nuevaFecha = l.vencimiento || '';
+  const productoOriginal = productos.find(function(p) { return p.id === l.id_producto; });
+  const controlaVenc = productoOriginal && (productoOriginal.controla_vencimiento === true || normalizar(productoOriginal.controla_vencimiento || '') === 'si');
+  
+  if (controlaVenc) {
+    const fecha = prompt(
+      `Fecha de vencimiento de ${l.nombre} (AAAA-MM-DD):\n\n(Deja vacío si no la sabes)`,
+      l.vencimiento || ''
+    );
+    if (fecha === null) return;
+    if (fecha.trim()) {
+      const fechaObj = new Date(fecha);
+      if (!isNaN(fechaObj.getTime())) {
+        nuevaFecha = fecha.trim();
+      }
+    } else {
+      nuevaFecha = '';
+    }
+  }
+  
   lineasAgregadas[index].cantidad = Number(nuevaCant);
   lineasAgregadas[index].precio = nuevoPrecio && !isNaN(nuevoPrecio) ? Number(nuevoPrecio) : '';
+  lineasAgregadas[index].vencimiento = nuevaFecha;
   
   renderizarLineas();
 }
