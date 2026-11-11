@@ -47,51 +47,125 @@
   .input-camara-group input { margin-bottom: 0; flex: 1; min-width: 0; }
   .btn-camara { padding: 0 16px; border-radius: 12px; background: var(--acento); border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .btn-camara:disabled { opacity: 0.5; }
+  /* Pestañas */
+  .tabs { display: flex; background: var(--card); border-radius: 14px; padding: 4px; margin-bottom: 16px; border: 1px solid var(--borde); }
+  .tabs button { flex: 1; padding: 12px; border: none; border-radius: 10px; background: transparent; color: var(--suave); font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
+  .tabs button.active { background: var(--acento); color: #000; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  
+  /* Historial */
+  .hist-filtros { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+  .hist-filtros input, .hist-filtros select { margin-bottom: 0; padding: 10px; font-size: 13px; }
+  .hist-item { background: var(--card); border: 1px solid var(--borde); border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer; }
+  .hist-item:active { background: var(--input); }
+  .hist-item-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px; }
+  .hist-item-header h4 { font-size: 14px; margin: 0; }
+  .hist-item-header .total { font-size: 15px; font-weight: bold; color: var(--acento); }
+  .hist-item p { font-size: 12px; color: var(--suave); margin: 2px 0; }
+  .hist-item .badge { display: inline-block; background: var(--borde); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
+  
+  /* Modal detalle */
+  .modal-detalle { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-detalle.open { display: flex; }
+  .modal-detalle-content { background: var(--card); border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+  .modal-detalle-header { padding: 16px; background: var(--input); border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; }
+  .modal-detalle-body { padding: 16px; overflow-y: auto; }
+  .detalle-producto { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--borde); }
+  .detalle-producto:last-child { border-bottom: none; }
+  .detalle-producto-info h5 { font-size: 14px; margin: 0 0 2px 0; }
+  .detalle-producto-info p { font-size: 12px; color: var(--suave); margin: 0; }
+  .detalle-producto-total { text-align: right; font-size: 13px; }
+  .detalle-producto-total strong { color: var(--acento); }
 </style>
 </head>
 <body>
 
-  <div class="header">
+    <div class="header">
     <h1>Recepción</h1>
     <a href="index.html" class="btn-volver" onclick="return confirmarVolverEntrada()">← Volver</a>
   </div>
 
-  <div id="estado" class="ok" style="display: block;">Cargando productos...</div>
+  <div class="tabs">
+    <button id="tab-nueva-btn" class="active" onclick="cambiarTabRecepcion('nueva')">📥 Nueva recepción</button>
+    <button id="tab-hist-btn" onclick="cambiarTabRecepcion('historial')">📋 Historial</button>
+  </div>
 
-  <div class="card">
-    <div class="input-camara-group">
-      <input type="text" id="factura" placeholder="Número de factura">
-      <button class="btn-camara" title="Tomar foto de la factura" onclick="document.getElementById('fotoCamara').click()">📷</button>
-      <button class="btn-camara" title="Elegir foto de la galería" onclick="document.getElementById('fotoGaleria').click()">🖼️</button>
-      <button class="btn-camara" id="btn-microfono" title="Dictar por voz" onclick="iniciarDictado()">🎤</button>
+  <!-- ==================== TAB NUEVA ==================== -->
+  <div id="tab-nueva" class="tab-content active">
+
+    <div id="estado" class="ok" style="display: block;">Cargando productos...</div>
+
+    <div class="card">
+      <div class="input-camara-group">
+        <input type="text" id="factura" placeholder="Número de factura">
+        <button class="btn-camara" title="Tomar foto de la factura" onclick="document.getElementById('fotoCamara').click()">📷</button>
+        <button class="btn-camara" title="Elegir foto de la galería" onclick="document.getElementById('fotoGaleria').click()">🖼️</button>
+        <button class="btn-camara" id="btn-microfono" title="Dictar por voz" onclick="iniciarDictado()">🎤</button>
+      </div>
+      <input type="file" id="fotoCamara" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoIA(this)">
+      <input type="file" id="fotoGaleria" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
+      
+      <select id="proveedor">
+        <option value="">Seleccione Proveedor...</option>
+        <option value="7314450-5">Distribuidora Jencar</option>
+        <option value="9010515728.0">Dulces y Marcas S.A.S</option>
+        <option value="7223562-0">Margarita</option>
+        <option value="860020308-9">Comestibles Ricos S.A</option>
+      </select>
     </div>
-    <input type="file" id="fotoCamara" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoIA(this)">
-    <input type="file" id="fotoGaleria" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
-    
-    <select id="proveedor">
-      <option value="">Seleccione Proveedor...</option>
-      <option value="7314450-5">Distribuidora Jencar</option>
-      <option value="9010515728.0">Dulces y Marcas S.A.S</option>
-      <option value="7223562-0">Margarita</option>
-      <option value="860020308-9">Comestibles Ricos S.A</option>
-    </select>
+
+    <div id="lista-lineas" class="card">
+      <p style="text-align: center; color: var(--suave); font-size: 14px;">No hay productos agregados.</p>
+    </div>
+
+    <button class="btn-secundario" onclick="abrirBuscador()">+ Agregar Producto Manualmente</button>
+    <button class="btn-primario" id="btn-guardar" onclick="guardarEntrada()">Guardar Recepción</button>
+    <button class="btn-secundario" onclick="limpiarEntrada()" style="margin-top: 10px;">🗑️ Limpiar lista</button>
+
   </div>
 
-  <div id="lista-lineas" class="card">
-    <p style="text-align: center; color: var(--suave); font-size: 14px;">No hay productos agregados.</p>
+  <!-- ==================== TAB HISTORIAL ==================== -->
+  <div id="tab-historial" class="tab-content">
+
+    <div class="card">
+      <div class="hist-filtros">
+        <input type="text" id="hist-busqueda" placeholder="🔍 Producto o factura..." oninput="cargarHistorial()">
+        <select id="hist-proveedor" onchange="cargarHistorial()">
+          <option value="">Todos los proveedores</option>
+        </select>
+        <input type="date" id="hist-fecha-desde" onchange="cargarHistorial()">
+        <input type="date" id="hist-fecha-hasta" onchange="cargarHistorial()">
+      </div>
+    </div>
+
+    <div id="hist-lista">
+      <p style="text-align: center; color: var(--suave); font-size: 14px;">Toca "Historial" para cargar...</p>
+    </div>
+
   </div>
 
-  <button class="btn-secundario" onclick="abrirBuscador()">+ Agregar Producto Manualmente</button>
-  <button class="btn-primario" id="btn-guardar" onclick="guardarEntrada()">Guardar Recepción</button>
-  <button class="btn-secundario" onclick="limpiarEntrada()" style="margin-top: 10px;">🗑️ Limpiar lista</button>
-
+  <!-- ==================== BUSCADOR FLOTANTE ==================== -->
   <div id="buscador-wrapper">
     <input type="text" id="input-buscar" placeholder="Buscar producto..." oninput="filtrar()">
     <div id="resultados-busqueda" style="max-height: 300px; overflow-y: auto; border-radius: 12px; overflow: hidden;"></div>
     <button class="btn-volver" style="margin-top: 10px; color: var(--peligro);" onclick="cerrarBuscador()">Cancelar</button>
   </div>
 
-  <!-- Modal de recorte de imagen (ANTES del script) -->
+  <!-- ==================== MODAL DETALLE RECEPCIÓN ==================== -->
+  <div id="modal-detalle" class="modal-detalle" onclick="if(event.target.id==='modal-detalle')cerrarDetalle()">
+    <div class="modal-detalle-content">
+      <div class="modal-detalle-header">
+        <h3 style="font-size: 16px;">Detalle de recepción</h3>
+        <button onclick="cerrarDetalle()" style="background:none;border:none;color:var(--suave);font-size:22px;cursor:pointer;">×</button>
+      </div>
+      <div class="modal-detalle-body" id="detalle-contenido">
+        Cargando...
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL RECORTE ==================== -->
   <div id="modal-recorte" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
     <p style="color:#FFF; font-size:16px; font-weight:bold; margin-bottom:10px; text-align:center;">
       Ajusta el recuadro para que solo quede la factura
