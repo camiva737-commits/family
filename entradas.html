@@ -107,12 +107,9 @@
       <input type="file" id="fotoGaleria" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
       
       <select id="proveedor">
-        <option value="">Seleccione Proveedor...</option>
-        <option value="7314450-5">Distribuidora Jencar</option>
-        <option value="9010515728.0">Dulces y Marcas S.A.S</option>
-        <option value="7223562-0">Margarita</option>
-        <option value="860020308-9">Comestibles Ricos S.A</option>
-      </select>
+  <option value="">Seleccione Proveedor...</option>
+</select>
+<button class="btn-secundario" style="margin-top: 8px;" onclick="abrirNuevoProveedor()">+ Nuevo proveedor</button>
     </div>
 
     <div id="lista-lineas" class="card">
@@ -202,7 +199,49 @@ let indexEditando = -1; // -1 = agregar nuevo; >= 0 = reemplazar pendiente
     document.getElementById('estado').textContent = 'Error al cargar catálogo: ' + err.message;
     document.getElementById('estado').className = 'error';
   }
+  // Cargar proveedores dinámicamente
+  await cargarProveedores();
 })();
+
+async function cargarProveedores() {
+  try {
+    const r = await apiPost({ accion: 'listar_proveedores_completo' }, 30);
+    if (!r.ok) throw new Error(r.error || 'No se pudieron cargar los proveedores');
+    const select = document.getElementById('proveedor');
+    // Conservar el valor seleccionado (si lo hay) y el placeholder
+    const seleccionado = select.value;
+    select.innerHTML = '<option value="">Seleccione Proveedor...</option>';
+    (r.items || []).forEach(function (p) {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.nombre + (p.numero ? ' (' + p.numero + ')' : '');
+      select.appendChild(opt);
+    });
+    if (seleccionado) select.value = seleccionado;
+  } catch (err) {
+    console.error('Error cargando proveedores:', err);
+  }
+}
+
+async function cargarProveedores() {
+  try {
+    const r = await apiPost({ accion: 'listar_proveedores_completo' }, 30);
+    if (!r.ok) throw new Error(r.error || 'No se pudieron cargar los proveedores');
+    const select = document.getElementById('proveedor');
+    // Conservar el valor seleccionado (si lo hay) y el placeholder
+    const seleccionado = select.value;
+    select.innerHTML = '<option value="">Seleccione Proveedor...</option>';
+    (r.items || []).forEach(function (p) {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.nombre + (p.numero ? ' (' + p.numero + ')' : '');
+      select.appendChild(opt);
+    });
+    if (seleccionado) select.value = seleccionado;
+  } catch (err) {
+    console.error('Error cargando proveedores:', err);
+  }
+}
 
 // --- PROCESAR FOTO CON RECORTE ---
 let cropper = null;
@@ -908,6 +947,39 @@ async function verDetalleRecepcion(idEntrada) {
 
 function cerrarDetalle() {
   document.getElementById('modal-detalle').classList.remove('open');
+}
+// ============================================
+// NUEVO PROVEEDOR
+// ============================================
+async function abrirNuevoProveedor() {
+  const nombre = prompt('Nombre del proveedor:');
+  if (!nombre || !nombre.trim()) return;
+
+  const numero = prompt('Número / NIT (opcional):') || '';
+  const correo = prompt('Correo (opcional):') || '';
+
+  const btn = event && event.target ? event.target : null;
+  const textoOriginal = btn ? btn.textContent : null;
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+
+  try {
+    const r = await apiPost({
+      accion: 'crear_proveedor',
+      datos: { nombre: nombre.trim(), numero: numero.trim(), correo: correo.trim() }
+    }, 30);
+
+    if (!r.ok) throw new Error(r.error || 'No se pudo crear el proveedor');
+
+    // Recargar la lista y seleccionar el nuevo
+    await cargarProveedores();
+    document.getElementById('proveedor').value = r.id_proveedor;
+
+    alert('✅ Proveedor creado: ' + r.nombre + '\nID: ' + r.id_proveedor);
+  } catch (err) {
+    alert('❌ Error: ' + err.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+  }
 }
 </script>
 </body>
