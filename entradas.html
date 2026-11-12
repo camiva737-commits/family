@@ -77,6 +77,20 @@
   .detalle-producto-info p { font-size: 12px; color: var(--suave); margin: 0; }
   .detalle-producto-total { text-align: right; font-size: 13px; }
   .detalle-producto-total strong { color: var(--acento); }
+    /* Modal nuevo proveedor */
+  .modal-prov { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 16px; }
+  .modal-prov.open { display: flex; }
+  .modal-prov-content { background: var(--card); border-radius: 18px; max-width: 460px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; border: 1px solid var(--borde); }
+  .modal-prov-header { padding: 16px; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; }
+  .modal-prov-body { padding: 16px; overflow-y: auto; }
+  .modal-prov-body label { display: block; font-size: 13px; color: var(--suave); margin-bottom: 6px; font-weight: bold; margin-top: 12px; }
+  .modal-prov-body label:first-child { margin-top: 0; }
+  .modal-prov-body input { margin-bottom: 0; }
+  .modal-prov-footer { padding: 12px 16px; border-top: 1px solid var(--borde); display: flex; gap: 10px; }
+  .modal-prov-footer button { flex: 1; padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: bold; cursor: pointer; }
+  .btn-cancelar-prov { background: var(--input); color: var(--suave); }
+  .btn-guardar-prov { background: var(--acento); color: #000; }
+  .btn-guardar-prov:disabled { opacity: 0.5; }
 </style>
 </head>
 <body>
@@ -147,6 +161,29 @@
     <input type="text" id="input-buscar" placeholder="Buscar producto..." oninput="filtrar()">
     <div id="resultados-busqueda" style="max-height: 300px; overflow-y: auto; border-radius: 12px; overflow: hidden;"></div>
     <button class="btn-volver" style="margin-top: 10px; color: var(--peligro);" onclick="cerrarBuscador()">Cancelar</button>
+  </div>
+  <!-- ==================== MODAL NUEVO PROVEEDOR ==================== -->
+  <div id="modal-nuevo-prov" class="modal-prov" onclick="if(event.target.id==='modal-nuevo-prov')cerrarNuevoProveedor()">
+    <div class="modal-prov-content">
+      <div class="modal-prov-header">
+        <h3 style="font-size: 16px;">Nuevo proveedor</h3>
+        <button onclick="cerrarNuevoProveedor()" style="background:none;border:none;color:var(--suave);font-size:22px;cursor:pointer;">×</button>
+      </div>
+      <div class="modal-prov-body">
+        <label>Nombre *</label>
+        <input type="text" id="nprov-nombre" placeholder="Ej: Distribuidora Jencar">
+
+        <label>Número / NIT</label>
+        <input type="text" id="nprov-numero" placeholder="Ej: 7314450-5">
+
+        <label>Correo</label>
+        <input type="email" id="nprov-correo" placeholder="Ej: contacto@proveedor.com">
+      </div>
+      <div class="modal-prov-footer">
+        <button class="btn-cancelar-prov" onclick="cerrarNuevoProveedor()">Cancelar</button>
+        <button class="btn-guardar-prov" id="nprov-btn-guardar" onclick="guardarNuevoProveedor()">Guardar</button>
+      </div>
+    </div>
   </div>
 
   <!-- ==================== MODAL DETALLE RECEPCIÓN ==================== -->
@@ -951,24 +988,47 @@ function cerrarDetalle() {
 // ============================================
 // NUEVO PROVEEDOR
 // ============================================
-async function abrirNuevoProveedor() {
-  const nombre = prompt('Nombre del proveedor:');
-  if (!nombre || !nombre.trim()) return;
+// ============================================
+// NUEVO PROVEEDOR
+// ============================================
+// ============================================
+// NUEVO PROVEEDOR (modal)
+// ============================================
+function abrirNuevoProveedor() {
+  document.getElementById('nprov-nombre').value = '';
+  document.getElementById('nprov-numero').value = '';
+  document.getElementById('nprov-correo').value = '';
+  document.getElementById('modal-nuevo-prov').classList.add('open');
+  setTimeout(() => document.getElementById('nprov-nombre').focus(), 100);
+}
 
-  const numero = prompt('Número / NIT (opcional):') || '';
-  const correo = prompt('Correo (opcional):') || '';
+function cerrarNuevoProveedor() {
+  document.getElementById('modal-nuevo-prov').classList.remove('open');
+}
 
-  const btn = event && event.target ? event.target : null;
-  const textoOriginal = btn ? btn.textContent : null;
-  if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+async function guardarNuevoProveedor() {
+  const nombre = document.getElementById('nprov-nombre').value.trim();
+  if (!nombre) {
+    alert('Escribe el nombre del proveedor');
+    document.getElementById('nprov-nombre').focus();
+    return;
+  }
+
+  const datos = {
+    nombre: nombre,
+    numero: document.getElementById('nprov-numero').value.trim(),
+    correo: document.getElementById('nprov-correo').value.trim()
+  };
+
+  const btn = document.getElementById('nprov-btn-guardar');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
 
   try {
-    const r = await apiPost({
-      accion: 'crear_proveedor',
-      datos: { nombre: nombre.trim(), numero: numero.trim(), correo: correo.trim() }
-    }, 30);
-
+    const r = await apiPost({ accion: 'crear_proveedor', datos: datos }, 30);
     if (!r.ok) throw new Error(r.error || 'No se pudo crear el proveedor');
+
+    cerrarNuevoProveedor();
 
     // Recargar la lista y seleccionar el nuevo
     await cargarProveedores();
@@ -976,9 +1036,10 @@ async function abrirNuevoProveedor() {
 
     alert('✅ Proveedor creado: ' + r.nombre + '\nID: ' + r.id_proveedor);
   } catch (err) {
-    alert('❌ Error: ' + err.message);
+    alert('❌ ' + err.message);
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+    btn.disabled = false;
+    btn.textContent = 'Guardar';
   }
 }
 </script>
