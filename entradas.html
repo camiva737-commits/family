@@ -5,113 +5,495 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Entradas · Distribuidora TAT</title>
 <script src="auth.js"></script>
-<script src="comun.js?v=8"></script>
+<script src="comun.js?v=11"></script>
+<link rel="stylesheet" href="tema.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css">
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
 <style>
-  :root {
-    --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
-    --suave: #94A3B8; --borde: #334155; --acento: #10B981; --peligro: #EF4444;
+  /* ============================================
+     PERSONALIZACIÓN DE ENTRADAS
+     ============================================ */
+  
+  .tabs {
+    display: flex;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 4px;
+    margin-bottom: 16px;
+    border: 1px solid var(--borde);
+    box-shadow: var(--shadow-1);
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: var(--bg); color: var(--texto); padding: 20px; padding-bottom: 50px; }
   
-  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .header h1 { font-size: 24px; color: var(--acento); font-weight: 800; }
-  .btn-volver { background: none; border: none; color: var(--suave); font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
-
-  #estado { padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: none; white-space: pre-line; }
-  .ok { background: rgba(16, 185, 129, 0.2); color: var(--acento); border: 1px solid var(--acento); }
-  .error { background: rgba(239, 68, 68, 0.2); color: var(--peligro); border: 1px solid var(--peligro); }
-
-  input, select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--borde); background: var(--input); color: var(--texto); font-size: 16px; margin-bottom: 12px; outline: none; }
+  .tabs button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--suave);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+  }
   
-  .card { background: var(--card); padding: 16px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--borde); }
+  .tabs button.active {
+    background: var(--acento);
+    color: #FFF;
+    box-shadow: 0 2px 8px rgba(242, 140, 0, 0.3);
+  }
   
-  .linea { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--borde); cursor: pointer; }
-  .linea:last-child { border-bottom: none; }
-  .linea-info { flex: 1; }
-  .linea-info h4 { font-size: 15px; }
-  .linea-info p { font-size: 13px; color: var(--suave); margin-top: 4px; }
-  .badge-unidad { display: inline-block; background: var(--borde); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-left: 6px; color: var(--texto); }
-  .btn-eliminar { background: none; border: none; color: var(--peligro); font-size: 20px; cursor: pointer; padding: 5px; }
-
-  .btn-primario { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--acento); color: #000; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; }
-  .btn-primario:disabled { opacity: 0.6; }
-  .btn-secundario { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--acento); background: transparent; color: var(--acento); font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-
-  #buscador-wrapper { display: none; background: var(--bg); position: sticky; top: 0; padding: 10px 0; z-index: 10; }
-  .resultado { padding: 12px; background: var(--card); border-bottom: 1px solid var(--borde); cursor: pointer; }
-  .resultado:active { background: var(--input); }
-
-  .input-camara-group { display: flex; gap: 10px; align-items: stretch; margin-bottom: 12px; }
-  .input-camara-group input { margin-bottom: 0; flex: 1; min-width: 0; }
-  .btn-camara { padding: 0 16px; border-radius: 12px; background: var(--acento); border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .btn-camara:disabled { opacity: 0.5; }
-  /* Pestañas */
-  .tabs { display: flex; background: var(--card); border-radius: 14px; padding: 4px; margin-bottom: 16px; border: 1px solid var(--borde); }
-  .tabs button { flex: 1; padding: 12px; border: none; border-radius: 10px; background: transparent; color: var(--suave); font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
-  .tabs button.active { background: var(--acento); color: #000; }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
   
-  /* Historial */
-  .hist-filtros { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
-  .hist-filtros input, .hist-filtros select { margin-bottom: 0; padding: 10px; font-size: 13px; }
-  .hist-item { background: var(--card); border: 1px solid var(--borde); border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer; }
-  .hist-item:active { background: var(--input); }
-  .hist-item-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px; }
-  .hist-item-header h4 { font-size: 14px; margin: 0; }
-  .hist-item-header .total { font-size: 15px; font-weight: bold; color: var(--acento); }
-  .hist-item p { font-size: 12px; color: var(--suave); margin: 2px 0; }
-  .hist-item .badge { display: inline-block; background: var(--borde); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
+  /* Input cámara */
+  .input-camara-group {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    margin-bottom: 12px;
+  }
   
-  /* Modal detalle */
-  .modal-detalle { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .input-camara-group input {
+    margin-bottom: 0;
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .btn-camara {
+    padding: 0 14px;
+    border-radius: var(--radius-input);
+    background: var(--acento);
+    border: none;
+    font-size: 18px;
+    color: #FFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.15s;
+  }
+  
+  .btn-camara:hover {
+    background: var(--acento-2);
+  }
+  
+  .btn-camara:active {
+    transform: scale(0.95);
+  }
+  
+  .btn-camara:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* Líneas agregadas */
+  .linea {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--borde);
+    cursor: pointer;
+  }
+  
+  .linea:last-child { border-bottom: none; }
+  
+  .linea-info { flex: 1; min-width: 0; }
+  
+  .linea-info h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--texto);
+    margin-bottom: 4px;
+  }
+  
+  .linea-info p {
+    font-size: 12px;
+    color: var(--suave);
+    margin-top: 4px;
+  }
+  
+  .badge-unidad {
+    display: inline-block;
+    background: var(--acento-suave);
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-left: 6px;
+    color: var(--primario);
+  }
+  
+  .btn-eliminar {
+    background: none;
+    border: none;
+    color: var(--peligro);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+  }
+  
+  .linea-pendiente {
+    border-left: 4px solid var(--peligro);
+    padding-left: 12px;
+    background: var(--peligro-bg);
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+  }
+  
+  .linea-pendiente h4 {
+    color: var(--peligro);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  
+  .linea-pendiente p {
+    color: var(--suave);
+    font-size: 12px;
+  }
+  
+  /* Buscador flotante */
+  #buscador-wrapper {
+    display: none;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    padding: 10px 0;
+    z-index: 10;
+  }
+  
+  .resultado {
+    padding: 12px 14px;
+    background: var(--card);
+    border-bottom: 1px solid var(--borde);
+    cursor: pointer;
+    transition: 0.1s;
+  }
+  
+  .resultado:hover { background: var(--input-hover); }
+  .resultado:active { background: var(--input); }
+  
+  /* Historial */
+  .hist-filtros {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  
+  .hist-filtros input,
+  .hist-filtros select {
+    margin-bottom: 0;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  .hist-item {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    box-shadow: var(--shadow-1);
+    transition: 0.15s;
+  }
+  
+  .hist-item:hover {
+    transform: translateX(2px);
+    box-shadow: var(--shadow-2);
+  }
+  
+  .hist-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+    gap: 8px;
+  }
+  
+  .hist-item-header h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--texto);
+    margin: 0;
+  }
+  
+  .hist-item-header .total {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--acento);
+    white-space: nowrap;
+  }
+  
+  .hist-item p {
+    font-size: 12px;
+    color: var(--suave);
+    margin: 3px 0;
+  }
+  
+  .hist-item .badge {
+    display: inline-block;
+    background: var(--acento-suave);
+    color: var(--primario);
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  
+  /* Modal detalle recepción */
+  .modal-detalle {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
   .modal-detalle.open { display: flex; }
-  .modal-detalle-content { background: var(--card); border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
-  .modal-detalle-header { padding: 16px; background: var(--input); border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; }
-  .modal-detalle-body { padding: 16px; overflow-y: auto; }
-  .detalle-producto { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--borde); }
+  
+  .modal-detalle-content {
+    background: var(--card);
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-3);
+    border: 1px solid var(--borde);
+  }
+  
+  .modal-detalle-header {
+    padding: 16px;
+    background: var(--input);
+    border-bottom: 1px solid var(--borde);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .modal-detalle-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--texto);
+    margin: 0;
+  }
+  
+  .modal-detalle-header button {
+    background: none;
+    border: none;
+    color: var(--suave);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  
+  .modal-detalle-body {
+    padding: 16px;
+    overflow-y: auto;
+  }
+  
+  .detalle-producto {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--borde);
+  }
+  
   .detalle-producto:last-child { border-bottom: none; }
-  .detalle-producto-info h5 { font-size: 14px; margin: 0 0 2px 0; }
-  .detalle-producto-info p { font-size: 12px; color: var(--suave); margin: 0; }
-  .detalle-producto-total { text-align: right; font-size: 13px; }
-  .detalle-producto-total strong { color: var(--acento); }
-    /* Modal nuevo proveedor */
-  .modal-prov { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 16px; }
+  
+  .detalle-producto-info h5 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 2px 0;
+    color: var(--texto);
+  }
+  
+  .detalle-producto-info p {
+    font-size: 12px;
+    color: var(--suave);
+    margin: 0;
+  }
+  
+  .detalle-producto-total {
+    text-align: right;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  
+  .detalle-producto-total strong {
+    color: var(--acento);
+    font-weight: 800;
+  }
+  
+  /* Modal nuevo proveedor */
+  .modal-prov {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  
   .modal-prov.open { display: flex; }
-  .modal-prov-content { background: var(--card); border-radius: 18px; max-width: 460px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; border: 1px solid var(--borde); }
-  .modal-prov-header { padding: 16px; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; }
-  .modal-prov-body { padding: 16px; overflow-y: auto; }
-  .modal-prov-body label { display: block; font-size: 13px; color: var(--suave); margin-bottom: 6px; font-weight: bold; margin-top: 12px; }
+  
+  .modal-prov-content {
+    background: var(--card);
+    border-radius: 18px;
+    max-width: 460px;
+    width: 100%;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--borde);
+    box-shadow: var(--shadow-3);
+  }
+  
+  .modal-prov-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--borde);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--input);
+    border-radius: 18px 18px 0 0;
+  }
+  
+  .modal-prov-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--texto);
+    margin: 0;
+  }
+  
+  .modal-prov-header button {
+    background: none;
+    border: none;
+    color: var(--suave);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  
+  .modal-prov-body {
+    padding: 16px;
+    overflow-y: auto;
+  }
+  
+  .modal-prov-body label {
+    display: block;
+    font-size: 12px;
+    color: var(--suave);
+    margin-bottom: 6px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-top: 12px;
+  }
+  
   .modal-prov-body label:first-child { margin-top: 0; }
   .modal-prov-body input { margin-bottom: 0; }
-  .modal-prov-footer { padding: 12px 16px; border-top: 1px solid var(--borde); display: flex; gap: 10px; }
-  .modal-prov-footer button { flex: 1; padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: bold; cursor: pointer; }
-  .btn-cancelar-prov { background: var(--input); color: var(--suave); }
-  .btn-guardar-prov { background: var(--acento); color: #000; }
-  .btn-guardar-prov:disabled { opacity: 0.5; }
+  
+  .modal-prov-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--borde);
+    display: flex;
+    gap: 10px;
+    background: var(--input);
+    border-radius: 0 0 18px 18px;
+  }
+  
+  .modal-prov-footer button {
+    flex: 1;
+    padding: 14px;
+    border-radius: var(--radius-input);
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  
+  .btn-cancelar-prov {
+    background: var(--card);
+    color: var(--suave);
+    border: 1px solid var(--borde);
+  }
+  
+  .btn-guardar-prov {
+    background: var(--acento-2);
+    color: #FFF;
+  }
+  
+  .btn-guardar-prov:hover { background: var(--acento); }
+  .btn-guardar-prov:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  /* Modal recorte */
+  #modal-recorte {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
 </style>
 </head>
 <body>
 
-    <div class="header">
-    <h1>Recepción</h1>
-    <a href="index.html" class="btn-volver" onclick="return confirmarVolverEntrada()">← Volver</a>
+  <!-- ============================================
+       HEADER
+       ============================================ -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 style="color: var(--acento); margin: 0;">Recepción</h1>
+      <p class="subtitulo">Registro de mercancía nueva</p>
+    </div>
+    <div class="page-header-right">
+      <button class="icon-btn" onclick="if(confirmarVolverEntrada()) window.location.href='index.html'" title="Volver">←</button>
+    </div>
   </div>
 
+  <!-- ============================================
+       TABS
+       ============================================ -->
   <div class="tabs">
-    <button id="tab-nueva-btn" class="active" onclick="cambiarTabRecepcion('nueva')">📥 Nueva recepción</button>
+    <button id="tab-nueva-btn" class="active" onclick="cambiarTabRecepcion('nueva')">📥 Nueva</button>
     <button id="tab-hist-btn" onclick="cambiarTabRecepcion('historial')">📋 Historial</button>
   </div>
 
-  <!-- ==================== TAB NUEVA ==================== -->
+  <!-- ============================================
+       TAB NUEVA
+       ============================================ -->
   <div id="tab-nueva" class="tab-content active">
 
-    <div id="estado" class="ok" style="display: block;">Cargando productos...</div>
+    <div id="estado" style="display: none;"></div>
 
     <div class="card">
+      <label class="label" style="display: block; margin-bottom: 8px;">Factura y foto</label>
       <div class="input-camara-group">
         <input type="text" id="factura" placeholder="Número de factura">
         <button class="btn-camara" title="Tomar foto de la factura" onclick="document.getElementById('fotoCamara').click()">📷</button>
@@ -121,10 +503,11 @@
       <input type="file" id="fotoCamara" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoIA(this)">
       <input type="file" id="fotoGaleria" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
       
+      <label class="label" style="display: block; margin-bottom: 8px; margin-top: 12px;">Proveedor</label>
       <select id="proveedor">
-  <option value="">Seleccione Proveedor...</option>
-</select>
-<button class="btn-secundario" style="margin-top: 8px;" onclick="abrirNuevoProveedor()">+ Nuevo proveedor</button>
+        <option value="">Seleccione Proveedor...</option>
+      </select>
+      <button class="btn-secundario" style="margin-top: 4px;" onclick="abrirNuevoProveedor()">+ Nuevo proveedor</button>
     </div>
 
     <div id="lista-lineas" class="card">
@@ -137,7 +520,9 @@
 
   </div>
 
-  <!-- ==================== TAB HISTORIAL ==================== -->
+  <!-- ============================================
+       TAB HISTORIAL
+       ============================================ -->
   <div id="tab-historial" class="tab-content">
 
     <div class="card">
@@ -152,23 +537,31 @@
     </div>
 
     <div id="hist-lista">
-      <p style="text-align: center; color: var(--suave); font-size: 14px;">Toca "Historial" para cargar...</p>
+      <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <div class="empty-state-text">Toca "Historial" para cargar</div>
+      </div>
     </div>
 
   </div>
 
-  <!-- ==================== BUSCADOR FLOTANTE ==================== -->
+  <!-- ============================================
+       BUSCADOR FLOTANTE
+       ============================================ -->
   <div id="buscador-wrapper">
-    <input type="text" id="input-buscar" placeholder="Buscar producto..." oninput="filtrar()">
-    <div id="resultados-busqueda" style="max-height: 300px; overflow-y: auto; border-radius: 12px; overflow: hidden;"></div>
-    <button class="btn-volver" style="margin-top: 10px; color: var(--peligro);" onclick="cerrarBuscador()">Cancelar</button>
+    <input type="text" id="input-buscar" placeholder="🔍 Buscar producto..." oninput="filtrar()" class="search-bar">
+    <div id="resultados-busqueda" style="max-height: 300px; overflow-y: auto; border-radius: 12px; overflow: hidden; border: 1px solid var(--borde);"></div>
+    <button class="btn-secundario" style="margin-top: 10px; color: var(--peligro); border-color: var(--peligro);" onclick="cerrarBuscador()">Cancelar</button>
   </div>
-  <!-- ==================== MODAL NUEVO PROVEEDOR ==================== -->
+
+  <!-- ============================================
+       MODAL NUEVO PROVEEDOR
+       ============================================ -->
   <div id="modal-nuevo-prov" class="modal-prov" onclick="if(event.target.id==='modal-nuevo-prov')cerrarNuevoProveedor()">
     <div class="modal-prov-content">
       <div class="modal-prov-header">
-        <h3 style="font-size: 16px;">Nuevo proveedor</h3>
-        <button onclick="cerrarNuevoProveedor()" style="background:none;border:none;color:var(--suave);font-size:22px;cursor:pointer;">×</button>
+        <h3>Nuevo proveedor</h3>
+        <button onclick="cerrarNuevoProveedor()">×</button>
       </div>
       <div class="modal-prov-body">
         <label>Nombre *</label>
@@ -187,12 +580,14 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL DETALLE RECEPCIÓN ==================== -->
+  <!-- ============================================
+       MODAL DETALLE RECEPCIÓN
+       ============================================ -->
   <div id="modal-detalle" class="modal-detalle" onclick="if(event.target.id==='modal-detalle')cerrarDetalle()">
     <div class="modal-detalle-content">
       <div class="modal-detalle-header">
-        <h3 style="font-size: 16px;">Detalle de recepción</h3>
-        <button onclick="cerrarDetalle()" style="background:none;border:none;color:var(--suave);font-size:22px;cursor:pointer;">×</button>
+        <h3>Detalle de recepción</h3>
+        <button onclick="cerrarDetalle()">×</button>
       </div>
       <div class="modal-detalle-body" id="detalle-contenido">
         Cargando...
@@ -200,8 +595,10 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL RECORTE ==================== -->
-  <div id="modal-recorte" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+  <!-- ============================================
+       MODAL RECORTE
+       ============================================ -->
+  <div id="modal-recorte">
     <p style="color:#FFF; font-size:16px; font-weight:bold; margin-bottom:10px; text-align:center;">
       Ajusta el recuadro para que solo quede la factura
     </p>
@@ -224,24 +621,47 @@
 <script>
 let productos = [];
 let lineasAgregadas = [];
-let indexEditando = -1; // -1 = agregar nuevo; >= 0 = reemplazar pendiente
+let indexEditando = -1;
 
-// --- CARGA INICIAL DEL CATÁLOGO ---
-// --- CARGA INICIAL DEL CATÁLOGO ---
-// --- CARGA INICIAL DEL CATÁLOGO ---
+// ============================================
+// CARGA INICIAL
+// ============================================
 (async function () {
   try {
     const r = await apiGet('accion=inventario');
     if (!r.ok) throw new Error(r.error);
     productos = r.items;
-    document.getElementById('estado').style.display = 'none';
   } catch (err) {
-    document.getElementById('estado').textContent = 'Error al cargar catálogo: ' + err.message;
-    document.getElementById('estado').className = 'error';
+    mostrarMensaje('Error al cargar catálogo: ' + err.message, 'error');
   }
-  // Cargar proveedores dinámicamente
   await cargarProveedores();
 })();
+
+function mostrarMensaje(msg, tipo) {
+  const el = document.getElementById('estado');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.padding = '14px';
+  el.style.borderRadius = '12px';
+  el.style.textAlign = 'center';
+  el.style.fontWeight = '700';
+  el.style.fontSize = '14px';
+  el.style.marginBottom = '16px';
+  
+  if (tipo === 'ok') {
+    el.style.background = 'var(--ok-bg)';
+    el.style.color = 'var(--ok)';
+    el.style.border = '1px solid var(--ok)';
+  } else if (tipo === 'error') {
+    el.style.background = 'var(--peligro-bg)';
+    el.style.color = 'var(--peligro)';
+    el.style.border = '1px solid var(--peligro)';
+  } else {
+    el.style.background = 'var(--warning-bg)';
+    el.style.color = 'var(--warning)';
+    el.style.border = '1px solid var(--warning)';
+  }
+}
 
 async function cargarProveedores() {
   try {
@@ -262,12 +682,9 @@ async function cargarProveedores() {
   }
 }
 
-// --- PROCESAR FOTO CON RECORTE ---
-
-// --- PROCESAR FOTO CON RECORTE ---
-
-
-// --- PROCESAR FOTO CON RECORTE ---
+// ============================================
+// PROCESAR FOTO CON RECORTE
+// ============================================
 let cropper = null;
 let inputFotoActual = null;
 
@@ -323,24 +740,21 @@ async function aplicarRecorte() {
   
   const modal = document.getElementById('modal-recorte');
   
-  // Obtener el canvas recortado
   const canvasOriginal = cropper.getCroppedCanvas({
-  maxWidth: 2400,
-  maxHeight: 2400,
-  imageSmoothingQuality: 'high'
-});
+    maxWidth: 2400,
+    maxHeight: 2400,
+    imageSmoothingQuality: 'high'
+  });
   
-  // Mejorar la imagen: aumentar contraste y brillo
   const canvasMejorado = document.createElement('canvas');
   canvasMejorado.width = canvasOriginal.width;
   canvasMejorado.height = canvasOriginal.height;
   const ctx = canvasMejorado.getContext('2d');
   
-  // Filtro CSS de mejora
   ctx.filter = 'contrast(1.3) brightness(1.1) grayscale(0.2)';
   ctx.drawImage(canvasOriginal, 0, 0);
   
- const dataUrl = canvasMejorado.toDataURL('image/jpeg', 0.92);
+  const dataUrl = canvasMejorado.toDataURL('image/jpeg', 0.92);
   
   modal.style.display = 'none';
   if (cropper) { cropper.destroy(); cropper = null; }
@@ -353,10 +767,7 @@ async function enviarFotoIA(dataUrl, esCompleta) {
   const botones = document.querySelectorAll('.btn-camara');
   botones.forEach(b => { b.disabled = true; });
   
-  const estado = document.getElementById('estado');
-  estado.className = 'ok';
-  estado.textContent = (esCompleta ? 'Enviando imagen completa' : 'Enviando recorte') + ' a la IA... (puede tardar unos segundos)';
-  estado.style.display = 'block';
+  mostrarMensaje((esCompleta ? 'Enviando imagen completa' : 'Enviando recorte') + ' a la IA... (puede tardar unos segundos)', 'aviso');
   
   try {
     const r = await apiPost({ accion: 'escanear_ia', base64: dataUrl }, 90);
@@ -396,16 +807,17 @@ async function enviarFotoIA(dataUrl, esCompleta) {
       msg += '\n\nNo reconocí estos, agrégalos manualmente:\n- ' + r.sin_coincidencia.join('\n- ');
     }
     alert(msg);
-    estado.style.display = 'none';
+    document.getElementById('estado').style.display = 'none';
   } catch (err) {
-    estado.className = 'error';
-    estado.textContent = 'Error: ' + err.message;
+    mostrarMensaje('Error: ' + err.message, 'error');
   } finally {
     botones.forEach(b => { b.disabled = false; });
   }
 }
 
-// --- BUSCADOR MANUAL ---
+// ============================================
+// BUSCADOR
+// ============================================
 function abrirBuscador(index) {
   indexEditando = (typeof index === 'number') ? index : -1;
   document.getElementById('buscador-wrapper').style.display = 'block';
@@ -440,11 +852,9 @@ function filtrar() {
 function agregarLinea(p) {
   cerrarBuscador();
   
-  // controla_vencimiento ya viene como booleano del backend
   const controlaVenc = p.controla_vencimiento === true;
   
   if (indexEditando === -1) {
-    // Agregar nuevo manual
     const cant = prompt(`¿Cuántas unidades de ${p.nombre} llegaron?`);
     if (!cant || isNaN(cant)) return;
     
@@ -452,7 +862,6 @@ function agregarLinea(p) {
     if (precio === null) return;
     const precioNum = precio && !isNaN(precio) ? Number(precio) : '';
     
-    // Pedir fecha de vencimiento si el producto controla vencimiento
     let fechaVenc = '';
     if (controlaVenc) {
       const fecha = prompt(
@@ -477,7 +886,6 @@ function agregarLinea(p) {
       vencimiento: fechaVenc
     });
   } else {
-    // Reemplazar pendiente
     const anterior = lineasAgregadas[indexEditando];
     
     if (!anterior.id_producto) {
@@ -516,7 +924,6 @@ function agregarLinea(p) {
     if (precio === null) return;
     const precioNum = precio && !isNaN(precio) ? Number(precio) : '';
     
-    // Pedir fecha de vencimiento si controla
     let fechaVenc = anterior.vencimiento || '';
     if (controlaVenc) {
       const fecha = prompt(
@@ -561,21 +968,16 @@ function renderizarLineas() {
     div.className = 'linea';
 
     if (!l.id_producto) {
-      // PENDIENTE
-      div.style.borderLeft = '4px solid #EF4444';
-      div.style.paddingLeft = '12px';
-      div.style.background = 'rgba(239, 68, 68, 0.05)';
-      div.style.borderRadius = '4px';
+      div.className = 'linea-pendiente';
       div.onclick = () => abrirBuscadorParaReemplazar(index);
       div.innerHTML = `
         <div class="linea-info">
-          <h4 style="color:#EF4444;">${l.nombre} (No reconocido)</h4>
+          <h4>${l.nombre} (No reconocido)</h4>
           <p>Toca aquí para asignarle un producto del catálogo</p>
         </div>
         <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>
       `;
     } else {
-      // RECONOCIDO
       const precioTexto = l.precio ? ' · $' + Number(l.precio).toLocaleString('es-CO') + ' c/u' : ' · Sin precio';
       const vencTexto = l.vencimiento ? ' · 📅 Vence: ' + l.vencimiento : '';
       div.innerHTML = `
@@ -590,29 +992,18 @@ function renderizarLineas() {
   });
 }
 
-function editarCantidad(index) {
-  const actual = lineasAgregadas[index].cantidad;
-  const nueva = prompt(`Editar cantidad de ${lineasAgregadas[index].nombre}:`, actual);
-  if (nueva !== null && nueva !== '' && !isNaN(nueva)) {
-    lineasAgregadas[index].cantidad = Number(nueva);
-    renderizarLineas();
-  }
-}
 function editarLinea(index) {
   const l = lineasAgregadas[index];
   
-  // Editar cantidad
   const nuevaCant = prompt(`Cantidad de ${l.nombre}:`, l.cantidad);
   if (nuevaCant === null || nuevaCant === '' || isNaN(nuevaCant)) return;
   
-  // Editar precio
   const nuevoPrecio = prompt(
     `Precio de compra unitario de ${l.nombre}:\n\n(Deja vacío si no lo sabes)`,
     l.precio || ''
   );
   if (nuevoPrecio === null) return;
   
-  // Editar fecha de vencimiento si aplica
   let nuevaFecha = l.vencimiento || '';
   const productoOriginal = productos.find(function(p) { return p.id === l.id_producto; });
   const controlaVenc = productoOriginal && productoOriginal.controla_vencimiento === true;
@@ -639,6 +1030,7 @@ function editarLinea(index) {
   
   renderizarLineas();
 }
+
 function eliminarLinea(index) {
   lineasAgregadas.splice(index, 1);
   renderizarLineas();
@@ -697,7 +1089,10 @@ async function guardarEntrada() {
     btn.disabled = false;
   }
 }
-// --- MÓDULO DE VOZ ---
+
+// ============================================
+// MÓDULO DE VOZ
+// ============================================
 let reconocimientoVoz = null;
 let dictadoActivo = false;
 let textoCapturado = '';
@@ -710,7 +1105,6 @@ function iniciarDictado() {
   }
 
   const btn = document.getElementById('btn-microfono');
-  const estado = document.getElementById('estado');
 
   if (dictadoActivo && reconocimientoVoz) {
     reconocimientoVoz.stop();
@@ -726,17 +1120,14 @@ function iniciarDictado() {
 
   reconocimientoVoz.onstart = function() {
     dictadoActivo = true;
-    btn.style.background = '#EF4444';
+    btn.style.background = 'var(--peligro)';
     btn.textContent = '⏹️';
-    estado.className = 'ok';
-    estado.textContent = '🎤 Escuchando... Habla claro y espera.';
-    estado.style.display = 'block';
+    mostrarMensaje('🎤 Escuchando... Habla claro y espera.', 'ok');
   };
 
   reconocimientoVoz.onresult = function(event) {
     if (event.results && event.results[0] && event.results[0][0]) {
       textoCapturado = event.results[0][0].transcript || '';
-      estado.textContent = '📝 Capturado: "' + textoCapturado + '"';
     }
   };
 
@@ -744,8 +1135,7 @@ function iniciarDictado() {
     dictadoActivo = false;
     btn.style.background = '';
     btn.textContent = '🎤';
-    estado.className = 'error';
-    estado.textContent = 'Error de micrófono: ' + event.error;
+    mostrarMensaje('Error de micrófono: ' + event.error, 'error');
   };
 
   reconocimientoVoz.onend = async function() {
@@ -754,13 +1144,11 @@ function iniciarDictado() {
     btn.textContent = '🎤';
 
     if (!textoCapturado || textoCapturado.trim() === '') {
-      estado.className = 'error';
-      estado.textContent = '⚠️ No se captó audio. Intenta de nuevo.';
+      mostrarMensaje('⚠️ No se captó audio. Intenta de nuevo.', 'error');
       return;
     }
 
-    estado.className = 'ok';
-    estado.textContent = '📝 Dijiste: "' + textoCapturado + '"\nProcesando...';
+    mostrarMensaje('📝 Procesando: "' + textoCapturado + '"...', 'aviso');
 
     try {
       const proveedor = document.getElementById('proveedor').value;
@@ -790,14 +1178,11 @@ function iniciarDictado() {
       (r.gemini_dijo && r.gemini_dijo.lineas ? r.gemini_dijo.lineas : []).forEach(function(l) {
         msg += '  • ' + l.descripcion + ' (' + l.cantidad + ' ' + l.unidad + ')\n';
       });
-      msg += '\n🔍 Resultado:\n';
-      (r.diagnostico || []).forEach(function(d) { msg += '  ' + d + '\n'; });
       msg += '\n✅ Se agregaron ' + (r.lineas || []).length + ' producto(s).';
       alert(msg);
-      estado.style.display = 'none';
+      document.getElementById('estado').style.display = 'none';
     } catch (err) {
-      estado.className = 'error';
-      estado.textContent = 'Error: ' + err.message;
+      mostrarMensaje('Error: ' + err.message, 'error');
     }
   };
 
@@ -827,10 +1212,10 @@ function limpiarEntrada() {
     alert('✅ Lista limpiada.');
   }
 }
-// ============================================
-// PESTAÑAS
-// ============================================
 
+// ============================================
+// TABS
+// ============================================
 function cambiarTabRecepcion(tab) {
   document.getElementById('tab-nueva-btn').classList.remove('active');
   document.getElementById('tab-hist-btn').classList.remove('active');
@@ -850,13 +1235,12 @@ function cambiarTabRecepcion(tab) {
 // ============================================
 // HISTORIAL
 // ============================================
-
 let proveedoresCargados = false;
 
 async function cargarHistorial() {
   const lista = document.getElementById('hist-lista');
   if (!lista) return;
-  lista.innerHTML = '<p style="text-align: center; color: var(--suave); font-size: 14px;">Cargando historial...</p>';
+  lista.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-text">Cargando historial...</div></div>';
   
   if (!proveedoresCargados) {
     try {
@@ -886,11 +1270,11 @@ async function cargarHistorial() {
     if (!r.ok) throw new Error(r.error || 'Error al cargar');
     
     if (!r.recepciones || r.recepciones.length === 0) {
-      lista.innerHTML = '<p style="text-align: center; color: var(--suave); font-size: 14px; padding: 20px;">No hay recepciones registradas.</p>';
+      lista.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">No hay recepciones registradas.</div></div>';
       return;
     }
     
-    let html = '<p style="text-align: center; color: var(--suave); font-size: 12px; margin-bottom: 8px;">' + r.recepciones.length + ' recepción(es)</p>';
+    let html = '<p style="text-align: center; color: var(--suave); font-size: 12px; margin-bottom: 12px;">' + r.recepciones.length + ' recepción(es)</p>';
     
     r.recepciones.forEach(function(rec) {
       const fecha = rec.fecha ? formatearFecha(rec.fecha) : 'Sin fecha';
@@ -910,7 +1294,7 @@ async function cargarHistorial() {
     
     lista.innerHTML = html;
   } catch (err) {
-    lista.innerHTML = '<p style="text-align: center; color: var(--peligro); font-size: 14px;">Error: ' + err.message + '</p>';
+    lista.innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text" style="color: var(--peligro);">Error: ' + err.message + '</div></div>';
   }
 }
 
@@ -938,7 +1322,7 @@ async function verDetalleRecepcion(idEntrada) {
     const rec = r.recepcion;
     const fecha = rec.fecha ? formatearFecha(rec.fecha) : 'Sin fecha';
     
-    let html = '<div style="margin-bottom: 16px;">' +
+    let html = '<div style="margin-bottom: 16px; background: var(--input); padding: 12px; border-radius: 12px;">' +
       '<p style="font-size: 13px; color: var(--suave);">Fecha: <strong style="color: var(--texto);">' + fecha + '</strong></p>' +
       '<p style="font-size: 13px; color: var(--suave);">Proveedor: <strong style="color: var(--texto);">' + (rec.proveedor_nombre || '—') + '</strong></p>' +
       '<p style="font-size: 13px; color: var(--suave);">Factura: <strong style="color: var(--texto);">' + (rec.factura || '—') + '</strong></p>' +
@@ -958,7 +1342,7 @@ async function verDetalleRecepcion(idEntrada) {
     });
     
     html += '</div>' +
-      '<div style="border-top: 2px solid var(--acento); margin-top: 12px; padding-top: 12px; display: flex; justify-content: space-between; font-size: 16px; font-weight: bold;">' +
+      '<div style="border-top: 2px solid var(--acento); margin-top: 12px; padding-top: 12px; display: flex; justify-content: space-between; font-size: 16px; font-weight: 800;">' +
         '<span>Total</span>' +
         '<span style="color: var(--acento);">$' + rec.total.toLocaleString('es-CO') + '</span>' +
       '</div>';
@@ -972,14 +1356,9 @@ async function verDetalleRecepcion(idEntrada) {
 function cerrarDetalle() {
   document.getElementById('modal-detalle').classList.remove('open');
 }
+
 // ============================================
 // NUEVO PROVEEDOR
-// ============================================
-// ============================================
-// NUEVO PROVEEDOR
-// ============================================
-// ============================================
-// NUEVO PROVEEDOR (modal)
 // ============================================
 function abrirNuevoProveedor() {
   document.getElementById('nprov-nombre').value = '';
@@ -1016,8 +1395,6 @@ async function guardarNuevoProveedor() {
     if (!r.ok) throw new Error(r.error || 'No se pudo crear el proveedor');
 
     cerrarNuevoProveedor();
-
-    // Recargar la lista y seleccionar el nuevo
     await cargarProveedores();
     document.getElementById('proveedor').value = r.id_proveedor;
 
