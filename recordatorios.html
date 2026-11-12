@@ -5,74 +5,195 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Recordatorios · Distribuidora TAT</title>
 <script src="auth.js"></script>
-<script src="comun.js?v=10"></script>
+<script src="comun.js?v=11"></script>
+<link rel="stylesheet" href="tema.css">
 <style>
-  :root {
-    --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
-    --suave: #94A3B8; --borde: #334155; --acento: #F59E0B; --peligro: #EF4444; --ok: #10B981;
+  /* Personalización específica de recordatorios */
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: var(--bg); color: var(--texto); padding: 20px; padding-bottom: 50px; }
   
-  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .header h1 { font-size: 24px; color: var(--acento); font-weight: 800; }
-  .btn-volver { background: none; border: none; color: var(--suave); font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    padding: 14px 8px;
+    text-align: center;
+    box-shadow: var(--shadow-1);
+    transition: 0.15s;
+  }
   
-  #estado { padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: none; }
-  .ok { background: rgba(16, 185, 129, 0.2); color: var(--ok); border: 1px solid var(--ok); }
-  .error { background: rgba(239, 68, 68, 0.2); color: var(--peligro); border: 1px solid var(--peligro); }
+  .stat-card:active {
+    transform: scale(0.97);
+  }
   
-  .filtros { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--borde); background: var(--input); color: var(--texto); font-size: 14px; outline: none; }
+  .stat-num {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
   
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
-  .stat { background: var(--card); border: 1px solid var(--borde); border-radius: 12px; padding: 10px; text-align: center; }
-  .stat .num { font-size: 20px; font-weight: bold; }
-  .stat .lbl { font-size: 10px; color: var(--suave); margin-top: 2px; }
-  .stat.stock { border-color: #EF4444; }
-  .stat.venc { border-color: #F59E0B; }
-  .stat.precio { border-color: #3B82F6; }
-  .stat.dev { border-color: #A855F7; }
+  .stat-lbl {
+    font-size: 10px;
+    color: var(--suave);
+    margin-top: 4px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
   
-  .rec-item { background: var(--card); border: 1px solid var(--borde); border-radius: 12px; padding: 14px; margin-bottom: 10px; border-left: 4px solid var(--borde); }
-  .rec-item.stock_bajo { border-left-color: #EF4444; }
-  .rec-item.vencimiento_proximo { border-left-color: #F59E0B; }
-  .rec-item.incremento_precio { border-left-color: #3B82F6; }
+  .stat-card.stock .stat-num { color: var(--peligro); }
+  .stat-card.venc .stat-num { color: var(--warning); }
+  .stat-card.precio .stat-num { color: var(--info); }
+  .stat-card.dev .stat-num { color: #A855F7; }
+  
+  .filtros-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .filtros-grid select {
+    margin-bottom: 0;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  /* Recordatorios */
+  .rec-item {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-1);
+    border-left: 4px solid var(--borde);
+    transition: 0.15s;
+  }
+  
+  .rec-item.stock_bajo { border-left-color: var(--peligro); }
+  .rec-item.vencimiento_proximo { border-left-color: var(--warning); }
+  .rec-item.incremento_precio { border-left-color: var(--info); }
   .rec-item.devolucion_pendiente { border-left-color: #A855F7; }
-  .rec-item.completado { opacity: 0.5; border-left-color: var(--borde); }
+  .rec-item.completado { opacity: 0.55; border-left-color: var(--borde); }
   
-  .rec-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px; gap: 8px; }
-  .rec-header .msg { flex: 1; font-size: 14px; }
-  .rec-header .tipo-badge { font-size: 10px; padding: 2px 8px; border-radius: 6px; font-weight: bold; text-transform: uppercase; white-space: nowrap; }
-  .rec-header .tipo-badge.stock_bajo { background: rgba(239, 68, 68, 0.2); color: #EF4444; }
-  .rec-header .tipo-badge.vencimiento_proximo { background: rgba(245, 158, 11, 0.2); color: #F59E0B; }
-  .rec-header .tipo-badge.incremento_precio { background: rgba(59, 130, 246, 0.2); color: #3B82F6; }
-  .rec-header .tipo-badge.devolucion_pendiente { background: rgba(168, 85, 247, 0.2); color: #A855F7; }
+  .rec-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 8px;
+  }
   
-  .rec-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 11px; color: var(--suave); }
-  .btn-completar { background: var(--ok); color: #000; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
-  .btn-completar:hover { opacity: 0.9; }
+  .rec-msg {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--texto);
+  }
   
-  .empty { text-align: center; padding: 40px 20px; color: var(--suave); font-size: 14px; }
+  .tipo-badge {
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 9999px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .tipo-badge.stock_bajo { background: var(--peligro-bg); color: var(--peligro); }
+  .tipo-badge.vencimiento_proximo { background: var(--warning-bg); color: var(--warning); }
+  .tipo-badge.incremento_precio { background: var(--info-bg); color: var(--info); }
+  .tipo-badge.devolucion_pendiente { background: #F3E8FF; color: #A855F7; }
+  
+  .rec-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--suave);
+  }
+  
+  .btn-completar {
+    background: var(--ok-bg);
+    color: var(--ok);
+    border: 1px solid var(--ok);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  
+  .btn-completar:hover {
+    background: var(--ok);
+    color: #FFF;
+  }
+  
+  .btn-completar:active {
+    transform: scale(0.96);
+  }
+  
+  .completado-badge {
+    color: var(--ok);
+    font-weight: 700;
+    font-size: 12px;
+  }
 </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>🔔 Recordatorios</h1>
-    <a href="index.html" class="btn-volver">← Volver</a>
+  <!-- ============================================
+       HEADER
+       ============================================ -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 style="color: var(--acento); margin: 0;">Recordatorios</h1>
+      <p class="subtitulo">Alertas inteligentes del inventario</p>
+    </div>
+    <div class="page-header-right">
+      <button class="icon-btn" onclick="window.location.href='index.html'" title="Volver">←</button>
+    </div>
   </div>
 
   <div id="estado" style="display: none;"></div>
 
-  <div class="stats" id="stats">
-    <div class="stat stock"><div class="num" id="stat-stock">-</div><div class="lbl">Stock bajo</div></div>
-    <div class="stat venc"><div class="num" id="stat-venc">-</div><div class="lbl">Por vencer</div></div>
-    <div class="stat precio"><div class="num" id="stat-precio">-</div><div class="lbl">Subieron</div></div>
-    <div class="stat dev"><div class="num" id="stat-dev">-</div><div class="lbl">Devoluciones</div></div>
+  <!-- ============================================
+       STATS
+       ============================================ -->
+  <div class="stats-grid">
+    <div class="stat-card stock">
+      <div class="stat-num" id="stat-stock">-</div>
+      <div class="stat-lbl">Stock bajo</div>
+    </div>
+    <div class="stat-card venc">
+      <div class="stat-num" id="stat-venc">-</div>
+      <div class="stat-lbl">Por vencer</div>
+    </div>
+    <div class="stat-card precio">
+      <div class="stat-num" id="stat-precio">-</div>
+      <div class="stat-lbl">Subieron</div>
+    </div>
+    <div class="stat-card dev">
+      <div class="stat-num" id="stat-dev">-</div>
+      <div class="stat-lbl">Devoluciones</div>
+    </div>
   </div>
 
-  <div class="filtros">
+  <!-- ============================================
+       FILTROS
+       ============================================ -->
+  <div class="filtros-grid">
     <select id="filtro-estado" onchange="cargarRecordatorios()">
       <option value="pendiente">Pendientes</option>
       <option value="completado">Completados</option>
@@ -87,8 +208,14 @@
     </select>
   </div>
 
+  <!-- ============================================
+       LISTA
+       ============================================ -->
   <div id="lista-recordatorios">
-    <p class="empty">Cargando...</p>
+    <div class="empty-state">
+      <div class="empty-state-icon">⏳</div>
+      <div class="empty-state-text">Cargando...</div>
+    </div>
   </div>
 
 <script>
@@ -108,7 +235,7 @@ const TIPO_LABELS = {
 
 async function cargarRecordatorios() {
   const lista = document.getElementById('lista-recordatorios');
-  lista.innerHTML = '<p class="empty">Cargando...</p>';
+  lista.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-text">Cargando...</div></div>';
   
   const filtros = {
     estado: document.getElementById('filtro-estado').value,
@@ -122,7 +249,7 @@ async function cargarRecordatorios() {
     recordatorios = r.items || [];
     
     if (recordatorios.length === 0) {
-      lista.innerHTML = '<p class="empty">🎉 No hay recordatorios en este filtro.</p>';
+      lista.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎉</div><div class="empty-state-text">No hay recordatorios en este filtro.</div></div>';
       return;
     }
     
@@ -134,18 +261,18 @@ async function cargarRecordatorios() {
       
       html += '<div class="rec-item ' + rec.tipo + (esCompletado ? ' completado' : '') + '">' +
         '<div class="rec-header">' +
-          '<div class="msg">' + rec.mensaje + '</div>' +
+          '<div class="rec-msg">' + rec.mensaje + '</div>' +
           '<span class="tipo-badge ' + rec.tipo + '">' + tipoLabel + '</span>' +
         '</div>' +
         '<div class="rec-footer">' +
           '<span>' + rec.id + ' · ' + fecha + '</span>' +
-          (esCompletado ? '<span style="color: var(--ok);">✓ Completado</span>' : '<button class="btn-completar" onclick="marcarCompletado(\'' + rec.id + '\')">Marcar completado</button>') +
+          (esCompletado ? '<span class="completado-badge">✓ Completado</span>' : '<button class="btn-completar" onclick="marcarCompletado(\'' + rec.id + '\')">Marcar completado</button>') +
         '</div>' +
       '</div>';
     });
     lista.innerHTML = html;
   } catch (e) {
-    lista.innerHTML = '<p class="empty" style="color: var(--peligro);">Error: ' + e.message + '</p>';
+    lista.innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text" style="color: var(--peligro);">Error: ' + e.message + '</div></div>';
   }
 }
 
@@ -190,6 +317,28 @@ function mostrarEstado(msg, tipo) {
   el.textContent = msg;
   el.className = tipo;
   el.style.display = 'block';
+  // Aplicar estilos del tema a los estados
+  if (tipo === 'ok') {
+    el.style.background = 'var(--ok-bg)';
+    el.style.color = 'var(--ok)';
+    el.style.border = '1px solid var(--ok)';
+    el.style.padding = '14px';
+    el.style.borderRadius = '12px';
+    el.style.textAlign = 'center';
+    el.style.fontWeight = 'bold';
+    el.style.fontSize = '14px';
+    el.style.marginBottom = '16px';
+  } else if (tipo === 'error') {
+    el.style.background = 'var(--peligro-bg)';
+    el.style.color = 'var(--peligro)';
+    el.style.border = '1px solid var(--peligro)';
+    el.style.padding = '14px';
+    el.style.borderRadius = '12px';
+    el.style.textAlign = 'center';
+    el.style.fontWeight = 'bold';
+    el.style.fontSize = '14px';
+    el.style.marginBottom = '16px';
+  }
 }
 
 function formatearFecha(fecha) {
