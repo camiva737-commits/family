@@ -8,301 +8,62 @@
 <script src="comun.js?v=11"></script>
 <link rel="stylesheet" href="tema.css">
 <style>
-  /* Personalización específica de devoluciones */
-  
-  .tabs {
-    display: flex;
-    background: var(--card);
-    border-radius: 14px;
-    padding: 4px;
-    margin-bottom: 16px;
-    border: 1px solid var(--borde);
-    box-shadow: var(--shadow-1);
-  }
-  
-  .tabs button {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    background: transparent;
-    color: var(--suave);
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    transition: 0.2s;
-    font-family: inherit;
-  }
-  
-  .tabs button.active {
-    background: var(--acento);
-    color: #FFF;
-    box-shadow: 0 2px 8px rgba(242, 140, 0, 0.3);
-  }
-  
+  .tabs { display: flex; background: var(--card); border-radius: 14px; padding: 4px; margin-bottom: 16px; border: 1px solid var(--borde); box-shadow: var(--shadow-1); }
+  .tabs button { flex: 1; padding: 12px; border: none; border-radius: 10px; background: transparent; color: var(--suave); font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; font-family: inherit; }
+  .tabs button.active { background: var(--acento); color: #FFF; box-shadow: 0 2px 8px rgba(242, 140, 0, 0.3); }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
-  
-  .fotos-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  
-  .foto-item {
-    position: relative;
-    aspect-ratio: 1;
-    background: var(--input);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  
-  .foto-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .foto-item .btn-x {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    background: var(--peligro);
-    color: #FFF;
-    border: none;
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    font-size: 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .foto-vacia {
-    aspect-ratio: 1;
-    background: var(--input);
-    border: 2px dashed var(--borde);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--suave);
-    font-size: 26px;
-    cursor: pointer;
-    transition: 0.15s;
-  }
-  
-  .foto-vacia:hover {
-    border-color: var(--acento);
-    color: var(--acento);
-    background: var(--acento-suave);
-  }
-  
-  .producto-sel {
-    background: var(--acento-suave);
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    border-left: 3px solid var(--acento);
-  }
-  
-  .producto-sel-lbl {
-    font-size: 11px;
-    color: var(--primario);
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-  
-  .producto-sel-nombre {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--texto);
-  }
-  
-  /* Resultados de búsqueda */
-  .dev-resultado {
-    padding: 12px;
-    background: var(--card);
-    border-bottom: 1px solid var(--borde);
-    cursor: pointer;
-    transition: 0.1s;
-  }
-  
-  .dev-resultado:hover {
-    background: var(--input-hover);
-  }
-  
-  .dev-resultado strong {
-    font-size: 14px;
-    color: var(--texto);
-  }
-  
-  .dev-resultado span {
-    font-size: 12px;
-    color: var(--suave);
-  }
-  
-  /* Items de la lista de devoluciones */
-  .dev-item {
-    background: var(--card);
-    border: 1px solid var(--borde);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    border-left: 4px solid var(--borde);
-    box-shadow: var(--shadow-1);
-    transition: 0.15s;
-  }
-  
-  .dev-item:hover {
-    transform: translateX(2px);
-    box-shadow: var(--shadow-2);
-  }
-  
+  .fotos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .foto-item { position: relative; aspect-ratio: 1; background: var(--input); border-radius: 10px; overflow: hidden; }
+  .foto-item img { width: 100%; height: 100%; object-fit: cover; }
+  .foto-item .btn-x { position: absolute; top: 4px; right: 4px; background: var(--peligro); color: #FFF; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .foto-vacia { aspect-ratio: 1; background: var(--input); border: 2px dashed var(--borde); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--suave); font-size: 26px; cursor: pointer; transition: 0.15s; }
+  .foto-vacia:hover { border-color: var(--acento); color: var(--acento); background: var(--acento-suave); }
+  .producto-sel { background: var(--acento-suave); padding: 12px; border-radius: 12px; margin-bottom: 12px; border-left: 3px solid var(--acento); }
+  .producto-sel-lbl { font-size: 11px; color: var(--primario); font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 4px; }
+  .producto-sel-nombre { font-size: 15px; font-weight: 700; color: var(--texto); }
+  .dev-resultado { padding: 12px; background: var(--card); border-bottom: 1px solid var(--borde); cursor: pointer; transition: 0.1s; }
+  .dev-resultado:hover { background: var(--input-hover); }
+  .dev-resultado strong { font-size: 14px; color: var(--texto); }
+  .dev-resultado span { font-size: 12px; color: var(--suave); }
+  .dev-item { background: var(--card); border: 1px solid var(--borde); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; border-left: 4px solid var(--borde); box-shadow: var(--shadow-1); transition: 0.15s; }
+  .dev-item:hover { transform: translateX(2px); box-shadow: var(--shadow-2); }
   .dev-item.pendiente { border-left-color: var(--peligro); }
   .dev-item.en_proceso { border-left-color: var(--warning); }
   .dev-item.cambio_recibido { border-left-color: var(--info); }
   .dev-item.cerrada { border-left-color: var(--ok); opacity: 0.7; }
-  
-  .dev-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 8px;
-    gap: 8px;
-  }
-  
-  .dev-header h4 {
-    font-size: 14px;
-    font-weight: 700;
-    margin: 0;
-    color: var(--texto);
-    flex: 1;
-  }
-  
-  .dev-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 9999px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  
+  .dev-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+  .dev-header h4 { font-size: 14px; font-weight: 700; margin: 0; color: var(--texto); flex: 1; }
+  .dev-badge { display: inline-block; padding: 3px 10px; border-radius: 9999px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; white-space: nowrap; flex-shrink: 0; }
   .dev-badge.pendiente { background: var(--peligro-bg); color: var(--peligro); }
   .dev-badge.en_proceso { background: var(--warning-bg); color: var(--warning); }
   .dev-badge.cambio_recibido { background: var(--info-bg); color: var(--info); }
   .dev-badge.cerrada { background: var(--ok-bg); color: var(--ok); }
-  
-  .dev-item p {
-    font-size: 12px;
-    color: var(--suave);
-    margin: 3px 0;
-  }
-  
-  .dev-fotos {
-    display: flex;
-    gap: 4px;
-    margin-top: 8px;
-  }
-  
-  .dev-fotos img {
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
-    object-fit: cover;
-    border: 1px solid var(--borde);
-  }
-  
-  /* Modal detalle */
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  
+  .dev-item p { font-size: 12px; color: var(--suave); margin: 3px 0; }
+  .dev-fotos { display: flex; gap: 4px; margin-top: 8px; }
+  .dev-fotos img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; border: 1px solid var(--borde); }
+  .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
   .modal.open { display: flex; }
-  
-  .modal-content {
-    background: var(--card);
-    border-radius: 16px;
-    max-width: 500px;
-    width: 100%;
-    max-height: 90vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow-3);
-    border: 1px solid var(--borde);
-  }
-  
-  .modal-header {
-    padding: 16px;
-    background: var(--input);
-    border-bottom: 1px solid var(--borde);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .modal-header h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--texto);
-    margin: 0;
-  }
-  
-  .modal-header button {
-    background: none;
-    border: none;
-    color: var(--suave);
-    font-size: 22px;
-    cursor: pointer;
-    line-height: 1;
-  }
-  
-  .modal-body {
-    padding: 16px;
-    overflow-y: auto;
-  }
+  .modal-content { background: var(--card); border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow-3); border: 1px solid var(--borde); }
+  .modal-header { padding: 16px; background: var(--input); border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h3 { font-size: 16px; font-weight: 700; color: var(--texto); margin: 0; }
+  .modal-header button { background: none; border: none; color: var(--suave); font-size: 22px; cursor: pointer; line-height: 1; }
+  .modal-body { padding: 16px; overflow-y: auto; }
 </style>
 </head>
 <body>
 
-  <!-- ============================================
-       HEADER
-       ============================================ -->
   <div class="page-header">
     <div class="page-header-left">
       <h1 style="color: var(--acento); margin: 0;">Devoluciones</h1>
       <p class="subtitulo">Gestionar productos con problemas</p>
     </div>
     <div class="page-header-right">
-  <button class="icon-btn" id="btn-tema" onclick="Tema.cambiar()" title="Cambiar tema">🌙</button>
-  <button class="icon-btn" onclick="Auth.cerrarSesion()" title="Cerrar sesión">🚪</button>
-</div>
+      <button class="icon-btn" id="btn-tema" onclick="Tema.cambiar()" title="Cambiar tema">🌙</button>
+      <button class="icon-btn" onclick="window.location.href='index.html'" title="Volver">←</button>
+    </div>
   </div>
 
-  <!-- ============================================
-       TABS
-       ============================================ -->
   <div class="tabs">
     <button id="tab-nueva-btn" class="active" onclick="cambiarTab('nueva')">➕ Nueva</button>
     <button id="tab-lista-btn" onclick="cambiarTab('lista')">📋 Listado</button>
@@ -310,11 +71,7 @@
 
   <div id="estado" style="display: none;"></div>
 
-  <!-- ============================================
-       TAB NUEVA
-       ============================================ -->
   <div id="tab-nueva" class="tab-content active">
-    
     <div class="card">
       <label class="label" style="display: block; margin-bottom: 8px;">Producto</label>
       <input type="text" id="dev-buscar" placeholder="🔍 Buscar producto..." oninput="buscarProducto()" autocomplete="off">
@@ -344,9 +101,6 @@
     <button class="btn-primario" id="btn-crear" onclick="crearDevolucion()">Registrar Devolución</button>
   </div>
 
-  <!-- ============================================
-       TAB LISTA
-       ============================================ -->
   <div id="tab-lista" class="tab-content">
     <div class="card">
       <select id="filtro-estado" onchange="cargarListado()">
@@ -366,9 +120,6 @@
     </div>
   </div>
 
-  <!-- ============================================
-       MODAL DETALLE
-       ============================================ -->
   <div id="modal-detalle" class="modal" onclick="if(event.target.id==='modal-detalle')cerrarDetalle()">
     <div class="modal-content">
       <div class="modal-header">
@@ -387,9 +138,6 @@ let fotosSubidas = [];
 let devolucionesActuales = [];
 let devActual = null;
 
-// ============================================
-// INICIALIZACIÓN
-// ============================================
 (async function init() {
   document.getElementById('dev-fecha').value = new Date().toISOString().split('T')[0];
   
@@ -413,9 +161,6 @@ let devActual = null;
   } catch (e) { console.error('Error proveedores:', e); }
 })();
 
-// ============================================
-// TABS
-// ============================================
 function cambiarTab(tab) {
   document.getElementById('tab-nueva-btn').classList.remove('active');
   document.getElementById('tab-lista-btn').classList.remove('active');
@@ -432,9 +177,6 @@ function cambiarTab(tab) {
   }
 }
 
-// ============================================
-// BUSCAR PRODUCTO
-// ============================================
 function buscarProducto() {
   const q = document.getElementById('dev-buscar').value.toLowerCase().trim();
   const cont = document.getElementById('dev-resultados');
@@ -459,9 +201,7 @@ function buscarProducto() {
     const div = document.createElement('div');
     div.className = 'dev-resultado';
     div.innerHTML = '<strong>' + p.nombre + '</strong> <span>(stock: ' + p.stock_actual + ' ' + p.unidad_base + ')</span>';
-    div.onclick = function() {
-      seleccionarProducto(p);
-    };
+    div.onclick = function() { seleccionarProducto(p); };
     cont.appendChild(div);
   });
   cont.style.display = 'block';
@@ -475,9 +215,6 @@ function seleccionarProducto(p) {
   document.getElementById('dev-resultados').style.display = 'none';
 }
 
-// ============================================
-// FOTOS
-// ============================================
 function agregarFoto(input) {
   const file = input.files[0];
   if (!file) return;
@@ -488,8 +225,7 @@ function agregarFoto(input) {
   
   const reader = new FileReader();
   reader.onload = function(e) {
-    const base64 = e.target.result;
-    fotosSubidas.push({ base64: base64, url: '' });
+    fotosSubidas.push({ base64: e.target.result, url: '' });
     renderizarFotos();
   };
   reader.readAsDataURL(file);
@@ -521,9 +257,6 @@ function eliminarFoto(index) {
   renderizarFotos();
 }
 
-// ============================================
-// CREAR DEVOLUCIÓN
-// ============================================
 async function crearDevolucion() {
   if (!productoSeleccionado) return alert('Selecciona un producto');
   const cantidad = Number(document.getElementById('dev-cantidad').value);
@@ -576,9 +309,6 @@ async function crearDevolucion() {
   }
 }
 
-// ============================================
-// LISTADO
-// ============================================
 async function cargarListado() {
   const cont = document.getElementById('lista-devoluciones');
   cont.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-text">Cargando...</div></div>';
@@ -641,9 +371,6 @@ function formatFecha(fecha) {
   return dia + '/' + mes + '/' + año;
 }
 
-// ============================================
-// DETALLE Y CAMBIO DE ESTADO
-// ============================================
 function verDetalle(id) {
   const dev = devolucionesActuales.find(function(d) { return d.id === id; });
   if (!dev) return;

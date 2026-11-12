@@ -8,340 +8,74 @@
 <script src="comun.js?v=11"></script>
 <link rel="stylesheet" href="tema.css">
 <style>
-  /* Personalización específica de inventario */
-  
-  .toggle {
-    display: flex;
-    background: var(--card);
-    border-radius: 14px;
-    padding: 4px;
-    margin-bottom: 16px;
-    border: 1px solid var(--borde);
-    box-shadow: var(--shadow-1);
-  }
-  
-  .toggle button {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    background: transparent;
-    color: var(--suave);
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    transition: 0.2s;
-    font-family: inherit;
-  }
-  
-  .toggle button.active {
-    background: var(--acento);
-    color: #FFF;
-    box-shadow: 0 2px 8px rgba(242, 140, 0, 0.3);
-  }
-  
-  .btn-nuevo-prod {
-    width: 100%;
-    padding: 14px;
-    border-radius: var(--radius-input);
-    border: 1px dashed var(--acento);
-    background: transparent;
-    color: var(--acento);
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-bottom: 16px;
-    transition: 0.15s;
-    font-family: inherit;
-  }
-  
-  .btn-nuevo-prod:hover {
-    background: var(--acento-suave);
-  }
-  
-  .btn-nuevo-prod:active {
-    transform: scale(0.98);
-  }
-  
-  /* Lista de productos */
-  .prod-card {
-    background: var(--card);
-    padding: 14px 16px;
-    border-radius: 14px;
-    margin-bottom: 10px;
-    display: flex;
-    gap: 14px;
-    align-items: center;
-    border: 1px solid var(--borde);
-    cursor: pointer;
-    box-shadow: var(--shadow-1);
-    transition: 0.15s;
-  }
-  
-  .prod-card:hover {
-    transform: translateX(2px);
-    box-shadow: var(--shadow-2);
-  }
-  
-  .prod-card:active {
-    transform: scale(0.99);
-  }
-  
-  .prod-foto {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    object-fit: cover;
-    background: var(--input);
-    flex-shrink: 0;
-  }
-  
-  .prod-inicial {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: var(--acento-suave);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: var(--acento);
-    font-weight: 800;
-    flex-shrink: 0;
-  }
-  
-  .prod-info {
-    flex: 1;
-    min-width: 0;
-  }
-  
-  .prod-info h3 {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--texto);
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .prod-info p {
-    font-size: 12px;
-    color: var(--suave);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-  
+  .toggle { display: flex; background: var(--card); border-radius: 14px; padding: 4px; margin-bottom: 16px; border: 1px solid var(--borde); box-shadow: var(--shadow-1); }
+  .toggle button { flex: 1; padding: 12px; border: none; border-radius: 10px; background: transparent; color: var(--suave); font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; font-family: inherit; }
+  .toggle button.active { background: var(--acento); color: #FFF; box-shadow: 0 2px 8px rgba(242, 140, 0, 0.3); }
+  .btn-nuevo-prod { width: 100%; padding: 14px; border-radius: var(--radius-input); border: 1px dashed var(--acento); background: transparent; color: var(--acento); font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 16px; transition: 0.15s; font-family: inherit; }
+  .btn-nuevo-prod:hover { background: var(--acento-suave); }
+  .btn-nuevo-prod:active { transform: scale(0.98); }
+  .prod-card { background: var(--card); padding: 14px 16px; border-radius: 14px; margin-bottom: 10px; display: flex; gap: 14px; align-items: center; border: 1px solid var(--borde); cursor: pointer; box-shadow: var(--shadow-1); transition: 0.15s; }
+  .prod-card:hover { transform: translateX(2px); box-shadow: var(--shadow-2); }
+  .prod-card:active { transform: scale(0.99); }
+  .prod-foto { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; background: var(--input); flex-shrink: 0; }
+  .prod-inicial { width: 48px; height: 48px; border-radius: 12px; background: var(--acento-suave); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--acento); font-weight: 800; flex-shrink: 0; }
+  .prod-info { flex: 1; min-width: 0; }
+  .prod-info h3 { font-size: 15px; font-weight: 700; color: var(--texto); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .prod-info p { font-size: 12px; color: var(--suave); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .stock-positivo { color: var(--ok); font-weight: 700; font-size: 14px; }
   .stock-cero { color: var(--peligro); font-weight: 700; font-size: 14px; }
   .stock-negativo { color: var(--peligro); font-weight: 800; font-size: 14px; }
   .stock-gris { color: var(--suave); font-weight: 600; font-size: 14px; }
-  
-  /* Panel de edición */
-  #panel {
-    background: var(--card);
-    padding: 20px;
-    border-radius: 16px;
-    border: 1px solid var(--borde);
-    display: none;
-    margin-top: 16px;
-    box-shadow: var(--shadow-2);
-  }
-  
-  #panel h2 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 6px;
-  }
-  
-  .stock-actual-info {
-    background: var(--acento-suave);
-    padding: 12px 16px;
-    border-radius: 12px;
-    margin-bottom: 16px;
-    border-left: 3px solid var(--acento);
-  }
-  
-  .stock-actual-info-lbl {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--primario);
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-  
-  .stock-actual-info-val {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--acento);
-  }
-  
-  /* Modal nuevo producto */
-  .modal-prod {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-  }
-  
+  #panel { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid var(--borde); display: none; margin-top: 16px; box-shadow: var(--shadow-2); }
+  #panel h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .stock-actual-info { background: var(--acento-suave); padding: 12px 16px; border-radius: 12px; margin-bottom: 16px; border-left: 3px solid var(--acento); }
+  .stock-actual-info-lbl { font-size: 11px; font-weight: 700; color: var(--primario); letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 4px; }
+  .stock-actual-info-val { font-size: 22px; font-weight: 800; color: var(--acento); }
+  .modal-prod { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 16px; }
   .modal-prod.open { display: flex; }
-  
-  .modal-prod-content {
-    background: var(--card);
-    border-radius: 18px;
-    max-width: 500px;
-    width: 100%;
-    max-height: 92vh;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid var(--borde);
-    box-shadow: var(--shadow-3);
-  }
-  
-  .modal-prod-header {
-    padding: 16px;
-    border-bottom: 1px solid var(--borde);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--input);
-    border-radius: 18px 18px 0 0;
-  }
-  
-  .modal-prod-header h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--texto);
-    margin: 0;
-  }
-  
-  .modal-prod-header button {
-    background: none;
-    border: none;
-    color: var(--suave);
-    font-size: 22px;
-    cursor: pointer;
-    line-height: 1;
-  }
-  
-  .modal-prod-body {
-    padding: 16px;
-    overflow-y: auto;
-  }
-  
-  .modal-prod-body label {
-    display: block;
-    font-size: 12px;
-    color: var(--suave);
-    margin-bottom: 6px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    margin-top: 12px;
-  }
-  
+  .modal-prod-content { background: var(--card); border-radius: 18px; max-width: 500px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; border: 1px solid var(--borde); box-shadow: var(--shadow-3); }
+  .modal-prod-header { padding: 16px; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; background: var(--input); border-radius: 18px 18px 0 0; }
+  .modal-prod-header h3 { font-size: 16px; font-weight: 700; color: var(--texto); margin: 0; }
+  .modal-prod-header button { background: none; border: none; color: var(--suave); font-size: 22px; cursor: pointer; line-height: 1; }
+  .modal-prod-body { padding: 16px; overflow-y: auto; }
+  .modal-prod-body label { display: block; font-size: 12px; color: var(--suave); margin-bottom: 6px; font-weight: 700; letter-spacing: 0.02em; margin-top: 12px; }
   .modal-prod-body label:first-child { margin-top: 0; }
   .modal-prod-body input, .modal-prod-body select { margin-bottom: 0; }
-  
-  .modal-prod-footer {
-    padding: 12px 16px;
-    border-top: 1px solid var(--borde);
-    display: flex;
-    gap: 10px;
-    background: var(--input);
-    border-radius: 0 0 18px 18px;
-  }
-  
-  .modal-prod-footer button {
-    flex: 1;
-    padding: 14px;
-    border-radius: var(--radius-input);
-    border: none;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  
-  .btn-cancelar-modal {
-    background: var(--card);
-    color: var(--suave);
-    border: 1px solid var(--borde);
-  }
-  
-  .btn-guardar-modal {
-    background: var(--acento-2);
-    color: #FFF;
-  }
-  
-  .btn-guardar-modal:hover {
-    background: var(--acento);
-  }
-  
-  .btn-guardar-modal:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  .contador {
-    text-align: center;
-    color: var(--suave);
-    font-size: 12px;
-    font-weight: 600;
-    margin: 12px 0;
-  }
+  .modal-prod-footer { padding: 12px 16px; border-top: 1px solid var(--borde); display: flex; gap: 10px; background: var(--input); border-radius: 0 0 18px 18px; }
+  .modal-prod-footer button { flex: 1; padding: 14px; border-radius: var(--radius-input); border: none; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .btn-cancelar-modal { background: var(--card); color: var(--suave); border: 1px solid var(--borde); }
+  .btn-guardar-modal { background: var(--acento-2); color: #FFF; }
+  .btn-guardar-modal:hover { background: var(--acento); }
+  .btn-guardar-modal:disabled { opacity: 0.5; cursor: not-allowed; }
+  .contador { text-align: center; color: var(--suave); font-size: 12px; font-weight: 600; margin: 12px 0; }
 </style>
 </head>
 <body>
 
-  <!-- ============================================
-       HEADER
-       ============================================ -->
   <div class="page-header">
     <div class="page-header-left">
       <h1 style="color: var(--acento); margin: 0;">Inventario</h1>
-     <div class="page-header-right">
-  <button class="icon-btn" id="btn-tema" onclick="Tema.cambiar()" title="Cambiar tema">🌙</button>
-  <button class="icon-btn" onclick="if(confirmarVolverInventario()) window.location.href='index.html'" title="Volver">←</button>
-</div>
+      <p class="subtitulo">Stock y ajustes</p>
+    </div>
+    <div class="page-header-right">
+      <button class="icon-btn" id="btn-tema" onclick="Tema.cambiar()" title="Cambiar tema">🌙</button>
+      <button class="icon-btn" onclick="if(confirmarVolverInventario()) window.location.href='index.html'" title="Volver">←</button>
+    </div>
+  </div>
 
   <div id="estado" style="display: none;"></div>
 
-  <!-- ============================================
-       TOGGLE MODO
-       ============================================ -->
   <div class="toggle">
     <button id="btn-inicial" class="active" onclick="cambiarModo('inicial')">Conteo Inicial</button>
     <button id="btn-ajuste" onclick="cambiarModo('ajuste')">Ajuste de Stock</button>
   </div>
 
-  <!-- ============================================
-       BOTÓN NUEVO PRODUCTO
-       ============================================ -->
   <button class="btn-nuevo-prod" onclick="abrirNuevoProducto()">+ Nuevo producto</button>
 
-  <!-- ============================================
-       BÚSQUEDA
-       ============================================ -->
   <input type="text" id="buscar" placeholder="🔍 Buscar producto..." autocomplete="off" oninput="filtrar()" class="search-bar">
 
-  <!-- ============================================
-       LISTA
-       ============================================ -->
   <div id="lista"></div>
 
-  <!-- ============================================
-       PANEL DE EDICIÓN
-       ============================================ -->
   <div id="panel">
     <h2 id="p-nombre">Producto</h2>
     <div class="stock-actual-info">
@@ -362,9 +96,6 @@
     <button class="btn-primario" id="btn-guardar" onclick="guardarCambios()">Guardar Cambios</button>
   </div>
 
-  <!-- ============================================
-       MODAL NUEVO PRODUCTO
-       ============================================ -->
   <div id="modal-nuevo-prod" class="modal-prod" onclick="if(event.target.id==='modal-nuevo-prod')cerrarNuevoProducto()">
     <div class="modal-prod-content">
       <div class="modal-prod-header">
@@ -374,25 +105,18 @@
       <div class="modal-prod-body">
         <label>Nombre *</label>
         <input type="text" id="np-nombre" placeholder="Ej: Gol Surtido 50g">
-
         <label>Categoría</label>
         <input type="text" id="np-categoria" placeholder="Ej: Dulces" value="General">
-
         <label>Precio de venta</label>
         <input type="number" id="np-precio" placeholder="0" value="0" min="0" step="0.01">
-
         <label>Unidad base *</label>
         <input type="text" id="np-unidad" placeholder="Unidad, Caja, Paquete..." value="Unidad">
-
         <label>Factor (cuántas unidades base vienen en una presentación)</label>
         <input type="number" id="np-factor" placeholder="1" value="1" min="1">
-
         <label>Stock mínimo (para alertas)</label>
         <input type="number" id="np-stock-min" placeholder="2" value="2" min="0">
-
         <label>Código de barras (opcional)</label>
         <input type="text" id="np-codigo" placeholder="Ej: 7701234567890">
-
         <label>¿Controla vencimiento?</label>
         <select id="np-controla-venc">
           <option value="No">No</option>
@@ -411,13 +135,11 @@ let productos = [];
 let elegido = null;
 let modo = 'inicial';
 
-// --- CARGA INICIAL ---
 (async function () {
   mostrarMensaje('Cargando productos...', 'aviso');
   try {
     const r = await apiGet('accion=inventario');
     if (!r.ok) throw new Error(r.error);
-    
     productos = r.items;
     mostrarMensaje('¡Catálogo cargado!', 'ok');
     setTimeout(() => { document.getElementById('estado').style.display = 'none'; }, 3000);
@@ -471,7 +193,6 @@ function filtrar() {
     return stockB - stockA;
   });
 
-  // Contador arriba
   if (resultados.length > 0) {
     const contador = document.createElement('div');
     contador.className = 'contador';
@@ -571,9 +292,6 @@ function cambiarModo(m) {
   document.getElementById('conteo').value = '';
 }
 
-// ============================================
-// NUEVO PRODUCTO
-// ============================================
 function abrirNuevoProducto() {
   document.getElementById('np-nombre').value = '';
   document.getElementById('np-categoria').value = 'General';

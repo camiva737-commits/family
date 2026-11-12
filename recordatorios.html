@@ -8,170 +8,51 @@
 <script src="comun.js?v=11"></script>
 <link rel="stylesheet" href="tema.css">
 <style>
-  /* Personalización específica de recordatorios */
-  
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-  
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--borde);
-    border-radius: 14px;
-    padding: 14px 8px;
-    text-align: center;
-    box-shadow: var(--shadow-1);
-    transition: 0.15s;
-  }
-  
-  .stat-card:active {
-    transform: scale(0.97);
-  }
-  
-  .stat-num {
-    font-size: 22px;
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-  }
-  
-  .stat-lbl {
-    font-size: 10px;
-    color: var(--suave);
-    margin-top: 4px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-  }
-  
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+  .stat-card { background: var(--card); border: 1px solid var(--borde); border-radius: 14px; padding: 14px 8px; text-align: center; box-shadow: var(--shadow-1); transition: 0.15s; }
+  .stat-card:active { transform: scale(0.97); }
+  .stat-num { font-size: 22px; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; }
+  .stat-lbl { font-size: 10px; color: var(--suave); margin-top: 4px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; }
   .stat-card.stock .stat-num { color: var(--peligro); }
   .stat-card.venc .stat-num { color: var(--warning); }
   .stat-card.precio .stat-num { color: var(--info); }
   .stat-card.dev .stat-num { color: #A855F7; }
-  
-  .filtros-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  
-  .filtros-grid select {
-    margin-bottom: 0;
-    padding: 10px 14px;
-    font-size: 13px;
-  }
-  
-  /* Recordatorios */
-  .rec-item {
-    background: var(--card);
-    border: 1px solid var(--borde);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    box-shadow: var(--shadow-1);
-    border-left: 4px solid var(--borde);
-    transition: 0.15s;
-  }
-  
+  .filtros-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .filtros-grid select { margin-bottom: 0; padding: 10px 14px; font-size: 13px; }
+  .rec-item { background: var(--card); border: 1px solid var(--borde); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow-1); border-left: 4px solid var(--borde); transition: 0.15s; }
   .rec-item.stock_bajo { border-left-color: var(--peligro); }
   .rec-item.vencimiento_proximo { border-left-color: var(--warning); }
   .rec-item.incremento_precio { border-left-color: var(--info); }
   .rec-item.devolucion_pendiente { border-left-color: #A855F7; }
   .rec-item.completado { opacity: 0.55; border-left-color: var(--borde); }
-  
-  .rec-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-    gap: 8px;
-  }
-  
-  .rec-msg {
-    flex: 1;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
-    color: var(--texto);
-  }
-  
-  .tipo-badge {
-    font-size: 10px;
-    padding: 3px 9px;
-    border-radius: 9999px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  
+  .rec-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 8px; }
+  .rec-msg { flex: 1; font-size: 14px; font-weight: 500; line-height: 1.4; color: var(--texto); }
+  .tipo-badge { font-size: 10px; padding: 3px 9px; border-radius: 9999px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; white-space: nowrap; flex-shrink: 0; }
   .tipo-badge.stock_bajo { background: var(--peligro-bg); color: var(--peligro); }
   .tipo-badge.vencimiento_proximo { background: var(--warning-bg); color: var(--warning); }
   .tipo-badge.incremento_precio { background: var(--info-bg); color: var(--info); }
   .tipo-badge.devolucion_pendiente { background: #F3E8FF; color: #A855F7; }
-  
-  .rec-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    color: var(--suave);
-  }
-  
-  .btn-completar {
-    background: var(--ok-bg);
-    color: var(--ok);
-    border: 1px solid var(--ok);
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.15s;
-  }
-  
-  .btn-completar:hover {
-    background: var(--ok);
-    color: #FFF;
-  }
-  
-  .btn-completar:active {
-    transform: scale(0.96);
-  }
-  
-  .completado-badge {
-    color: var(--ok);
-    font-weight: 700;
-    font-size: 12px;
-  }
+  .rec-footer { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--suave); }
+  .btn-completar { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.15s; }
+  .btn-completar:hover { background: var(--ok); color: #FFF; }
+  .completado-badge { color: var(--ok); font-weight: 700; font-size: 12px; }
 </style>
 </head>
 <body>
 
-  <!-- ============================================
-       HEADER
-       ============================================ -->
   <div class="page-header">
     <div class="page-header-left">
       <h1 style="color: var(--acento); margin: 0;">Recordatorios</h1>
       <p class="subtitulo">Alertas inteligentes del inventario</p>
     </div>
     <div class="page-header-right">
-  <button class="icon-btn" id="btn-tema" onclick="Tema.cambiar()" title="Cambiar tema">🌙</button>
-  <button class="icon-btn" onclick="window.location.href='index.html'" title="Volver">←</button>
-</div>
+      <button class="icon-btn" id="btn-tema" onclick="Tema.cambiar()" title="Cambiar tema">🌙</button>
+      <button class="icon-btn" onclick="window.location.href='index.html'" title="Volver">←</button>
+    </div>
   </div>
 
   <div id="estado" style="display: none;"></div>
 
-  <!-- ============================================
-       STATS
-       ============================================ -->
   <div class="stats-grid">
     <div class="stat-card stock">
       <div class="stat-num" id="stat-stock">-</div>
@@ -191,9 +72,6 @@
     </div>
   </div>
 
-  <!-- ============================================
-       FILTROS
-       ============================================ -->
   <div class="filtros-grid">
     <select id="filtro-estado" onchange="cargarRecordatorios()">
       <option value="pendiente">Pendientes</option>
@@ -209,9 +87,6 @@
     </select>
   </div>
 
-  <!-- ============================================
-       LISTA
-       ============================================ -->
   <div id="lista-recordatorios">
     <div class="empty-state">
       <div class="empty-state-icon">⏳</div>
@@ -316,30 +191,16 @@ async function marcarCompletado(id) {
 function mostrarEstado(msg, tipo) {
   const el = document.getElementById('estado');
   el.textContent = msg;
-  el.className = tipo;
   el.style.display = 'block';
-  // Aplicar estilos del tema a los estados
-  if (tipo === 'ok') {
-    el.style.background = 'var(--ok-bg)';
-    el.style.color = 'var(--ok)';
-    el.style.border = '1px solid var(--ok)';
-    el.style.padding = '14px';
-    el.style.borderRadius = '12px';
-    el.style.textAlign = 'center';
-    el.style.fontWeight = 'bold';
-    el.style.fontSize = '14px';
-    el.style.marginBottom = '16px';
-  } else if (tipo === 'error') {
-    el.style.background = 'var(--peligro-bg)';
-    el.style.color = 'var(--peligro)';
-    el.style.border = '1px solid var(--peligro)';
-    el.style.padding = '14px';
-    el.style.borderRadius = '12px';
-    el.style.textAlign = 'center';
-    el.style.fontWeight = 'bold';
-    el.style.fontSize = '14px';
-    el.style.marginBottom = '16px';
-  }
+  el.style.padding = '14px';
+  el.style.borderRadius = '12px';
+  el.style.textAlign = 'center';
+  el.style.fontWeight = '700';
+  el.style.fontSize = '14px';
+  el.style.marginBottom = '16px';
+  el.style.background = tipo === 'ok' ? 'var(--ok-bg)' : 'var(--peligro-bg)';
+  el.style.color = tipo === 'ok' ? 'var(--ok)' : 'var(--peligro)';
+  el.style.border = '1px solid ' + (tipo === 'ok' ? 'var(--ok)' : 'var(--peligro)');
 }
 
 function formatearFecha(fecha) {

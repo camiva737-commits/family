@@ -10,485 +10,90 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css">
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
 <style>
-  /* ============================================
-     PERSONALIZACIÓN DE ENTRADAS
-     ============================================ */
-  
-  .tabs {
-    display: flex;
-    background: var(--card);
-    border-radius: 14px;
-    padding: 4px;
-    margin-bottom: 16px;
-    border: 1px solid var(--borde);
-    box-shadow: var(--shadow-1);
-  }
-  
-  .tabs button {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    background: transparent;
-    color: var(--suave);
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    transition: 0.2s;
-    font-family: inherit;
-  }
-  
-  .tabs button.active {
-    background: var(--acento);
-    color: #FFF;
-    box-shadow: 0 2px 8px rgba(242, 140, 0, 0.3);
-  }
-  
+  .tabs { display: flex; background: var(--card); border-radius: 14px; padding: 4px; margin-bottom: 16px; border: 1px solid var(--borde); box-shadow: var(--shadow-1); }
+  .tabs button { flex: 1; padding: 12px; border: none; border-radius: 10px; background: transparent; color: var(--suave); font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; font-family: inherit; }
+  .tabs button.active { background: var(--acento); color: #FFF; box-shadow: 0 2px 8px rgba(242, 140, 0, 0.3); }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
-  
-  /* Input cámara */
-  .input-camara-group {
-    display: flex;
-    gap: 8px;
-    align-items: stretch;
-    margin-bottom: 12px;
-  }
-  
-  .input-camara-group input {
-    margin-bottom: 0;
-    flex: 1;
-    min-width: 0;
-  }
-  
-  .btn-camara {
-    padding: 0 14px;
-    border-radius: var(--radius-input);
-    background: var(--acento);
-    border: none;
-    font-size: 18px;
-    color: #FFF;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.15s;
-  }
-  
-  .btn-camara:hover {
-    background: var(--acento-2);
-  }
-  
-  .btn-camara:active {
-    transform: scale(0.95);
-  }
-  
-  .btn-camara:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  /* Líneas agregadas */
-  .linea {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--borde);
-    cursor: pointer;
-  }
-  
+  .input-camara-group { display: flex; gap: 8px; align-items: stretch; margin-bottom: 12px; }
+  .input-camara-group input { margin-bottom: 0; flex: 1; min-width: 0; }
+  .btn-camara { padding: 0 14px; border-radius: var(--radius-input); background: var(--acento); border: none; font-size: 18px; color: #FFF; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
+  .btn-camara:hover { background: var(--acento-2); }
+  .btn-camara:active { transform: scale(0.95); }
+  .btn-camara:disabled { opacity: 0.5; cursor: not-allowed; }
+  .linea { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--borde); cursor: pointer; }
   .linea:last-child { border-bottom: none; }
-  
   .linea-info { flex: 1; min-width: 0; }
-  
-  .linea-info h4 {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--texto);
-    margin-bottom: 4px;
-  }
-  
-  .linea-info p {
-    font-size: 12px;
-    color: var(--suave);
-    margin-top: 4px;
-  }
-  
-  .badge-unidad {
-    display: inline-block;
-    background: var(--acento-suave);
-    padding: 2px 8px;
-    border-radius: 9999px;
-    font-size: 10px;
-    font-weight: 700;
-    margin-left: 6px;
-    color: var(--primario);
-  }
-  
-  .btn-eliminar {
-    background: none;
-    border: none;
-    color: var(--peligro);
-    font-size: 20px;
-    cursor: pointer;
-    padding: 5px;
-    line-height: 1;
-  }
-  
-  .linea-pendiente {
-    border-left: 4px solid var(--peligro);
-    padding-left: 12px;
-    background: var(--peligro-bg);
-    border-radius: 8px;
-    padding: 12px;
-    cursor: pointer;
-  }
-  
-  .linea-pendiente h4 {
-    color: var(--peligro);
-    font-size: 14px;
-    font-weight: 700;
-  }
-  
-  .linea-pendiente p {
-    color: var(--suave);
-    font-size: 12px;
-  }
-  
-  /* Buscador flotante */
-  #buscador-wrapper {
-    display: none;
-    background: var(--bg);
-    position: sticky;
-    top: 0;
-    padding: 10px 0;
-    z-index: 10;
-  }
-  
-  .resultado {
-    padding: 12px 14px;
-    background: var(--card);
-    border-bottom: 1px solid var(--borde);
-    cursor: pointer;
-    transition: 0.1s;
-  }
-  
+  .linea-info h4 { font-size: 14px; font-weight: 700; color: var(--texto); margin-bottom: 4px; }
+  .linea-info p { font-size: 12px; color: var(--suave); margin-top: 4px; }
+  .badge-unidad { display: inline-block; background: var(--acento-suave); padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 700; margin-left: 6px; color: var(--primario); }
+  .btn-eliminar { background: none; border: none; color: var(--peligro); font-size: 20px; cursor: pointer; padding: 5px; line-height: 1; }
+  .linea-pendiente { border-left: 4px solid var(--peligro); padding: 12px; background: var(--peligro-bg); border-radius: 8px; cursor: pointer; }
+  .linea-pendiente h4 { color: var(--peligro); font-size: 14px; font-weight: 700; }
+  .linea-pendiente p { color: var(--suave); font-size: 12px; }
+  #buscador-wrapper { display: none; background: var(--bg); position: sticky; top: 0; padding: 10px 0; z-index: 10; }
+  .resultado { padding: 12px 14px; background: var(--card); border-bottom: 1px solid var(--borde); cursor: pointer; transition: 0.1s; }
   .resultado:hover { background: var(--input-hover); }
   .resultado:active { background: var(--input); }
-  
-  /* Historial */
-  .hist-filtros {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  
-  .hist-filtros input,
-  .hist-filtros select {
-    margin-bottom: 0;
-    padding: 10px 14px;
-    font-size: 13px;
-  }
-  
-  .hist-item {
-    background: var(--card);
-    border: 1px solid var(--borde);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    box-shadow: var(--shadow-1);
-    transition: 0.15s;
-  }
-  
-  .hist-item:hover {
-    transform: translateX(2px);
-    box-shadow: var(--shadow-2);
-  }
-  
-  .hist-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 6px;
-    gap: 8px;
-  }
-  
-  .hist-item-header h4 {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--texto);
-    margin: 0;
-  }
-  
-  .hist-item-header .total {
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--acento);
-    white-space: nowrap;
-  }
-  
-  .hist-item p {
-    font-size: 12px;
-    color: var(--suave);
-    margin: 3px 0;
-  }
-  
-  .hist-item .badge {
-    display: inline-block;
-    background: var(--acento-suave);
-    color: var(--primario);
-    padding: 3px 10px;
-    border-radius: 9999px;
-    font-size: 10px;
-    font-weight: 700;
-  }
-  
-  /* Modal detalle recepción */
-  .modal-detalle {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  
+  .hist-filtros { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hist-filtros input, .hist-filtros select { margin-bottom: 0; padding: 10px 14px; font-size: 13px; }
+  .hist-item { background: var(--card); border: 1px solid var(--borde); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; box-shadow: var(--shadow-1); transition: 0.15s; }
+  .hist-item:hover { transform: translateX(2px); box-shadow: var(--shadow-2); }
+  .hist-item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 8px; }
+  .hist-item-header h4 { font-size: 14px; font-weight: 700; color: var(--texto); margin: 0; }
+  .hist-item-header .total { font-size: 15px; font-weight: 800; color: var(--acento); white-space: nowrap; }
+  .hist-item p { font-size: 12px; color: var(--suave); margin: 3px 0; }
+  .hist-item .badge { display: inline-block; background: var(--acento-suave); color: var(--primario); padding: 3px 10px; border-radius: 9999px; font-size: 10px; font-weight: 700; }
+  .modal-detalle { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
   .modal-detalle.open { display: flex; }
-  
-  .modal-detalle-content {
-    background: var(--card);
-    border-radius: 16px;
-    max-width: 500px;
-    width: 100%;
-    max-height: 90vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow-3);
-    border: 1px solid var(--borde);
-  }
-  
-  .modal-detalle-header {
-    padding: 16px;
-    background: var(--input);
-    border-bottom: 1px solid var(--borde);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .modal-detalle-header h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--texto);
-    margin: 0;
-  }
-  
-  .modal-detalle-header button {
-    background: none;
-    border: none;
-    color: var(--suave);
-    font-size: 22px;
-    cursor: pointer;
-    line-height: 1;
-  }
-  
-  .modal-detalle-body {
-    padding: 16px;
-    overflow-y: auto;
-  }
-  
-  .detalle-producto {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--borde);
-  }
-  
+  .modal-detalle-content { background: var(--card); border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow-3); border: 1px solid var(--borde); }
+  .modal-detalle-header { padding: 16px; background: var(--input); border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; }
+  .modal-detalle-header h3 { font-size: 16px; font-weight: 700; color: var(--texto); margin: 0; }
+  .modal-detalle-header button { background: none; border: none; color: var(--suave); font-size: 22px; cursor: pointer; line-height: 1; }
+  .modal-detalle-body { padding: 16px; overflow-y: auto; }
+  .detalle-producto { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--borde); }
   .detalle-producto:last-child { border-bottom: none; }
-  
-  .detalle-producto-info h5 {
-    font-size: 14px;
-    font-weight: 700;
-    margin: 0 0 2px 0;
-    color: var(--texto);
-  }
-  
-  .detalle-producto-info p {
-    font-size: 12px;
-    color: var(--suave);
-    margin: 0;
-  }
-  
-  .detalle-producto-total {
-    text-align: right;
-    font-size: 13px;
-    font-weight: 600;
-  }
-  
-  .detalle-producto-total strong {
-    color: var(--acento);
-    font-weight: 800;
-  }
-  
-  /* Modal nuevo proveedor */
-  .modal-prov {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-  }
-  
+  .detalle-producto-info h5 { font-size: 14px; font-weight: 700; margin: 0 0 2px 0; color: var(--texto); }
+  .detalle-producto-info p { font-size: 12px; color: var(--suave); margin: 0; }
+  .detalle-producto-total { text-align: right; font-size: 13px; font-weight: 600; }
+  .detalle-producto-total strong { color: var(--acento); font-weight: 800; }
+  .modal-prov { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 16px; }
   .modal-prov.open { display: flex; }
-  
-  .modal-prov-content {
-    background: var(--card);
-    border-radius: 18px;
-    max-width: 460px;
-    width: 100%;
-    max-height: 92vh;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid var(--borde);
-    box-shadow: var(--shadow-3);
-  }
-  
-  .modal-prov-header {
-    padding: 16px;
-    border-bottom: 1px solid var(--borde);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--input);
-    border-radius: 18px 18px 0 0;
-  }
-  
-  .modal-prov-header h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--texto);
-    margin: 0;
-  }
-  
-  .modal-prov-header button {
-    background: none;
-    border: none;
-    color: var(--suave);
-    font-size: 22px;
-    cursor: pointer;
-    line-height: 1;
-  }
-  
-  .modal-prov-body {
-    padding: 16px;
-    overflow-y: auto;
-  }
-  
-  .modal-prov-body label {
-    display: block;
-    font-size: 12px;
-    color: var(--suave);
-    margin-bottom: 6px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    margin-top: 12px;
-  }
-  
+  .modal-prov-content { background: var(--card); border-radius: 18px; max-width: 460px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; border: 1px solid var(--borde); box-shadow: var(--shadow-3); }
+  .modal-prov-header { padding: 16px; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; background: var(--input); border-radius: 18px 18px 0 0; }
+  .modal-prov-header h3 { font-size: 16px; font-weight: 700; color: var(--texto); margin: 0; }
+  .modal-prov-header button { background: none; border: none; color: var(--suave); font-size: 22px; cursor: pointer; line-height: 1; }
+  .modal-prov-body { padding: 16px; overflow-y: auto; }
+  .modal-prov-body label { display: block; font-size: 12px; color: var(--suave); margin-bottom: 6px; font-weight: 700; letter-spacing: 0.02em; margin-top: 12px; }
   .modal-prov-body label:first-child { margin-top: 0; }
   .modal-prov-body input { margin-bottom: 0; }
-  
-  .modal-prov-footer {
-    padding: 12px 16px;
-    border-top: 1px solid var(--borde);
-    display: flex;
-    gap: 10px;
-    background: var(--input);
-    border-radius: 0 0 18px 18px;
-  }
-  
-  .modal-prov-footer button {
-    flex: 1;
-    padding: 14px;
-    border-radius: var(--radius-input);
-    border: none;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  
-  .btn-cancelar-prov {
-    background: var(--card);
-    color: var(--suave);
-    border: 1px solid var(--borde);
-  }
-  
-  .btn-guardar-prov {
-    background: var(--acento-2);
-    color: #FFF;
-  }
-  
+  .modal-prov-footer { padding: 12px 16px; border-top: 1px solid var(--borde); display: flex; gap: 10px; background: var(--input); border-radius: 0 0 18px 18px; }
+  .modal-prov-footer button { flex: 1; padding: 14px; border-radius: var(--radius-input); border: none; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .btn-cancelar-prov { background: var(--card); color: var(--suave); border: 1px solid var(--borde); }
+  .btn-guardar-prov { background: var(--acento-2); color: #FFF; }
   .btn-guardar-prov:hover { background: var(--acento); }
   .btn-guardar-prov:disabled { opacity: 0.5; cursor: not-allowed; }
-  
-  /* Modal recorte */
-  #modal-recorte {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 9999;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
+  #modal-recorte { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
 </style>
 </head>
 <body>
 
-  <!-- ============================================
-       HEADER
-       ============================================ -->
   <div class="page-header">
     <div class="page-header-left">
       <h1 style="color: var(--acento); margin: 0;">Recepción</h1>
       <p class="subtitulo">Registro de mercancía nueva</p>
     </div>
-   <div class="page-header-right">
-  <button class="icon-btn" id="btn-tema" onclick="Tema.cambiar()" title="Cambiar tema">🌙</button>
-  <button class="icon-btn" onclick="if(confirmarVolverEntrada()) window.location.href='index.html'" title="Volver">←</button>
-</div>
+    <div class="page-header-right">
+      <button class="icon-btn" id="btn-tema" onclick="Tema.cambiar()" title="Cambiar tema">🌙</button>
+      <button class="icon-btn" onclick="if(confirmarVolverEntrada()) window.location.href='index.html'" title="Volver">←</button>
+    </div>
   </div>
 
-  <!-- ============================================
-       TABS
-       ============================================ -->
   <div class="tabs">
     <button id="tab-nueva-btn" class="active" onclick="cambiarTabRecepcion('nueva')">📥 Nueva</button>
     <button id="tab-hist-btn" onclick="cambiarTabRecepcion('historial')">📋 Historial</button>
   </div>
 
-  <!-- ============================================
-       TAB NUEVA
-       ============================================ -->
   <div id="tab-nueva" class="tab-content active">
 
     <div id="estado" style="display: none;"></div>
@@ -521,11 +126,7 @@
 
   </div>
 
-  <!-- ============================================
-       TAB HISTORIAL
-       ============================================ -->
   <div id="tab-historial" class="tab-content">
-
     <div class="card">
       <div class="hist-filtros">
         <input type="text" id="hist-busqueda" placeholder="🔍 Producto o factura..." oninput="cargarHistorial()">
@@ -543,21 +144,14 @@
         <div class="empty-state-text">Toca "Historial" para cargar</div>
       </div>
     </div>
-
   </div>
 
-  <!-- ============================================
-       BUSCADOR FLOTANTE
-       ============================================ -->
   <div id="buscador-wrapper">
     <input type="text" id="input-buscar" placeholder="🔍 Buscar producto..." oninput="filtrar()" class="search-bar">
     <div id="resultados-busqueda" style="max-height: 300px; overflow-y: auto; border-radius: 12px; overflow: hidden; border: 1px solid var(--borde);"></div>
     <button class="btn-secundario" style="margin-top: 10px; color: var(--peligro); border-color: var(--peligro);" onclick="cerrarBuscador()">Cancelar</button>
   </div>
 
-  <!-- ============================================
-       MODAL NUEVO PROVEEDOR
-       ============================================ -->
   <div id="modal-nuevo-prov" class="modal-prov" onclick="if(event.target.id==='modal-nuevo-prov')cerrarNuevoProveedor()">
     <div class="modal-prov-content">
       <div class="modal-prov-header">
@@ -567,10 +161,8 @@
       <div class="modal-prov-body">
         <label>Nombre *</label>
         <input type="text" id="nprov-nombre" placeholder="Ej: Distribuidora Jencar">
-
         <label>Número / NIT</label>
         <input type="text" id="nprov-numero" placeholder="Ej: 7314450-5">
-
         <label>Correo</label>
         <input type="email" id="nprov-correo" placeholder="Ej: contacto@proveedor.com">
       </div>
@@ -581,41 +173,25 @@
     </div>
   </div>
 
-  <!-- ============================================
-       MODAL DETALLE RECEPCIÓN
-       ============================================ -->
   <div id="modal-detalle" class="modal-detalle" onclick="if(event.target.id==='modal-detalle')cerrarDetalle()">
     <div class="modal-detalle-content">
       <div class="modal-detalle-header">
         <h3>Detalle de recepción</h3>
         <button onclick="cerrarDetalle()">×</button>
       </div>
-      <div class="modal-detalle-body" id="detalle-contenido">
-        Cargando...
-      </div>
+      <div class="modal-detalle-body" id="detalle-contenido">Cargando...</div>
     </div>
   </div>
 
-  <!-- ============================================
-       MODAL RECORTE
-       ============================================ -->
   <div id="modal-recorte">
-    <p style="color:#FFF; font-size:16px; font-weight:bold; margin-bottom:10px; text-align:center;">
-      Ajusta el recuadro para que solo quede la factura
-    </p>
+    <p style="color:#FFF; font-size:16px; font-weight:bold; margin-bottom:10px; text-align:center;">Ajusta el recuadro para que solo quede la factura</p>
     <div style="width:100%; max-width:600px; height:60vh; background:#000; border-radius:12px; overflow:hidden;">
       <img id="imagen-a-recortar" style="max-width:100%; display:block;">
     </div>
     <div style="display:flex; gap:10px; margin-top:20px; width:100%; max-width:600px;">
-      <button onclick="cancelarRecorte()" style="flex:1; padding:14px; border-radius:12px; border:1px solid #94A3B8; background:transparent; color:#94A3B8; font-weight:bold; font-size:14px; cursor:pointer;">
-        Cancelar
-      </button>
-      <button onclick="usarImagenCompleta()" style="flex:1; padding:14px; border-radius:12px; border:1px solid #F59E0B; background:transparent; color:#F59E0B; font-weight:bold; font-size:14px; cursor:pointer;">
-        Enviar completa
-      </button>
-      <button onclick="aplicarRecorte()" style="flex:1; padding:14px; border-radius:12px; border:none; background:#10B981; color:#000; font-weight:bold; font-size:14px; cursor:pointer;">
-        Usar esta área
-      </button>
+      <button onclick="cancelarRecorte()" style="flex:1; padding:14px; border-radius:12px; border:1px solid #94A3B8; background:transparent; color:#94A3B8; font-weight:bold; font-size:14px; cursor:pointer;">Cancelar</button>
+      <button onclick="usarImagenCompleta()" style="flex:1; padding:14px; border-radius:12px; border:1px solid #F59E0B; background:transparent; color:#F59E0B; font-weight:bold; font-size:14px; cursor:pointer;">Enviar completa</button>
+      <button onclick="aplicarRecorte()" style="flex:1; padding:14px; border-radius:12px; border:none; background:#10B981; color:#000; font-weight:bold; font-size:14px; cursor:pointer;">Usar esta área</button>
     </div>
   </div>
 
@@ -624,9 +200,6 @@ let productos = [];
 let lineasAgregadas = [];
 let indexEditando = -1;
 
-// ============================================
-// CARGA INICIAL
-// ============================================
 (async function () {
   try {
     const r = await apiGet('accion=inventario');
@@ -683,9 +256,6 @@ async function cargarProveedores() {
   }
 }
 
-// ============================================
-// PROCESAR FOTO CON RECORTE
-// ============================================
 let cropper = null;
 let inputFotoActual = null;
 
@@ -694,27 +264,15 @@ async function procesarFotoIA(input) {
   if (!file) return;
   
   inputFotoActual = input;
-  
   const modal = document.getElementById('modal-recorte');
   const img = document.getElementById('imagen-a-recortar');
-  
   const url = URL.createObjectURL(file);
   img.src = url;
   modal.style.display = 'flex';
   
   img.onload = function() {
     if (cropper) cropper.destroy();
-    cropper = new Cropper(img, {
-      viewMode: 1,
-      autoCropArea: 0.9,
-      background: false,
-      responsive: true,
-      guides: true,
-      movable: true,
-      zoomable: true,
-      scalable: false,
-      rotatable: false
-    });
+    cropper = new Cropper(img, { viewMode: 1, autoCropArea: 0.9, background: false, responsive: true, guides: true, movable: true, zoomable: true, scalable: false, rotatable: false });
   };
 }
 
@@ -728,38 +286,25 @@ function cancelarRecorte() {
 async function usarImagenCompleta() {
   const modal = document.getElementById('modal-recorte');
   const img = document.getElementById('imagen-a-recortar');
-  
   modal.style.display = 'none';
   if (cropper) { cropper.destroy(); cropper = null; }
-  
   await enviarFotoIA(img.src, true);
   if (inputFotoActual) { inputFotoActual.value = ''; }
 }
 
 async function aplicarRecorte() {
   if (!cropper) return;
-  
   const modal = document.getElementById('modal-recorte');
-  
-  const canvasOriginal = cropper.getCroppedCanvas({
-    maxWidth: 2400,
-    maxHeight: 2400,
-    imageSmoothingQuality: 'high'
-  });
-  
+  const canvasOriginal = cropper.getCroppedCanvas({ maxWidth: 2400, maxHeight: 2400, imageSmoothingQuality: 'high' });
   const canvasMejorado = document.createElement('canvas');
   canvasMejorado.width = canvasOriginal.width;
   canvasMejorado.height = canvasOriginal.height;
   const ctx = canvasMejorado.getContext('2d');
-  
   ctx.filter = 'contrast(1.3) brightness(1.1) grayscale(0.2)';
   ctx.drawImage(canvasOriginal, 0, 0);
-  
   const dataUrl = canvasMejorado.toDataURL('image/jpeg', 0.92);
-  
   modal.style.display = 'none';
   if (cropper) { cropper.destroy(); cropper = null; }
-  
   await enviarFotoIA(dataUrl, false);
   if (inputFotoActual) { inputFotoActual.value = ''; }
 }
@@ -767,17 +312,12 @@ async function aplicarRecorte() {
 async function enviarFotoIA(dataUrl, esCompleta) {
   const botones = document.querySelectorAll('.btn-camara');
   botones.forEach(b => { b.disabled = true; });
-  
   mostrarMensaje((esCompleta ? 'Enviando imagen completa' : 'Enviando recorte') + ' a la IA... (puede tardar unos segundos)', 'aviso');
   
   try {
     const r = await apiPost({ accion: 'escanear_ia', base64: dataUrl }, 90);
-    
     if (!r.ok) throw new Error(r.error || 'No se pudo leer la factura');
-    
-    if (r.factura && document.getElementById('factura')) {
-      document.getElementById('factura').value = r.factura;
-    }
+    if (r.factura && document.getElementById('factura')) document.getElementById('factura').value = r.factura;
     
     (r.lineas || []).forEach(l => {
       const match = productos.find(p => p.id === l.id_producto);
@@ -792,21 +332,13 @@ async function enviarFotoIA(dataUrl, esCompleta) {
     });
     
     (r.sin_coincidencia || []).forEach(nombreOriginal => {
-      lineasAgregadas.push({
-        id_producto: null,
-        nombre: nombreOriginal,
-        unidad: 'Pendiente',
-        cantidad: 1,
-        stock_sistema: 0
-      });
+      lineasAgregadas.push({ id_producto: null, nombre: nombreOriginal, unidad: 'Pendiente', cantidad: 1, stock_sistema: 0 });
     });
     
     if (typeof renderizarLineas === 'function') renderizarLineas();
     
     let msg = 'Factura leída. Productos agregados: ' + (r.lineas || []).length + '.';
-    if (r.sin_coincidencia && r.sin_coincidencia.length) {
-      msg += '\n\nNo reconocí estos, agrégalos manualmente:\n- ' + r.sin_coincidencia.join('\n- ');
-    }
+    if (r.sin_coincidencia && r.sin_coincidencia.length) msg += '\n\nNo reconocí estos, agrégalos manualmente:\n- ' + r.sin_coincidencia.join('\n- ');
     alert(msg);
     document.getElementById('estado').style.display = 'none';
   } catch (err) {
@@ -816,18 +348,13 @@ async function enviarFotoIA(dataUrl, esCompleta) {
   }
 }
 
-// ============================================
-// BUSCADOR
-// ============================================
 function abrirBuscador(index) {
   indexEditando = (typeof index === 'number') ? index : -1;
   document.getElementById('buscador-wrapper').style.display = 'block';
   document.getElementById('input-buscar').focus();
 }
 
-function abrirBuscadorParaReemplazar(index) {
-  abrirBuscador(index);
-}
+function abrirBuscadorParaReemplazar(index) { abrirBuscador(index); }
 
 function cerrarBuscador() {
   document.getElementById('buscador-wrapper').style.display = 'none';
@@ -852,103 +379,62 @@ function filtrar() {
 
 function agregarLinea(p) {
   cerrarBuscador();
-  
   const controlaVenc = p.controla_vencimiento === true;
   
   if (indexEditando === -1) {
     const cant = prompt(`¿Cuántas unidades de ${p.nombre} llegaron?`);
     if (!cant || isNaN(cant)) return;
-    
     const precio = prompt(`¿A qué precio de compra llegó cada ${(p.unidad_base || 'Unidad').toLowerCase()} de ${p.nombre}?\n\n(Ej: 1811)`);
     if (precio === null) return;
     const precioNum = precio && !isNaN(precio) ? Number(precio) : '';
     
     let fechaVenc = '';
     if (controlaVenc) {
-      const fecha = prompt(
-        `Este producto controla vencimiento.\n\n¿Cuál es la FECHA DE VENCIMIENTO del lote?\n\nFormato: AAAA-MM-DD (ej: 2027-03-15)\n\n(Deja vacío si no la sabes)`
-      );
+      const fecha = prompt(`Este producto controla vencimiento.\n\n¿Cuál es la FECHA DE VENCIMIENTO del lote?\n\nFormato: AAAA-MM-DD (ej: 2027-03-15)\n\n(Deja vacío si no la sabes)`);
       if (fecha && fecha.trim()) {
         const fechaObj = new Date(fecha);
-        if (!isNaN(fechaObj.getTime())) {
-          fechaVenc = fecha.trim();
-        } else {
-          alert('Fecha inválida. Se guardará sin fecha de vencimiento.');
-        }
+        if (!isNaN(fechaObj.getTime())) fechaVenc = fecha.trim();
+        else alert('Fecha inválida. Se guardará sin fecha de vencimiento.');
       }
     }
     
     lineasAgregadas.push({
-      id_producto: p.id,
-      nombre: p.nombre,
-      unidad: p.unidad_base || 'Unidad',
-      cantidad: Number(cant),
-      precio: precioNum,
-      vencimiento: fechaVenc
+      id_producto: p.id, nombre: p.nombre, unidad: p.unidad_base || 'Unidad',
+      cantidad: Number(cant), precio: precioNum, vencimiento: fechaVenc
     });
   } else {
     const anterior = lineasAgregadas[indexEditando];
-    
     if (!anterior.id_producto) {
-      const confirmarTexto = confirm(
-        `La IA leyó: "${anterior.nombre}"\n\n` +
-        `¿Es correcto este texto en la factura?\n\n` +
-        `• Aceptar = Sí, es correcto\n` +
-        `• Cancelar = No, era otro texto`
-      );
-      
+      const confirmarTexto = confirm(`La IA leyó: "${anterior.nombre}"\n\n¿Es correcto este texto en la factura?\n\n• Aceptar = Sí, es correcto\n• Cancelar = No, era otro texto`);
       if (confirmarTexto) {
-        apiPost({
-          accion: 'guardar_alias',
-          alias: anterior.nombre,
-          id_producto: p.id
-        }).then(r => console.log('✅ Alias guardado:', r));
+        apiPost({ accion: 'guardar_alias', alias: anterior.nombre, id_producto: p.id }).then(r => console.log('✅ Alias guardado:', r));
       } else {
-        const textoReal = prompt(
-          `¿Cuál era el texto REAL en la factura? (escríbelo tal cual aparecía)`,
-          ''
-        );
+        const textoReal = prompt(`¿Cuál era el texto REAL en la factura? (escríbelo tal cual aparecía)`, '');
         if (textoReal && textoReal.trim()) {
-          apiPost({
-            accion: 'guardar_alias',
-            alias: textoReal.trim(),
-            id_producto: p.id
-          }).then(r => console.log('✅ Alias correcto guardado:', r));
+          apiPost({ accion: 'guardar_alias', alias: textoReal.trim(), id_producto: p.id }).then(r => console.log('✅ Alias correcto guardado:', r));
         }
       }
     }
     
     const cant = prompt(`¿Cuántas unidades de ${p.nombre}?`, anterior.cantidad || 1);
     if (!cant || isNaN(cant)) return;
-    
     const precio = prompt(`¿A qué precio de compra llegó cada ${(p.unidad_base || 'Unidad').toLowerCase()} de ${p.nombre}?`, anterior.precio || '');
     if (precio === null) return;
     const precioNum = precio && !isNaN(precio) ? Number(precio) : '';
     
     let fechaVenc = anterior.vencimiento || '';
     if (controlaVenc) {
-      const fecha = prompt(
-        `Fecha de vencimiento del lote de ${p.nombre}:\n\nFormato: AAAA-MM-DD`,
-        fechaVenc || ''
-      );
+      const fecha = prompt(`Fecha de vencimiento del lote de ${p.nombre}:\n\nFormato: AAAA-MM-DD`, fechaVenc || '');
       if (fecha === null) return;
       if (fecha.trim()) {
         const fechaObj = new Date(fecha);
-        if (!isNaN(fechaObj.getTime())) {
-          fechaVenc = fecha.trim();
-        }
-      } else {
-        fechaVenc = '';
-      }
+        if (!isNaN(fechaObj.getTime())) fechaVenc = fecha.trim();
+      } else fechaVenc = '';
     }
     
     lineasAgregadas[indexEditando] = {
-      id_producto: p.id,
-      nombre: p.nombre,
-      unidad: p.unidad_base || 'Unidad',
-      cantidad: Number(cant),
-      precio: precioNum,
-      vencimiento: fechaVenc
+      id_producto: p.id, nombre: p.nombre, unidad: p.unidad_base || 'Unidad',
+      cantidad: Number(cant), precio: precioNum, vencimiento: fechaVenc
     };
   }
   
@@ -971,23 +457,11 @@ function renderizarLineas() {
     if (!l.id_producto) {
       div.className = 'linea-pendiente';
       div.onclick = () => abrirBuscadorParaReemplazar(index);
-      div.innerHTML = `
-        <div class="linea-info">
-          <h4>${l.nombre} (No reconocido)</h4>
-          <p>Toca aquí para asignarle un producto del catálogo</p>
-        </div>
-        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>
-      `;
+      div.innerHTML = `<div class="linea-info"><h4>${l.nombre} (No reconocido)</h4><p>Toca aquí para asignarle un producto del catálogo</p></div><button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>`;
     } else {
       const precioTexto = l.precio ? ' · $' + Number(l.precio).toLocaleString('es-CO') + ' c/u' : ' · Sin precio';
       const vencTexto = l.vencimiento ? ' · 📅 Vence: ' + l.vencimiento : '';
-      div.innerHTML = `
-        <div class="linea-info" onclick="editarLinea(${index})">
-          <h4>${l.nombre} <span class="badge-unidad">${l.unidad}</span></h4>
-          <p>${l.cantidad} ${l.unidad.toLowerCase()}(s)${precioTexto}${vencTexto} (Toca para editar)</p>
-        </div>
-        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>
-      `;
+      div.innerHTML = `<div class="linea-info" onclick="editarLinea(${index})"><h4>${l.nombre} <span class="badge-unidad">${l.unidad}</span></h4><p>${l.cantidad} ${l.unidad.toLowerCase()}(s)${precioTexto}${vencTexto} (Toca para editar)</p></div><button class="btn-eliminar" onclick="event.stopPropagation(); eliminarLinea(${index})">×</button>`;
     }
     cont.appendChild(div);
   });
@@ -995,14 +469,9 @@ function renderizarLineas() {
 
 function editarLinea(index) {
   const l = lineasAgregadas[index];
-  
   const nuevaCant = prompt(`Cantidad de ${l.nombre}:`, l.cantidad);
   if (nuevaCant === null || nuevaCant === '' || isNaN(nuevaCant)) return;
-  
-  const nuevoPrecio = prompt(
-    `Precio de compra unitario de ${l.nombre}:\n\n(Deja vacío si no lo sabes)`,
-    l.precio || ''
-  );
+  const nuevoPrecio = prompt(`Precio de compra unitario de ${l.nombre}:\n\n(Deja vacío si no lo sabes)`, l.precio || '');
   if (nuevoPrecio === null) return;
   
   let nuevaFecha = l.vencimiento || '';
@@ -1010,25 +479,17 @@ function editarLinea(index) {
   const controlaVenc = productoOriginal && productoOriginal.controla_vencimiento === true;
   
   if (controlaVenc) {
-    const fecha = prompt(
-      `Fecha de vencimiento de ${l.nombre} (AAAA-MM-DD):\n\n(Deja vacío si no la sabes)`,
-      l.vencimiento || ''
-    );
+    const fecha = prompt(`Fecha de vencimiento de ${l.nombre} (AAAA-MM-DD):\n\n(Deja vacío si no la sabes)`, l.vencimiento || '');
     if (fecha === null) return;
     if (fecha.trim()) {
       const fechaObj = new Date(fecha);
-      if (!isNaN(fechaObj.getTime())) {
-        nuevaFecha = fecha.trim();
-      }
-    } else {
-      nuevaFecha = '';
-    }
+      if (!isNaN(fechaObj.getTime())) nuevaFecha = fecha.trim();
+    } else nuevaFecha = '';
   }
   
   lineasAgregadas[index].cantidad = Number(nuevaCant);
   lineasAgregadas[index].precio = nuevoPrecio && !isNaN(nuevoPrecio) ? Number(nuevoPrecio) : '';
   lineasAgregadas[index].vencimiento = nuevaFecha;
-  
   renderizarLineas();
 }
 
@@ -1040,7 +501,6 @@ function eliminarLinea(index) {
 async function guardarEntrada() {
   const factura = document.getElementById('factura').value.trim();
   const proveedor = document.getElementById('proveedor').value;
-
   if (!factura) return alert('Escribe el número de factura');
   if (!proveedor) return alert('Selecciona un proveedor');
   if (lineasAgregadas.length === 0) return alert('Agrega al menos un producto');
@@ -1050,8 +510,7 @@ async function guardarEntrada() {
   btn.disabled = true;
 
   const datos = {
-    factura: factura,
-    proveedor: proveedor,
+    factura: factura, proveedor: proveedor,
     fecha: new Date().toISOString().split('T')[0],
     lineas: lineasAgregadas
   };
@@ -1060,24 +519,16 @@ async function guardarEntrada() {
     const r = await apiPost({ accion: 'guardar_entrada', datos: datos });
     if (r.ok) {
       let mensaje = '¡Recepción guardada con éxito!\nID: ' + r.id_entrada;
-      
       if (r.alertas_devolucion && r.alertas_devolucion.length > 0) {
         mensaje += '\n\n🔄 ¡ATENCIÓN! Devoluciones pendientes:';
         r.alertas_devolucion.forEach(function(a) {
-          mensaje += '\n\n📦 ' + a.nombre_producto;
-          mensaje += '\n   • Devolución: ' + a.id_devolucion;
-          mensaje += '\n   • Cantidad recibida: ' + a.cantidad_entrada;
-          mensaje += '\n   • Cantidad pendiente: ' + a.cantidad_pendiente;
+          mensaje += '\n\n📦 ' + a.nombre_producto + '\n   • Devolución: ' + a.id_devolucion + '\n   • Cantidad recibida: ' + a.cantidad_entrada + '\n   • Cantidad pendiente: ' + a.cantidad_pendiente;
         });
       }
-      
       if (r.alertas_vencimiento && r.alertas_vencimiento.length > 0) {
         mensaje += '\n\n⏰ Productos próximos a vencer:';
-        r.alertas_vencimiento.forEach(function(a) {
-          mensaje += '\n• ' + a.nombre + ' — vence en ' + a.dias + ' días';
-        });
+        r.alertas_vencimiento.forEach(function(a) { mensaje += '\n• ' + a.nombre + ' — vence en ' + a.dias + ' días'; });
       }
-      
       alert(mensaje);
       window.location.href = 'index.html';
     } else {
@@ -1091,27 +542,16 @@ async function guardarEntrada() {
   }
 }
 
-// ============================================
-// MÓDULO DE VOZ
-// ============================================
 let reconocimientoVoz = null;
 let dictadoActivo = false;
 let textoCapturado = '';
 
 function iniciarDictado() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    alert('Tu navegador no soporta dictado por voz. Usa Chrome.');
-    return;
-  }
-
+  if (!SpeechRecognition) { alert('Tu navegador no soporta dictado por voz. Usa Chrome.'); return; }
   const btn = document.getElementById('btn-microfono');
-
-  if (dictadoActivo && reconocimientoVoz) {
-    reconocimientoVoz.stop();
-    return;
-  }
-
+  if (dictadoActivo && reconocimientoVoz) { reconocimientoVoz.stop(); return; }
+  
   textoCapturado = '';
   reconocimientoVoz = new SpeechRecognition();
   reconocimientoVoz.lang = 'es-CO';
@@ -1125,60 +565,40 @@ function iniciarDictado() {
     btn.textContent = '⏹️';
     mostrarMensaje('🎤 Escuchando... Habla claro y espera.', 'ok');
   };
-
   reconocimientoVoz.onresult = function(event) {
-    if (event.results && event.results[0] && event.results[0][0]) {
-      textoCapturado = event.results[0][0].transcript || '';
-    }
+    if (event.results && event.results[0] && event.results[0][0]) textoCapturado = event.results[0][0].transcript || '';
   };
-
   reconocimientoVoz.onerror = function(event) {
     dictadoActivo = false;
     btn.style.background = '';
     btn.textContent = '🎤';
     mostrarMensaje('Error de micrófono: ' + event.error, 'error');
   };
-
   reconocimientoVoz.onend = async function() {
     dictadoActivo = false;
     btn.style.background = '';
     btn.textContent = '🎤';
-
     if (!textoCapturado || textoCapturado.trim() === '') {
       mostrarMensaje('⚠️ No se captó audio. Intenta de nuevo.', 'error');
       return;
     }
-
     mostrarMensaje('📝 Procesando: "' + textoCapturado + '"...', 'aviso');
-
     try {
       const proveedor = document.getElementById('proveedor').value;
-      const r = await apiPost({
-        accion: 'parsear_texto',
-        texto: textoCapturado,
-        id_proveedor: proveedor
-      }, 60);
-
+      const r = await apiPost({ accion: 'parsear_texto', texto: textoCapturado, id_proveedor: proveedor }, 60);
       if (!r.ok) throw new Error(r.error || 'No se pudo interpretar');
-
       (r.lineas || []).forEach(l => {
         const match = productos.find(p => p.id === l.id_producto);
         lineasAgregadas.push({
-          id_producto: l.id_producto,
-          nombre: l.nombre,
+          id_producto: l.id_producto, nombre: l.nombre,
           unidad: match ? (match.unidad_base || l.unidad || 'Unidad') : (l.unidad || 'Unidad'),
-          cantidad: l.cantidad,
-          precio: l.precio || ''
+          cantidad: l.cantidad, precio: l.precio || ''
         });
       });
-
       renderizarLineas();
-
       let msg = '📝 Tú dijiste: "' + (r.texto_recibido || textoCapturado) + '"\n\n';
       msg += '🤖 Gemini entendió:\n';
-      (r.gemini_dijo && r.gemini_dijo.lineas ? r.gemini_dijo.lineas : []).forEach(function(l) {
-        msg += '  • ' + l.descripcion + ' (' + l.cantidad + ' ' + l.unidad + ')\n';
-      });
+      (r.gemini_dijo && r.gemini_dijo.lineas ? r.gemini_dijo.lineas : []).forEach(function(l) { msg += '  • ' + l.descripcion + ' (' + l.cantidad + ' ' + l.unidad + ')\n'; });
       msg += '\n✅ Se agregaron ' + (r.lineas || []).length + ' producto(s).';
       alert(msg);
       document.getElementById('estado').style.display = 'none';
@@ -1186,7 +606,6 @@ function iniciarDictado() {
       mostrarMensaje('Error: ' + err.message, 'error');
     }
   };
-
   reconocimientoVoz.start();
 }
 
@@ -1202,9 +621,7 @@ function confirmarVolverEntrada() {
 }
 
 function limpiarEntrada() {
-  if (lineasAgregadas.length === 0 && !document.getElementById('factura').value) {
-    return alert('No hay datos para limpiar.');
-  }
+  if (lineasAgregadas.length === 0 && !document.getElementById('factura').value) return alert('No hay datos para limpiar.');
   if (confirm('¿Seguro que quieres borrar todos los productos de la lista?')) {
     lineasAgregadas = [];
     document.getElementById('factura').value = '';
@@ -1214,15 +631,11 @@ function limpiarEntrada() {
   }
 }
 
-// ============================================
-// TABS
-// ============================================
 function cambiarTabRecepcion(tab) {
   document.getElementById('tab-nueva-btn').classList.remove('active');
   document.getElementById('tab-hist-btn').classList.remove('active');
   document.getElementById('tab-nueva').classList.remove('active');
   document.getElementById('tab-historial').classList.remove('active');
-  
   if (tab === 'nueva') {
     document.getElementById('tab-nueva-btn').classList.add('active');
     document.getElementById('tab-nueva').classList.add('active');
@@ -1233,9 +646,6 @@ function cambiarTabRecepcion(tab) {
   }
 }
 
-// ============================================
-// HISTORIAL
-// ============================================
 let proveedoresCargados = false;
 
 async function cargarHistorial() {
@@ -1269,30 +679,18 @@ async function cargarHistorial() {
   try {
     const r = await apiPost({ accion: 'listar_recepciones', filtros: filtros }, 60);
     if (!r.ok) throw new Error(r.error || 'Error al cargar');
-    
     if (!r.recepciones || r.recepciones.length === 0) {
       lista.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">No hay recepciones registradas.</div></div>';
       return;
     }
-    
     let html = '<p style="text-align: center; color: var(--suave); font-size: 12px; margin-bottom: 12px;">' + r.recepciones.length + ' recepción(es)</p>';
-    
     r.recepciones.forEach(function(rec) {
       const fecha = rec.fecha ? formatearFecha(rec.fecha) : 'Sin fecha';
       const proveedor = rec.proveedor_nombre || 'Sin proveedor';
       const factura = rec.factura || 'Sin factura';
       const total = '$' + rec.total.toLocaleString('es-CO');
-      
-      html += '<div class="hist-item" onclick="verDetalleRecepcion(\'' + rec.id + '\')">' +
-        '<div class="hist-item-header">' +
-          '<h4>' + fecha + '</h4>' +
-          '<span class="total">' + total + '</span>' +
-        '</div>' +
-        '<p>' + proveedor + ' · ' + factura + '</p>' +
-        '<p><span class="badge">' + rec.numProductos + ' producto(s)</span></p>' +
-      '</div>';
+      html += '<div class="hist-item" onclick="verDetalleRecepcion(\'' + rec.id + '\')"><div class="hist-item-header"><h4>' + fecha + '</h4><span class="total">' + total + '</span></div><p>' + proveedor + ' · ' + factura + '</p><p><span class="badge">' + rec.numProductos + ' producto(s)</span></p></div>';
     });
-    
     lista.innerHTML = html;
   } catch (err) {
     lista.innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text" style="color: var(--peligro);">Error: ' + err.message + '</div></div>';
@@ -1319,35 +717,13 @@ async function verDetalleRecepcion(idEntrada) {
   try {
     const r = await apiPost({ accion: 'detalle_recepcion', id_entrada: idEntrada }, 30);
     if (!r.ok) throw new Error(r.error);
-    
     const rec = r.recepcion;
     const fecha = rec.fecha ? formatearFecha(rec.fecha) : 'Sin fecha';
-    
-    let html = '<div style="margin-bottom: 16px; background: var(--input); padding: 12px; border-radius: 12px;">' +
-      '<p style="font-size: 13px; color: var(--suave);">Fecha: <strong style="color: var(--texto);">' + fecha + '</strong></p>' +
-      '<p style="font-size: 13px; color: var(--suave);">Proveedor: <strong style="color: var(--texto);">' + (rec.proveedor_nombre || '—') + '</strong></p>' +
-      '<p style="font-size: 13px; color: var(--suave);">Factura: <strong style="color: var(--texto);">' + (rec.factura || '—') + '</strong></p>' +
-    '</div>' +
-    '<div style="border-top: 1px solid var(--borde); padding-top: 12px;">';
-    
+    let html = '<div style="margin-bottom: 16px; background: var(--input); padding: 12px; border-radius: 12px;"><p style="font-size: 13px; color: var(--suave);">Fecha: <strong style="color: var(--texto);">' + fecha + '</strong></p><p style="font-size: 13px; color: var(--suave);">Proveedor: <strong style="color: var(--texto);">' + (rec.proveedor_nombre || '—') + '</strong></p><p style="font-size: 13px; color: var(--suave);">Factura: <strong style="color: var(--texto);">' + (rec.factura || '—') + '</strong></p></div><div style="border-top: 1px solid var(--borde); padding-top: 12px;">';
     rec.productos.forEach(function(p) {
-      html += '<div class="detalle-producto">' +
-        '<div class="detalle-producto-info">' +
-          '<h5>' + p.nombre + '</h5>' +
-          '<p>' + p.cantidad + ' ' + p.unidad.toLowerCase() + ' × $' + p.precio_unitario.toLocaleString('es-CO') + '</p>' +
-        '</div>' +
-        '<div class="detalle-producto-total">' +
-          '<strong>$' + p.subtotal.toLocaleString('es-CO') + '</strong>' +
-        '</div>' +
-      '</div>';
+      html += '<div class="detalle-producto"><div class="detalle-producto-info"><h5>' + p.nombre + '</h5><p>' + p.cantidad + ' ' + p.unidad.toLowerCase() + ' × $' + p.precio_unitario.toLocaleString('es-CO') + '</p></div><div class="detalle-producto-total"><strong>$' + p.subtotal.toLocaleString('es-CO') + '</strong></div></div>';
     });
-    
-    html += '</div>' +
-      '<div style="border-top: 2px solid var(--acento); margin-top: 12px; padding-top: 12px; display: flex; justify-content: space-between; font-size: 16px; font-weight: 800;">' +
-        '<span>Total</span>' +
-        '<span style="color: var(--acento);">$' + rec.total.toLocaleString('es-CO') + '</span>' +
-      '</div>';
-    
+    html += '</div><div style="border-top: 2px solid var(--acento); margin-top: 12px; padding-top: 12px; display: flex; justify-content: space-between; font-size: 16px; font-weight: 800;"><span>Total</span><span style="color: var(--acento);">$' + rec.total.toLocaleString('es-CO') + '</span></div>';
     contenido.innerHTML = html;
   } catch (err) {
     contenido.innerHTML = '<p style="color: var(--peligro);">Error: ' + err.message + '</p>';
@@ -1358,9 +734,6 @@ function cerrarDetalle() {
   document.getElementById('modal-detalle').classList.remove('open');
 }
 
-// ============================================
-// NUEVO PROVEEDOR
-// ============================================
 function abrirNuevoProveedor() {
   document.getElementById('nprov-nombre').value = '';
   document.getElementById('nprov-numero').value = '';
@@ -1380,25 +753,20 @@ async function guardarNuevoProveedor() {
     document.getElementById('nprov-nombre').focus();
     return;
   }
-
   const datos = {
     nombre: nombre,
     numero: document.getElementById('nprov-numero').value.trim(),
     correo: document.getElementById('nprov-correo').value.trim()
   };
-
   const btn = document.getElementById('nprov-btn-guardar');
   btn.disabled = true;
   btn.textContent = 'Guardando...';
-
   try {
     const r = await apiPost({ accion: 'crear_proveedor', datos: datos }, 30);
     if (!r.ok) throw new Error(r.error || 'No se pudo crear el proveedor');
-
     cerrarNuevoProveedor();
     await cargarProveedores();
     document.getElementById('proveedor').value = r.id_proveedor;
-
     alert('✅ Proveedor creado: ' + r.nombre + '\nID: ' + r.id_proveedor);
   } catch (err) {
     alert('❌ ' + err.message);
