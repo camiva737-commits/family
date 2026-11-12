@@ -5,102 +5,335 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Devoluciones · Distribuidora TAT</title>
 <script src="auth.js"></script>
-<script src="comun.js?v=10"></script>
+<script src="comun.js?v=11"></script>
+<link rel="stylesheet" href="tema.css">
 <style>
-  :root {
-    --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
-    --suave: #94A3B8; --borde: #334155; --acento: #EF4444; --peligro: #DC2626; --ok: #10B981;
+  /* Personalización específica de devoluciones */
+  
+  .tabs {
+    display: flex;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 4px;
+    margin-bottom: 16px;
+    border: 1px solid var(--borde);
+    box-shadow: var(--shadow-1);
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: var(--bg); color: var(--texto); padding: 20px; padding-bottom: 50px; }
   
-  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .header h1 { font-size: 24px; color: var(--acento); font-weight: 800; }
-  .btn-volver { background: none; border: none; color: var(--suave); font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
+  .tabs button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--suave);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+  }
   
-  .tabs { display: flex; background: var(--card); border-radius: 14px; padding: 4px; margin-bottom: 16px; border: 1px solid var(--borde); }
-  .tabs button { flex: 1; padding: 12px; border: none; border-radius: 10px; background: transparent; color: var(--suave); font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
-  .tabs button.active { background: var(--acento); color: #FFF; }
+  .tabs button.active {
+    background: var(--acento);
+    color: #FFF;
+    box-shadow: 0 2px 8px rgba(242, 140, 0, 0.3);
+  }
+  
   .tab-content { display: none; }
   .tab-content.active { display: block; }
   
-  #estado { padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: none; white-space: pre-line; }
-  .ok { background: rgba(16, 185, 129, 0.2); color: var(--ok); border: 1px solid var(--ok); }
-  .error { background: rgba(239, 68, 68, 0.2); color: var(--peligro); border: 1px solid var(--peligro); }
+  .fotos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
   
-  input, select, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--borde); background: var(--input); color: var(--texto); font-size: 15px; margin-bottom: 12px; outline: none; font-family: inherit; }
-  textarea { min-height: 80px; resize: vertical; }
+  .foto-item {
+    position: relative;
+    aspect-ratio: 1;
+    background: var(--input);
+    border-radius: 10px;
+    overflow: hidden;
+  }
   
-  .card { background: var(--card); padding: 16px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--borde); }
+  .foto-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
   
-  .btn-primario { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--acento); color: #FFF; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; }
-  .btn-primario:disabled { opacity: 0.6; }
-  .btn-secundario { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--acento); background: transparent; color: var(--acento); font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+  .foto-item .btn-x {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: var(--peligro);
+    color: #FFF;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   
-  .fotos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-  .foto-item { position: relative; aspect-ratio: 1; background: var(--input); border-radius: 10px; overflow: hidden; }
-  .foto-item img { width: 100%; height: 100%; object-fit: cover; }
-  .foto-item .btn-x { position: absolute; top: 4px; right: 4px; background: rgba(239, 68, 68, 0.9); color: #FFF; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; cursor: pointer; }
-  .foto-vacia { aspect-ratio: 1; background: var(--input); border: 2px dashed var(--borde); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--suave); font-size: 28px; cursor: pointer; }
+  .foto-vacia {
+    aspect-ratio: 1;
+    background: var(--input);
+    border: 2px dashed var(--borde);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--suave);
+    font-size: 26px;
+    cursor: pointer;
+    transition: 0.15s;
+  }
   
-  .dev-item { background: var(--card); border: 1px solid var(--borde); border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer; border-left: 4px solid var(--borde); }
-  .dev-item.pendiente { border-left-color: #EF4444; }
-  .dev-item.en_proceso { border-left-color: #F59E0B; }
-  .dev-item.cambio_recibido { border-left-color: #3B82F6; }
-  .dev-item.cerrada { border-left-color: #10B981; opacity: 0.7; }
-  .dev-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px; }
-  .dev-header h4 { font-size: 14px; margin: 0; }
-  .dev-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-  .dev-badge.pendiente { background: rgba(239, 68, 68, 0.2); color: #EF4444; }
-  .dev-badge.en_proceso { background: rgba(245, 158, 11, 0.2); color: #F59E0B; }
-  .dev-badge.cambio_recibido { background: rgba(59, 130, 246, 0.2); color: #3B82F6; }
-  .dev-badge.cerrada { background: rgba(16, 185, 129, 0.2); color: #10B981; }
-  .dev-item p { font-size: 12px; color: var(--suave); margin: 2px 0; }
-  .dev-fotos { display: flex; gap: 4px; margin-top: 8px; }
-  .dev-fotos img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
+  .foto-vacia:hover {
+    border-color: var(--acento);
+    color: var(--acento);
+    background: var(--acento-suave);
+  }
   
-  /* Modal */
-  .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .producto-sel {
+    background: var(--acento-suave);
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--acento);
+  }
+  
+  .producto-sel-lbl {
+    font-size: 11px;
+    color: var(--primario);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  
+  .producto-sel-nombre {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--texto);
+  }
+  
+  /* Resultados de búsqueda */
+  .dev-resultado {
+    padding: 12px;
+    background: var(--card);
+    border-bottom: 1px solid var(--borde);
+    cursor: pointer;
+    transition: 0.1s;
+  }
+  
+  .dev-resultado:hover {
+    background: var(--input-hover);
+  }
+  
+  .dev-resultado strong {
+    font-size: 14px;
+    color: var(--texto);
+  }
+  
+  .dev-resultado span {
+    font-size: 12px;
+    color: var(--suave);
+  }
+  
+  /* Items de la lista de devoluciones */
+  .dev-item {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    border-left: 4px solid var(--borde);
+    box-shadow: var(--shadow-1);
+    transition: 0.15s;
+  }
+  
+  .dev-item:hover {
+    transform: translateX(2px);
+    box-shadow: var(--shadow-2);
+  }
+  
+  .dev-item.pendiente { border-left-color: var(--peligro); }
+  .dev-item.en_proceso { border-left-color: var(--warning); }
+  .dev-item.cambio_recibido { border-left-color: var(--info); }
+  .dev-item.cerrada { border-left-color: var(--ok); opacity: 0.7; }
+  
+  .dev-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+  
+  .dev-header h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--texto);
+    flex: 1;
+  }
+  
+  .dev-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .dev-badge.pendiente { background: var(--peligro-bg); color: var(--peligro); }
+  .dev-badge.en_proceso { background: var(--warning-bg); color: var(--warning); }
+  .dev-badge.cambio_recibido { background: var(--info-bg); color: var(--info); }
+  .dev-badge.cerrada { background: var(--ok-bg); color: var(--ok); }
+  
+  .dev-item p {
+    font-size: 12px;
+    color: var(--suave);
+    margin: 3px 0;
+  }
+  
+  .dev-fotos {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  
+  .dev-fotos img {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid var(--borde);
+  }
+  
+  /* Modal detalle */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
   .modal.open { display: flex; }
-  .modal-content { background: var(--card); border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
-  .modal-header { padding: 16px; background: var(--input); border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; }
-  .modal-body { padding: 16px; overflow-y: auto; }
+  
+  .modal-content {
+    background: var(--card);
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-3);
+    border: 1px solid var(--borde);
+  }
+  
+  .modal-header {
+    padding: 16px;
+    background: var(--input);
+    border-bottom: 1px solid var(--borde);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .modal-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--texto);
+    margin: 0;
+  }
+  
+  .modal-header button {
+    background: none;
+    border: none;
+    color: var(--suave);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  
+  .modal-body {
+    padding: 16px;
+    overflow-y: auto;
+  }
 </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>🔄 Devoluciones</h1>
-    <a href="index.html" class="btn-volver">← Volver</a>
+  <!-- ============================================
+       HEADER
+       ============================================ -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 style="color: var(--acento); margin: 0;">Devoluciones</h1>
+      <p class="subtitulo">Gestionar productos con problemas</p>
+    </div>
+    <div class="page-header-right">
+      <button class="icon-btn" onclick="window.location.href='index.html'" title="Volver">←</button>
+    </div>
   </div>
 
+  <!-- ============================================
+       TABS
+       ============================================ -->
   <div class="tabs">
-    <button id="tab-nueva-btn" class="active" onclick="cambiarTab('nueva')">➕ Nueva devolución</button>
+    <button id="tab-nueva-btn" class="active" onclick="cambiarTab('nueva')">➕ Nueva</button>
     <button id="tab-lista-btn" onclick="cambiarTab('lista')">📋 Listado</button>
   </div>
 
   <div id="estado" style="display: none;"></div>
 
-  <!-- TAB NUEVA -->
+  <!-- ============================================
+       TAB NUEVA
+       ============================================ -->
   <div id="tab-nueva" class="tab-content active">
+    
     <div class="card">
+      <label class="label" style="display: block; margin-bottom: 8px;">Producto</label>
       <input type="text" id="dev-buscar" placeholder="🔍 Buscar producto..." oninput="buscarProducto()" autocomplete="off">
-      <div id="dev-resultados" style="max-height: 250px; overflow-y: auto; border-radius: 12px; overflow: hidden; margin-bottom: 12px; display: none;"></div>
-      <div id="dev-producto-sel" style="display: none; background: var(--input); padding: 12px; border-radius: 12px; margin-bottom: 12px;">
-        <p style="font-size: 13px; color: var(--suave);">Producto seleccionado:</p>
-        <p id="dev-producto-nombre" style="font-size: 15px; font-weight: bold;"></p>
+      <div id="dev-resultados" style="max-height: 250px; overflow-y: auto; border-radius: 12px; overflow: hidden; display: none; border: 1px solid var(--borde);"></div>
+      <div id="dev-producto-sel" class="producto-sel" style="display: none;">
+        <div class="producto-sel-lbl">Producto seleccionado</div>
+        <div id="dev-producto-nombre" class="producto-sel-nombre"></div>
       </div>
     </div>
     
     <div class="card">
+      <label class="label" style="display: block; margin-bottom: 8px;">Datos de la devolución</label>
       <input type="number" id="dev-cantidad" placeholder="Cantidad a devolver" min="1">
       <select id="dev-proveedor">
-        <option value="">Seleccione proveedor (opcional)...</option>
+        <option value="">Proveedor (opcional)</option>
       </select>
       <input type="date" id="dev-fecha">
-      <textarea id="dev-observacion" placeholder="Observaciones (opcional): describe el problema..."></textarea>
+      <textarea id="dev-observacion" placeholder="Observaciones (opcional): describe el problema..." style="min-height: 80px; resize: vertical;"></textarea>
       
-      <p style="font-size: 13px; color: var(--suave); margin-bottom: 8px;">Fotos de evidencia (hasta 3):</p>
+      <label class="label" style="display: block; margin-bottom: 8px; margin-top: 4px;">Fotos de evidencia (máx. 3)</label>
       <div class="fotos-grid" id="fotos-grid">
         <div class="foto-vacia" onclick="document.getElementById('foto-input').click()">📷</div>
       </div>
@@ -110,7 +343,9 @@
     <button class="btn-primario" id="btn-crear" onclick="crearDevolucion()">Registrar Devolución</button>
   </div>
 
-  <!-- TAB LISTA -->
+  <!-- ============================================
+       TAB LISTA
+       ============================================ -->
   <div id="tab-lista" class="tab-content">
     <div class="card">
       <select id="filtro-estado" onchange="cargarListado()">
@@ -123,16 +358,21 @@
       <input type="text" id="filtro-busqueda" placeholder="🔍 Buscar por producto..." oninput="cargarListado()">
     </div>
     <div id="lista-devoluciones">
-      <p style="text-align: center; color: var(--suave); font-size: 14px;">Cargando...</p>
+      <div class="empty-state">
+        <div class="empty-state-icon">⏳</div>
+        <div class="empty-state-text">Cargando...</div>
+      </div>
     </div>
   </div>
 
-  <!-- MODAL DETALLE -->
+  <!-- ============================================
+       MODAL DETALLE
+       ============================================ -->
   <div id="modal-detalle" class="modal" onclick="if(event.target.id==='modal-detalle')cerrarDetalle()">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 style="font-size: 16px;">Detalle de devolución</h3>
-        <button onclick="cerrarDetalle()" style="background:none;border:none;color:var(--suave);font-size:22px;cursor:pointer;">×</button>
+        <h3>Detalle de devolución</h3>
+        <button onclick="cerrarDetalle()">×</button>
       </div>
       <div class="modal-body" id="detalle-contenido">Cargando...</div>
     </div>
@@ -208,7 +448,7 @@ function buscarProducto() {
   }).slice(0, 10);
   
   if (filtrados.length === 0) {
-    cont.innerHTML = '<div style="padding: 12px; color: var(--suave); text-align: center;">No encontrado</div>';
+    cont.innerHTML = '<div style="padding: 12px; color: var(--suave); text-align: center; font-size: 13px;">No encontrado</div>';
     cont.style.display = 'block';
     return;
   }
@@ -216,11 +456,8 @@ function buscarProducto() {
   cont.innerHTML = '';
   filtrados.forEach(function(p) {
     const div = document.createElement('div');
-    div.style.padding = '12px';
-    div.style.background = 'var(--input)';
-    div.style.borderBottom = '1px solid var(--borde)';
-    div.style.cursor = 'pointer';
-    div.innerHTML = '<strong>' + p.nombre + '</strong> <span style="color: var(--suave); font-size: 12px;">(stock: ' + p.stock_actual + ' ' + p.unidad_base + ')</span>';
+    div.className = 'dev-resultado';
+    div.innerHTML = '<strong>' + p.nombre + '</strong> <span>(stock: ' + p.stock_actual + ' ' + p.unidad_base + ')</span>';
     div.onclick = function() {
       seleccionarProducto(p);
     };
@@ -296,7 +533,6 @@ async function crearDevolucion() {
   btn.disabled = true;
   
   try {
-    // 1. Primero subir fotos
     const urlsFotos = [];
     for (let i = 0; i < fotosSubidas.length; i++) {
       const r = await apiPost({
@@ -308,7 +544,6 @@ async function crearDevolucion() {
       if (r.ok && r.url) urlsFotos.push(r.url);
     }
     
-    // 2. Crear la devolución
     const datos = {
       id_producto: productoSeleccionado.id,
       cantidad: cantidad,
@@ -321,7 +556,6 @@ async function crearDevolucion() {
     const r = await apiPost({ accion: 'crear_devolucion', datos: datos }, 60);
     if (r.ok) {
       alert('✅ Devolución registrada: ' + r.id_devolucion);
-      // Limpiar formulario
       productoSeleccionado = null;
       document.getElementById('dev-producto-sel').style.display = 'none';
       document.getElementById('dev-cantidad').value = '';
@@ -346,7 +580,7 @@ async function crearDevolucion() {
 // ============================================
 async function cargarListado() {
   const cont = document.getElementById('lista-devoluciones');
-  cont.innerHTML = '<p style="text-align: center; color: var(--suave); font-size: 14px;">Cargando...</p>';
+  cont.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-text">Cargando...</div></div>';
   
   const filtros = {
     estado: document.getElementById('filtro-estado').value,
@@ -360,11 +594,11 @@ async function cargarListado() {
     devolucionesActuales = r.items || [];
     
     if (devolucionesActuales.length === 0) {
-      cont.innerHTML = '<p style="text-align: center; color: var(--suave); font-size: 14px; padding: 20px;">No hay devoluciones.</p>';
+      cont.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📦</div><div class="empty-state-text">No hay devoluciones registradas.</div></div>';
       return;
     }
     
-    let html = '<p style="text-align: center; color: var(--suave); font-size: 12px; margin-bottom: 8px;">' + devolucionesActuales.length + ' devolución(es)</p>';
+    let html = '<p style="text-align: center; color: var(--suave); font-size: 12px; margin-bottom: 12px;">' + devolucionesActuales.length + ' devolución(es)</p>';
     
     devolucionesActuales.forEach(function(d) {
       const estadoClass = d.estado.toLowerCase().replace(/_/g, '_');
@@ -393,7 +627,7 @@ async function cargarListado() {
     
     cont.innerHTML = html;
   } catch (e) {
-    cont.innerHTML = '<p style="text-align: center; color: var(--peligro); font-size: 14px;">Error: ' + e.message + '</p>';
+    cont.innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text" style="color: var(--peligro);">Error: ' + e.message + '</div></div>';
   }
 }
 
@@ -420,30 +654,32 @@ function verDetalle(id) {
   const estados = ['Pendiente', 'En_proceso', 'Cambio_recibido', 'Cerrada'];
   let estadosHtml = '<select id="nuevo-estado" style="margin-bottom: 12px;">';
   estados.forEach(function(e) {
-    estadosHtml += '<option value="' + e + '"' + (dev.estado === e ? ' selected' : '') + '>' + e + '</option>';
+    estadosHtml += '<option value="' + e + '"' + (dev.estado === e ? ' selected' : '') + '>' + e.replace(/_/g, ' ') + '</option>';
   });
   estadosHtml += '</select>';
   
   let fotosHtml = '';
   if (dev.foto_urls.length > 0) {
-    fotosHtml = '<p style="font-size: 13px; color: var(--suave); margin-bottom: 8px;">Fotos:</p><div class="dev-fotos" style="flex-wrap: wrap;">';
+    fotosHtml = '<p style="font-size: 13px; color: var(--suave); margin-bottom: 8px;">Fotos:</p><div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">';
     dev.foto_urls.forEach(function(url) {
-      fotosHtml += '<a href="' + url + '" target="_blank"><img src="' + url + '" style="width: 80px; height: 80px;"></a>';
+      fotosHtml += '<a href="' + url + '" target="_blank"><img src="' + url + '" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 1px solid var(--borde);"></a>';
     });
     fotosHtml += '</div>';
   }
   
   contenido.innerHTML = 
-    '<h3 style="font-size: 18px; margin-bottom: 8px;">' + dev.nombre_producto + '</h3>' +
-    '<p style="font-size: 12px; color: var(--suave); margin-bottom: 12px;">' + dev.id + '</p>' +
-    '<p style="margin-bottom: 6px;"><strong>Cantidad:</strong> ' + dev.cantidad + ' ' + dev.unidad.toLowerCase() + '(s)</p>' +
-    '<p style="margin-bottom: 6px;"><strong>Pendiente:</strong> ' + dev.cantidad_pendiente + '</p>' +
-    '<p style="margin-bottom: 6px;"><strong>Fecha:</strong> ' + (dev.fecha ? formatFecha(dev.fecha) : 'Sin fecha') + '</p>' +
-    (dev.nombre_proveedor ? '<p style="margin-bottom: 6px;"><strong>Proveedor:</strong> ' + dev.nombre_proveedor + '</p>' : '') +
-    (dev.observacion ? '<p style="margin-bottom: 12px;"><strong>Observación:</strong><br>' + dev.observacion + '</p>' : '') +
+    '<h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--texto);">' + dev.nombre_producto + '</h3>' +
+    '<p style="font-size: 12px; color: var(--suave); margin-bottom: 14px;">' + dev.id + '</p>' +
+    '<div style="background: var(--input); padding: 14px; border-radius: 12px; margin-bottom: 14px;">' +
+      '<p style="margin-bottom: 6px; font-size: 13px;"><strong>Cantidad:</strong> ' + dev.cantidad + ' ' + dev.unidad.toLowerCase() + '(s)</p>' +
+      '<p style="margin-bottom: 6px; font-size: 13px;"><strong>Pendiente:</strong> ' + dev.cantidad_pendiente + '</p>' +
+      '<p style="margin-bottom: 6px; font-size: 13px;"><strong>Fecha:</strong> ' + (dev.fecha ? formatFecha(dev.fecha) : 'Sin fecha') + '</p>' +
+      (dev.nombre_proveedor ? '<p style="margin-bottom: 6px; font-size: 13px;"><strong>Proveedor:</strong> ' + dev.nombre_proveedor + '</p>' : '') +
+      (dev.observacion ? '<p style="margin-bottom: 0; font-size: 13px;"><strong>Observación:</strong><br>' + dev.observacion + '</p>' : '') +
+    '</div>' +
     fotosHtml +
-    '<hr style="margin: 16px 0; border-color: var(--borde);">' +
-    '<p style="font-size: 13px; margin-bottom: 8px;"><strong>Cambiar estado:</strong></p>' +
+    '<hr style="margin: 16px 0; border: none; border-top: 1px solid var(--borde);">' +
+    '<p class="label" style="margin-bottom: 8px; display: block;">Cambiar estado</p>' +
     estadosHtml +
     '<input type="number" id="cantidad-recibida" placeholder="Cantidad recibida (si aplica)" min="0" style="margin-bottom: 12px;">' +
     '<button class="btn-primario" onclick="actualizarEstado()">Guardar cambios</button>';
