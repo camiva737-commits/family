@@ -53,6 +53,24 @@
   .input-camara-group input { margin-bottom: 0; flex: 1; min-width: 0; }
   .btn-camara { padding: 0 16px; border-radius: 12px; background: var(--acento); border: none; font-size: 20px; color: #FFF; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .btn-camara:disabled { opacity: 0.5; }
+    /* Botón "+ Nuevo cliente" */
+  .btn-nuevo-cli { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--acento); background: transparent; color: var(--acento); font-size: 14px; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
+  .btn-nuevo-cli:active { background: rgba(239, 68, 68, 0.1); }
+
+  /* Modal de nuevo cliente */
+  .modal-cli { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 16px; }
+  .modal-cli.open { display: flex; }
+  .modal-cli-content { background: var(--card); border-radius: 18px; max-width: 460px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; border: 1px solid var(--borde); }
+  .modal-cli-header { padding: 16px; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; }
+  .modal-cli-body { padding: 16px; overflow-y: auto; }
+  .modal-cli-body label { display: block; font-size: 13px; color: var(--suave); margin-bottom: 6px; font-weight: bold; margin-top: 12px; }
+  .modal-cli-body label:first-child { margin-top: 0; }
+  .modal-cli-body input { margin-bottom: 0; }
+  .modal-cli-footer { padding: 12px 16px; border-top: 1px solid var(--borde); display: flex; gap: 10px; }
+  .modal-cli-footer button { flex: 1; padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: bold; cursor: pointer; }
+  .btn-cancelar-cli { background: var(--input); color: var(--suave); }
+  .btn-guardar-cli { background: var(--acento); color: #FFF; }
+  .btn-guardar-cli:disabled { opacity: 0.5; }
 </style>
 </head>
 <body>
@@ -74,11 +92,12 @@
     <input type="file" id="fotoCamara" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoIA(this)">
     <input type="file" id="fotoGaleria" accept="image/*" style="display: none;" onchange="procesarFotoIA(this)">
     
-    <div style="position:relative;">
+        <div style="position:relative;">
   <input type="text" id="cliente-input" placeholder="Buscar cliente..." oninput="buscarCliente(this.value)" onfocus="buscarCliente(this.value)" autocomplete="off">
   <input type="hidden" id="cliente" value="esporadico" onchange="guardarBorrador()">
   <div id="cliente-resultados" style="display:none; position:absolute; top:100%; left:0; right:0; background:#1A1D2D; border:1px solid #334155; border-radius:12px; max-height:250px; overflow-y:auto; z-index:100; margin-top:4px;"></div>
 </div>
+<button class="btn-nuevo-cli" onclick="abrirNuevoCliente()">+ Nuevo cliente</button>
   </div>
 
   <div id="lista-lineas" class="card">
@@ -94,6 +113,33 @@
     <div id="resultados-busqueda" style="max-height: 300px; overflow-y: auto; border-radius: 12px; overflow: hidden;"></div>
     <button class="btn-volver" style="margin-top: 10px; color: var(--peligro);" onclick="cerrarBuscador()">Cancelar</button>
   </div>
+    <!-- ==================== MODAL NUEVO CLIENTE ==================== -->
+  <div id="modal-nuevo-cli" class="modal-cli" onclick="if(event.target.id==='modal-nuevo-cli')cerrarNuevoCliente()">
+    <div class="modal-cli-content">
+      <div class="modal-cli-header">
+        <h3 style="font-size: 16px;">Nuevo cliente</h3>
+        <button onclick="cerrarNuevoCliente()" style="background:none;border:none;color:var(--suave);font-size:22px;cursor:pointer;">×</button>
+      </div>
+      <div class="modal-cli-body">
+        <label>Nombre *</label>
+        <input type="text" id="nc-nombre" placeholder="Ej: Juan">
+
+        <label>Apellido</label>
+        <input type="text" id="nc-apellido" placeholder="Ej: Pérez">
+
+        <label>Número / Teléfono</label>
+        <input type="tel" id="nc-numero" placeholder="Ej: 3001234567">
+
+        <label>Dirección</label>
+        <input type="text" id="nc-direccion" placeholder="Ej: Calle 10 #5-20">
+      </div>
+      <div class="modal-cli-footer">
+        <button class="btn-cancelar-cli" onclick="cerrarNuevoCliente()">Cancelar</button>
+        <button class="btn-guardar-cli" id="nc-btn-guardar" onclick="guardarNuevoCliente()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
 <div id="modal-recorte" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
   <p style="color:#FFF; font-size:16px; font-weight:bold; margin-bottom:10px; text-align:center;">
     Ajusta el recuadro para que solo quede la factura
@@ -829,6 +875,68 @@ function limpiarSalida() {
     renderizarLineas();
     guardarBorrador();
     alert('✅ Lista limpiada. Puedes empezar de nuevo.');
+  }
+}
+// ============================================
+// NUEVO CLIENTE
+// ============================================
+function abrirNuevoCliente() {
+  document.getElementById('nc-nombre').value = '';
+  document.getElementById('nc-apellido').value = '';
+  document.getElementById('nc-numero').value = '';
+  document.getElementById('nc-direccion').value = '';
+  document.getElementById('modal-nuevo-cli').classList.add('open');
+  setTimeout(() => document.getElementById('nc-nombre').focus(), 100);
+}
+
+function cerrarNuevoCliente() {
+  document.getElementById('modal-nuevo-cli').classList.remove('open');
+}
+
+async function guardarNuevoCliente() {
+  const nombre = document.getElementById('nc-nombre').value.trim();
+  if (!nombre) {
+    alert('Escribe el nombre del cliente');
+    document.getElementById('nc-nombre').focus();
+    return;
+  }
+
+  const datos = {
+    nombre: nombre,
+    apellido: document.getElementById('nc-apellido').value.trim(),
+    numero: document.getElementById('nc-numero').value.trim(),
+    direccion: document.getElementById('nc-direccion').value.trim()
+  };
+
+  const btn = document.getElementById('nc-btn-guardar');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  try {
+    const r = await apiPost({ accion: 'crear_cliente', datos: datos }, 30);
+    if (!r.ok) throw new Error(r.error || 'No se pudo crear el cliente');
+
+    cerrarNuevoCliente();
+
+    // Recargar la lista de clientes en memoria
+    try {
+      const inv = await apiGet('accion=clientes');
+      if (inv.ok) {
+        clientesCache = inv.items || [];
+      }
+    } catch (e) { console.error('Error recargando clientes:', e); }
+
+    // Seleccionar automáticamente el cliente recién creado
+    document.getElementById('cliente-input').value = r.nombre_completo;
+    document.getElementById('cliente').value = r.id_cliente;
+    guardarBorrador();
+
+    alert('✅ Cliente creado: ' + r.nombre_completo + '\nID: ' + r.id_cliente);
+  } catch (err) {
+    alert('❌ ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar';
   }
 }
 </script>
