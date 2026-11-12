@@ -5,81 +5,351 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Inventario · Distribuidora TAT</title>
 <script src="auth.js"></script>
-<script src="comun.js?v=6"></script>
+<script src="comun.js?v=11"></script>
+<link rel="stylesheet" href="tema.css">
 <style>
-  :root {
-    --bg: #0F111A; --card: #1A1D2D; --input: #25293D; --texto: #F8FAFC; 
-    --suave: #94A3B8; --borde: #334155; --acento: #F59E0B; --peligro: #EF4444; --exito: #10B981;
+  /* Personalización específica de inventario */
+  
+  .toggle {
+    display: flex;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 4px;
+    margin-bottom: 16px;
+    border: 1px solid var(--borde);
+    box-shadow: var(--shadow-1);
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: var(--bg); color: var(--texto); padding: 20px; padding-bottom: 50px; }
   
-  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .header h1 { font-size: 24px; color: var(--acento); font-weight: 800; }
-  .btn-volver { background: none; border: none; color: var(--suave); font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
-
-  #estado { padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: none; }
-  .ok { background: rgba(16, 185, 129, 0.2); color: var(--exito); border: 1px solid var(--exito); }
-  .error { background: rgba(239, 68, 68, 0.2); color: var(--peligro); border: 1px solid var(--peligro); }
-  .aviso { background: rgba(245, 158, 11, 0.2); color: var(--acento); border: 1px solid var(--acento); }
-
-  .toggle { display: flex; background: var(--card); border-radius: 14px; padding: 4px; margin-bottom: 20px; border: 1px solid var(--borde); }
-  .toggle button { flex: 1; padding: 12px; border: none; border-radius: 10px; background: transparent; color: var(--suave); font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
-  .toggle button.active { background: var(--acento); color: #000; }
-
-  input[type="text"], input[type="number"], select { width: 100%; padding: 16px; border-radius: 14px; border: 1px solid var(--borde); background: var(--input); color: var(--texto); font-size: 16px; margin-bottom: 16px; outline: none; }
+  .toggle button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--suave);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+  }
   
-  .card { background: var(--card); padding: 16px; border-radius: 16px; margin-bottom: 12px; display: flex; gap: 16px; align-items: center; border: 1px solid var(--borde); cursor: pointer; }
-  .card img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; background: var(--input); }
-  .card .inicial { width: 50px; height: 50px; border-radius: 10px; background: var(--input); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--acento); font-weight: bold; }
-  .card-info h3 { font-size: 16px; }
-  .card-info p { font-size: 13px; color: var(--suave); margin-top: 4px; }
-
-  #panel { background: var(--card); padding: 24px; border-radius: 20px; border: 1px solid var(--borde); display: none; margin-top: 20px; }
-  .btn-primario { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--acento); color: #000; font-size: 16px; font-weight: 800; cursor: pointer; }
-    /* Botón "+ Nuevo producto" */
-  .btn-nuevo-prod { width: 100%; padding: 14px; border-radius: 14px; border: 1px dashed var(--acento); background: transparent; color: var(--acento); font-size: 15px; font-weight: bold; cursor: pointer; margin-bottom: 16px; }
-  .btn-nuevo-prod:active { background: rgba(245, 158, 11, 0.1); }
-
-  /* Modal de nuevo producto */
-  .modal-prod { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 16px; }
+  .toggle button.active {
+    background: var(--acento);
+    color: #FFF;
+    box-shadow: 0 2px 8px rgba(242, 140, 0, 0.3);
+  }
+  
+  .btn-nuevo-prod {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-input);
+    border: 1px dashed var(--acento);
+    background: transparent;
+    color: var(--acento);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: 0.15s;
+    font-family: inherit;
+  }
+  
+  .btn-nuevo-prod:hover {
+    background: var(--acento-suave);
+  }
+  
+  .btn-nuevo-prod:active {
+    transform: scale(0.98);
+  }
+  
+  /* Lista de productos */
+  .prod-card {
+    background: var(--card);
+    padding: 14px 16px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    border: 1px solid var(--borde);
+    cursor: pointer;
+    box-shadow: var(--shadow-1);
+    transition: 0.15s;
+  }
+  
+  .prod-card:hover {
+    transform: translateX(2px);
+    box-shadow: var(--shadow-2);
+  }
+  
+  .prod-card:active {
+    transform: scale(0.99);
+  }
+  
+  .prod-foto {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: var(--input);
+    flex-shrink: 0;
+  }
+  
+  .prod-inicial {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--acento-suave);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--acento);
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  
+  .prod-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .prod-info h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--texto);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .prod-info p {
+    font-size: 12px;
+    color: var(--suave);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  
+  .stock-positivo { color: var(--ok); font-weight: 700; font-size: 14px; }
+  .stock-cero { color: var(--peligro); font-weight: 700; font-size: 14px; }
+  .stock-negativo { color: var(--peligro); font-weight: 800; font-size: 14px; }
+  .stock-gris { color: var(--suave); font-weight: 600; font-size: 14px; }
+  
+  /* Panel de edición */
+  #panel {
+    background: var(--card);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid var(--borde);
+    display: none;
+    margin-top: 16px;
+    box-shadow: var(--shadow-2);
+  }
+  
+  #panel h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  
+  .stock-actual-info {
+    background: var(--acento-suave);
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border-left: 3px solid var(--acento);
+  }
+  
+  .stock-actual-info-lbl {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primario);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  
+  .stock-actual-info-val {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--acento);
+  }
+  
+  /* Modal nuevo producto */
+  .modal-prod {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  
   .modal-prod.open { display: flex; }
-  .modal-prod-content { background: var(--card); border-radius: 18px; max-width: 500px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; border: 1px solid var(--borde); }
-  .modal-prod-header { padding: 16px; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; }
-  .modal-prod-body { padding: 16px; overflow-y: auto; }
-  .modal-prod-body label { display: block; font-size: 13px; color: var(--suave); margin-bottom: 6px; font-weight: bold; margin-top: 12px; }
+  
+  .modal-prod-content {
+    background: var(--card);
+    border-radius: 18px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--borde);
+    box-shadow: var(--shadow-3);
+  }
+  
+  .modal-prod-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--borde);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--input);
+    border-radius: 18px 18px 0 0;
+  }
+  
+  .modal-prod-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--texto);
+    margin: 0;
+  }
+  
+  .modal-prod-header button {
+    background: none;
+    border: none;
+    color: var(--suave);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  
+  .modal-prod-body {
+    padding: 16px;
+    overflow-y: auto;
+  }
+  
+  .modal-prod-body label {
+    display: block;
+    font-size: 12px;
+    color: var(--suave);
+    margin-bottom: 6px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-top: 12px;
+  }
+  
   .modal-prod-body label:first-child { margin-top: 0; }
   .modal-prod-body input, .modal-prod-body select { margin-bottom: 0; }
-  .modal-prod-footer { padding: 12px 16px; border-top: 1px solid var(--borde); display: flex; gap: 10px; }
-  .modal-prod-footer button { flex: 1; padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: bold; cursor: pointer; }
-  .btn-cancelar-modal { background: var(--input); color: var(--suave); }
-  .btn-guardar-modal { background: var(--acento); color: #000; }
-  .btn-guardar-modal:disabled { opacity: 0.5; }
+  
+  .modal-prod-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--borde);
+    display: flex;
+    gap: 10px;
+    background: var(--input);
+    border-radius: 0 0 18px 18px;
+  }
+  
+  .modal-prod-footer button {
+    flex: 1;
+    padding: 14px;
+    border-radius: var(--radius-input);
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  
+  .btn-cancelar-modal {
+    background: var(--card);
+    color: var(--suave);
+    border: 1px solid var(--borde);
+  }
+  
+  .btn-guardar-modal {
+    background: var(--acento-2);
+    color: #FFF;
+  }
+  
+  .btn-guardar-modal:hover {
+    background: var(--acento);
+  }
+  
+  .btn-guardar-modal:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .contador {
+    text-align: center;
+    color: var(--suave);
+    font-size: 12px;
+    font-weight: 600;
+    margin: 12px 0;
+  }
 </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>Inventario</h1>
-    <a href="index.html" class="btn-volver" onclick="return confirmarVolverInventario()">← Volver</a>
+  <!-- ============================================
+       HEADER
+       ============================================ -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 style="color: var(--acento); margin: 0;">Inventario</h1>
+      <p class="subtitulo">Stock y ajustes</p>
+    </div>
+    <div class="page-header-right">
+      <button class="icon-btn" onclick="if(confirmarVolverInventario()) window.location.href='index.html'" title="Volver">←</button>
+    </div>
   </div>
 
-  <div id="estado" class="aviso" style="display: block;">Conectando con Google Sheets...</div>
+  <div id="estado" style="display: none;"></div>
 
+  <!-- ============================================
+       TOGGLE MODO
+       ============================================ -->
   <div class="toggle">
     <button id="btn-inicial" class="active" onclick="cambiarModo('inicial')">Conteo Inicial</button>
     <button id="btn-ajuste" onclick="cambiarModo('ajuste')">Ajuste de Stock</button>
   </div>
 
-    <button class="btn-nuevo-prod" onclick="abrirNuevoProducto()">+ Nuevo producto</button>
+  <!-- ============================================
+       BOTÓN NUEVO PRODUCTO
+       ============================================ -->
+  <button class="btn-nuevo-prod" onclick="abrirNuevoProducto()">+ Nuevo producto</button>
 
-  <input type="text" id="buscar" placeholder="Buscar producto..." autocomplete="off" oninput="filtrar()">
+  <!-- ============================================
+       BÚSQUEDA
+       ============================================ -->
+  <input type="text" id="buscar" placeholder="🔍 Buscar producto..." autocomplete="off" oninput="filtrar()" class="search-bar">
 
+  <!-- ============================================
+       LISTA
+       ============================================ -->
   <div id="lista"></div>
 
+  <!-- ============================================
+       PANEL DE EDICIÓN
+       ============================================ -->
   <div id="panel">
-    <h2 id="p-nombre" style="margin-bottom: 8px;">Producto</h2>
-    <p style="margin-bottom: 20px; color: var(--suave);">Stock actual: <strong id="p-stock" style="color: var(--acento); font-size: 20px;">0</strong></p>
+    <h2 id="p-nombre">Producto</h2>
+    <div class="stock-actual-info">
+      <div class="stock-actual-info-lbl">Stock actual</div>
+      <div class="stock-actual-info-val" id="p-stock">0</div>
+    </div>
     
     <input type="number" id="conteo" placeholder="Conteo real">
     
@@ -91,15 +361,17 @@
       </select>
     </div>
 
-       <button class="btn-primario" id="btn-guardar" onclick="guardarCambios()">Guardar Cambios</button>
+    <button class="btn-primario" id="btn-guardar" onclick="guardarCambios()">Guardar Cambios</button>
   </div>
 
-  <!-- ==================== MODAL NUEVO PRODUCTO ==================== -->
+  <!-- ============================================
+       MODAL NUEVO PRODUCTO
+       ============================================ -->
   <div id="modal-nuevo-prod" class="modal-prod" onclick="if(event.target.id==='modal-nuevo-prod')cerrarNuevoProducto()">
     <div class="modal-prod-content">
       <div class="modal-prod-header">
-        <h3 style="font-size: 16px;">Nuevo producto</h3>
-        <button onclick="cerrarNuevoProducto()" style="background:none;border:none;color:var(--suave);font-size:22px;cursor:pointer;">×</button>
+        <h3>Nuevo producto</h3>
+        <button onclick="cerrarNuevoProducto()">×</button>
       </div>
       <div class="modal-prod-body">
         <label>Nombre *</label>
@@ -145,14 +417,13 @@ let modo = 'inicial';
 (async function () {
   mostrarMensaje('Cargando productos...', 'aviso');
   try {
-    // Usamos JSONP enviando el texto tal cual
     const r = await apiGet('accion=inventario');
     if (!r.ok) throw new Error(r.error);
     
     productos = r.items;
     mostrarMensaje('¡Catálogo cargado!', 'ok');
     setTimeout(() => { document.getElementById('estado').style.display = 'none'; }, 3000);
-    filtrar(); // Mostrar la lista completa al entrar
+    filtrar();
   } catch (err) {
     mostrarMensaje('Error de conexión: ' + err.message, 'error');
   }
@@ -161,8 +432,27 @@ let modo = 'inicial';
 function mostrarMensaje(msg, tipo) {
   const el = document.getElementById('estado');
   el.textContent = msg;
-  el.className = tipo;
   el.style.display = 'block';
+  el.style.padding = '14px';
+  el.style.borderRadius = '12px';
+  el.style.textAlign = 'center';
+  el.style.fontWeight = '700';
+  el.style.fontSize = '14px';
+  el.style.marginBottom = '16px';
+  
+  if (tipo === 'ok') {
+    el.style.background = 'var(--ok-bg)';
+    el.style.color = 'var(--ok)';
+    el.style.border = '1px solid var(--ok)';
+  } else if (tipo === 'error') {
+    el.style.background = 'var(--peligro-bg)';
+    el.style.color = 'var(--peligro)';
+    el.style.border = '1px solid var(--peligro)';
+  } else {
+    el.style.background = 'var(--warning-bg)';
+    el.style.color = 'var(--warning)';
+    el.style.border = '1px solid var(--warning)';
+  }
 }
 
 function filtrar() {
@@ -170,43 +460,44 @@ function filtrar() {
   const cont = document.getElementById('lista');
   cont.innerHTML = '';
 
-  // Filtrar por búsqueda
   let resultados = productos;
   if (q.length > 0) {
     resultados = productos.filter(p => (p.id + ' ' + p.nombre).toLowerCase().includes(q));
   }
 
-  // Orden: Mayor stock primero, con stock <= 0 al final en orden alfabético
   resultados.sort((a, b) => {
     const stockA = a.stock_actual || 0;
     const stockB = b.stock_actual || 0;
-
-    // Si ambos tienen stock > 0, ordenar por mayor stock
     if (stockA > 0 && stockB > 0) return stockB - stockA;
-
-    // Si ambos no tienen stock (<= 0), ordenar alfabéticamente
     if (stockA <= 0 && stockB <= 0) return a.nombre.localeCompare(b.nombre);
-
-    // Los que tienen stock van primero
     return stockB - stockA;
   });
 
-  // Mostrar todos los resultados
+  // Contador arriba
+  if (resultados.length > 0) {
+    const contador = document.createElement('div');
+    contador.className = 'contador';
+    contador.textContent = 'Mostrando ' + resultados.length + ' producto(s)';
+    cont.appendChild(contador);
+  }
+
   resultados.forEach(p => {
     const d = document.createElement('div');
-    d.className = 'card';
-    let foto = p.imagen_url ? `<img src="${p.imagen_url}">` : `<div class="inicial">${p.nombre.charAt(0)}</div>`;
+    d.className = 'prod-card';
+    
+    let foto = p.imagen_url 
+      ? `<img src="${p.imagen_url}" class="prod-foto">` 
+      : `<div class="prod-inicial">${p.nombre.charAt(0)}</div>`;
 
-    // Color del stock
-    let colorStock = '#94A3B8';
-    if (p.stock_actual > 0) colorStock = '#10B981';
-    if (p.stock_actual === 0) colorStock = '#EF4444';
-    if (p.stock_actual < 0) colorStock = '#DC2626';
+    let claseStock = 'stock-gris';
+    if (p.stock_actual > 0) claseStock = 'stock-positivo';
+    else if (p.stock_actual === 0) claseStock = 'stock-cero';
+    else if (p.stock_actual < 0) claseStock = 'stock-negativo';
 
     d.innerHTML = `${foto}
-      <div class="card-info">
+      <div class="prod-info">
         <h3>${p.nombre}</h3>
-        <p>${p.id} · Stock: <strong style="color:${colorStock}; font-size:16px;">${p.stock_actual}</strong> ${p.unidad_base || ''}</p>
+        <p>${p.id} · Stock: <span class="${claseStock}">${p.stock_actual}</span> ${p.unidad_base || ''}</p>
       </div>`;
 
     d.onclick = () => {
@@ -223,21 +514,17 @@ function filtrar() {
   });
 
   if (resultados.length === 0) {
-    cont.innerHTML = '<p style="text-align:center;color:var(--suave); padding:20px;">No se encontraron productos.</p>';
+    cont.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📦</div><div class="empty-state-text">No se encontraron productos.</div></div>';
   }
-
-  // Contador visible
-  const contador = document.createElement('p');
-  contador.style.cssText = 'text-align:center; color: var(--suave); font-size: 13px; margin: 10px 0;';
-  contador.textContent = 'Mostrando ' + resultados.length + ' producto(s)';
-  cont.insertBefore(contador, cont.firstChild);
 }
+
 async function guardarCambios() {
   if (!elegido) return;
   const cant = Number(document.getElementById('conteo').value);
   if (isNaN(cant)) return mostrarMensaje('Escribe un número válido', 'error');
 
   document.getElementById('btn-guardar').textContent = 'Guardando...';
+  document.getElementById('btn-guardar').disabled = true;
 
   try {
     let r;
@@ -249,38 +536,22 @@ async function guardarCambios() {
     }
 
     if (r.ok) {
-      mostrarMensaje('Guardado exitosamente', 'ok');
+      mostrarMensaje('✅ Guardado exitosamente', 'ok');
       elegido.stock_actual = (modo === 'inicial') ? r.stock_inicial : r.stock_nuevo;
       document.getElementById('panel').style.display = 'none';
+      filtrar();
+      setTimeout(() => { document.getElementById('estado').style.display = 'none'; }, 3000);
     } else {
-      mostrarMensaje(r.error || 'Error al guardar', 'error');
+      mostrarMensaje('❌ ' + (r.error || 'Error al guardar'), 'error');
     }
   } catch (err) {
-    mostrarMensaje('Error de conexión', 'error');
+    mostrarMensaje('❌ Error de conexión', 'error');
   } finally {
     document.getElementById('btn-guardar').textContent = 'Guardar Cambios';
+    document.getElementById('btn-guardar').disabled = false;
   }
 }
-// --- AVISO AL VOLVER CON CONTEO SIN GUARDAR ---
-document.addEventListener('DOMContentLoaded', function() {
-  const btnVolver = document.getElementById('btn-volver');
-  if (btnVolver) {
-    btnVolver.addEventListener('click', function(e) {
-      const panel = document.getElementById('panel');
-      const panelAbierto = panel && panel.style.display === 'block';
-      const conteo = document.getElementById('conteo');
-      const hayConteo = conteo && conteo.value.trim() !== '';
-      
-      if (panelAbierto && hayConteo) {
-        const salir = confirm('⚠️ Tienes un conteo sin guardar.\n\n¿Deseas salir sin guardar?');
-        if (!salir) {
-          e.preventDefault();
-          return false;
-        }
-      }
-    });
-  }
-});
+
 function confirmarVolverInventario() {
   const panel = document.getElementById('panel');
   const panelAbierto = panel && panel.style.display === 'block';
@@ -293,6 +564,7 @@ function confirmarVolverInventario() {
   }
   return true;
 }
+
 function cambiarModo(m) {
   modo = m;
   document.getElementById('btn-inicial').className = (m === 'inicial') ? 'active' : '';
@@ -300,6 +572,7 @@ function cambiarModo(m) {
   document.getElementById('div-motivo').style.display = (m === 'ajuste') ? 'block' : 'none';
   document.getElementById('conteo').value = '';
 }
+
 // ============================================
 // NUEVO PRODUCTO
 // ============================================
@@ -350,7 +623,6 @@ async function guardarNuevoProducto() {
     cerrarNuevoProducto();
     mostrarMensaje('✅ Producto creado: ' + r.nombre + ' (' + r.id_producto + ')', 'ok');
 
-    // Recargar catálogo para que aparezca el nuevo
     const inv = await apiGet('accion=inventario');
     if (inv.ok) {
       productos = inv.items;
