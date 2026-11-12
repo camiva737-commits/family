@@ -6,94 +6,136 @@
 <title>Distribuidora TAT · Menú Principal</title>
 <script src="auth.js"></script>
 <script src="comun.js?v=10"></script>
+<link rel="stylesheet" href="tema.css">
 <style>
-  :root {
-    --bg: #0F111A; --card: #1A1D2D; --texto: #F8FAFC; --suave: #94A3B8; --borde: #334155; --acento: #F59E0B;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: var(--bg); color: var(--texto); padding: 24px; min-height: 100vh; }
+  /* Personalización específica del index (el resto viene de tema.css) */
   
-  h1 { font-size: 32px; font-weight: 800; color: var(--acento); letter-spacing: -1px; margin-top: 20px; }
-  p.sub { color: var(--suave); font-size: 15px; margin-bottom: 40px; margin-top: 8px; }
-
-  .card {
-    background: var(--card); border: 1px solid var(--borde); border-radius: 20px;
-    padding: 24px; display: flex; align-items: center; gap: 20px;
-    text-decoration: none; color: var(--texto); margin-bottom: 16px;
-    transition: transform 0.2s;
+  .menu-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--acento);
+    letter-spacing: -0.02em;
+    margin-top: 20px;
   }
-  .card:active { transform: scale(0.98); }
-  .icon { width: 56px; height: 56px; border-radius: 16px; background: rgba(245, 158, 11, 0.15); color: var(--acento); display: flex; align-items: center; justify-content: center; font-size: 28px; }
-  .card-text h2 { font-size: 18px; margin-bottom: 4px; }
-  .card-text p { font-size: 13px; color: var(--suave); }
+  
+  .menu-sub {
+    color: var(--suave);
+    font-size: 15px;
+    margin-bottom: 32px;
+    margin-top: 8px;
+  }
+
+  .menu-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+    color: var(--texto);
+  }
+
+  .menu-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--acento-suave);
+    color: var(--acento);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+
+  .menu-card-text h2 {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .menu-card-text p {
+    font-size: 13px;
+    color: var(--suave);
+  }
 </style>
 </head>
 <body>
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-    <h1 style="margin-top: 0;">Distribuidora TAT</h1>
-    <button onclick="Auth.cerrarSesion()" style="background: none; border: 1px solid var(--borde); color: var(--suave); padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer;">
-      🚪 Salir
-    </button>
+  <!-- ============================================
+       HEADER DE LA PÁGINA
+       ============================================ -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 style="color: var(--acento); margin: 0;">Distribuidora TAT</h1>
+      <p class="subtitulo">Almacén Central · Selecciona una opción</p>
+    </div>
+    <div class="page-header-right">
+      <button class="icon-btn" onclick="Auth.cerrarSesion()" title="Cerrar sesión">🚪</button>
+    </div>
   </div>
-  <p class="sub">Selecciona una opción</p>
 
-  <a href="inventario.html" class="card">
-    <div class="icon">📦</div>
-    <div class="card-text">
-      <h2>Inventario</h2>
-      <p>Stock y ajustes</p>
-    </div>
-  </a>
+  <!-- ============================================
+       MENÚ DE MÓDULOS
+       ============================================ -->
+  <div style="margin-top: 24px;">
+    <a href="inventario.html" class="card menu-card">
+      <div class="menu-icon">📦</div>
+      <div class="menu-card-text">
+        <h2>Inventario</h2>
+        <p>Stock y ajustes</p>
+      </div>
+    </a>
 
-  <a href="entradas.html" class="card">
-    <div class="icon">📥</div>
-    <div class="card-text">
-      <h2>Recepciones</h2>
-      <p>Registro de mercancía nueva</p>
-    </div>
-  </a>
+    <a href="entradas.html" class="card menu-card">
+      <div class="menu-icon">📥</div>
+      <div class="menu-card-text">
+        <h2>Recepciones</h2>
+        <p>Registro de mercancía nueva</p>
+      </div>
+    </a>
 
-  <a href="salidas.html" class="card">
-    <div class="icon" style="color: #EF4444; background: rgba(239, 68, 68, 0.15);">📤</div>
-    <div class="card-text">
-      <h2>Salidas / Ventas</h2>
-      <p>Descontar mercancía</p>
-    </div>
-  </a>
-  <!-- Botón de Devoluciones -->
-  <a href="devoluciones.html" class="card">
-    <div class="icon" style="color: #F59E0B; background: rgba(245, 158, 11, 0.15);">🔄</div>
-    <div class="card-text">
-      <h2>Devoluciones</h2>
-      <p>Gestionar productos con problemas</p>
-    </div>
-  </a>
-    <!-- Botón de Recordatorios -->
-  <a href="recordatorios.html" class="card">
-    <div class="icon" style="color: #3B82F6; background: rgba(59, 130, 246, 0.15);">🔔</div>
-    <div class="card-text">
-      <h2>Recordatorios</h2>
-      <p>Alertas inteligentes</p>
-    </div>
-  </a>
-  <!-- Círculo del Dashboard -->
-  <div id="dashboard-mascota" onclick="toggleDashboard()" style="position:fixed; bottom:90px; right:20px; width:60px; height:60px; border-radius:50%; background:#3B82F6; display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.4); z-index:9998;" title="Dashboard">📊</div>
+    <a href="salidas.html" class="card menu-card">
+      <div class="menu-icon" style="color: var(--peligro); background: var(--peligro-bg);">📤</div>
+      <div class="menu-card-text">
+        <h2>Salidas / Ventas</h2>
+        <p>Descontar mercancía</p>
+      </div>
+    </a>
 
-  <!-- Círculo del Asistente -->
-    <!-- Círculo del Asistente -->
-  <div id="asistente-mascota" onclick="toggleAsistente()" style="position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:50%; background:#F59E0B; display:flex; align-items:center; justify-content:center; font-size:32px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.4); z-index:9998; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Asistente">
+    <a href="devoluciones.html" class="card menu-card">
+      <div class="menu-icon" style="color: var(--warning); background: var(--warning-bg);">🔄</div>
+      <div class="menu-card-text">
+        <h2>Devoluciones</h2>
+        <p>Gestionar productos con problemas</p>
+      </div>
+    </a>
+
+    <a href="recordatorios.html" class="card menu-card">
+      <div class="menu-icon" style="color: var(--info); background: var(--info-bg);">🔔</div>
+      <div class="menu-card-text">
+        <h2>Recordatorios</h2>
+        <p>Alertas inteligentes</p>
+      </div>
+    </a>
+  </div>
+
+  <!-- ============================================
+       BOTONES FLOTANTES (Dashboard + Asistente)
+       ============================================ -->
+  <div id="dashboard-mascota" onclick="toggleDashboard()" style="position:fixed; bottom:90px; right:20px; width:56px; height:56px; border-radius:50%; background:var(--info); color:#FFF; display:flex; align-items:center; justify-content:center; font-size:26px; cursor:pointer; box-shadow:0 6px 20px rgba(59,130,246,0.4); z-index:9998;" title="Dashboard">📊</div>
+
+  <div id="asistente-mascota" onclick="toggleAsistente()" style="position:fixed; bottom:20px; right:20px; width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, var(--acento), var(--acento-2)); display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer; box-shadow:0 6px 20px rgba(242,140,0,0.4); z-index:9998; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Asistente">
     🦉
-    <div id="badge-recordatorios" style="display:none; position:absolute; top:-4px; right:-4px; background:#EF4444; color:#FFF; border-radius:50%; width:22px; height:22px; font-size:11px; font-weight:bold; display:flex; align-items:center; justify-content:center; border:2px solid #0F111A;"></div>
+    <div id="badge-recordatorios" style="display:none; position:absolute; top:-4px; right:-4px; background:var(--peligro); color:#FFF; border-radius:50%; width:20px; height:20px; font-size:10px; font-weight:bold; align-items:center; justify-content:center; border:2px solid var(--bg);"></div>
   </div>
 
-  <!-- CHAT DEL ASISTENTE -->
-  <div id="asistente-chat" style="display:none; position:fixed; bottom:90px; right:20px; width:340px; max-width:calc(100vw - 40px); background:#1A1D2D; border:1px solid #334155; border-radius:16px; overflow:hidden; z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,0.6);">
-    <div style="padding:14px; background:#25293D; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
-      <span style="color:#F8FAFC; font-weight:bold; font-size:15px;">🦉 Asistente TAT</span>
-      <button onclick="toggleAsistente()" style="background:none; border:none; color:#94A3B8; font-size:20px; cursor:pointer;">×</button>
+  <!-- ============================================
+       CHAT DEL ASISTENTE
+       ============================================ -->
+  <div id="asistente-chat" style="display:none; position:fixed; bottom:88px; right:20px; width:340px; max-width:calc(100vw - 40px); background:var(--card); border:1px solid var(--borde); border-radius:16px; overflow:hidden; z-index:9999; box-shadow:var(--shadow-3);">
+    <div style="padding:14px; background:var(--input); border-bottom:1px solid var(--borde); display:flex; justify-content:space-between; align-items:center;">
+      <span style="color:var(--texto); font-weight:700; font-size:15px;">🦉 Asistente TAT</span>
+      <button onclick="toggleAsistente()" style="background:none; border:none; color:var(--suave); font-size:20px; cursor:pointer;">×</button>
     </div>
-    <div id="asistente-mensajes" style="padding:14px; max-height:350px; overflow-y:auto; font-size:14px; color:#F8FAFC; background:#0F111A;">
-      <div style="background:#25293D; padding:10px; border-radius:12px; margin-bottom:8px; line-height:1.5;">
+    <div id="asistente-mensajes" style="padding:14px; max-height:350px; overflow-y:auto; font-size:14px; color:var(--texto); background:var(--bg);">
+      <div style="background:var(--acento-suave); color:var(--primario); padding:12px; border-radius:12px; margin-bottom:8px; line-height:1.5;">
         ¡Hola! Soy tu asistente. Pregúntame:
         <br>• "¿Cuánto queda de Doritos?"
         <br>• "¿Cómo nos fue este mes?"
@@ -101,21 +143,23 @@
         <br>• "¿Cuánto vale el inventario?"
       </div>
     </div>
-    <div style="padding:10px; border-top:1px solid #334155; display:flex; gap:8px; background:#1A1D2D;">
-      <input type="text" id="asistente-input" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter')enviarPreguntaAsistente()" style="flex:1; padding:10px; border-radius:10px; border:1px solid #334155; background:#25293D; color:#F8FAFC; font-size:14px; outline:none;">
-      <button onclick="enviarPreguntaAsistente()" style="padding:0 14px; border-radius:10px; border:none; background:#F59E0B; color:#000; font-weight:bold; cursor:pointer;">→</button>
+    <div style="padding:10px; border-top:1px solid var(--borde); display:flex; gap:8px; background:var(--card);">
+      <input type="text" id="asistente-input" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter')enviarPreguntaAsistente()" style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid var(--borde); background:var(--input); color:var(--texto); font-size:14px; outline:none; margin-bottom:0;">
+      <button onclick="enviarPreguntaAsistente()" style="padding:0 14px; border-radius:10px; border:none; background:var(--acento-2); color:#FFF; font-weight:bold; cursor:pointer; font-size:16px;">→</button>
     </div>
   </div>
 
-  <!-- MODAL DEL DASHBOARD -->
-  <div id="modal-dashboard" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center; padding:20px;">
-    <div style="background:#1A1D2D; border:1px solid #334155; border-radius:16px; width:100%; max-width:500px; max-height:90vh; overflow:hidden; display:flex; flex-direction:column;">
-      <div style="padding:14px; background:#25293D; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
-        <span style="color:#F8FAFC; font-weight:bold; font-size:16px;">📊 Dashboard</span>
-        <button onclick="toggleDashboard()" style="background:none; border:none; color:#94A3B8; font-size:22px; cursor:pointer;">×</button>
+  <!-- ============================================
+       MODAL DEL DASHBOARD
+       ============================================ -->
+  <div id="modal-dashboard" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:var(--card); border:1px solid var(--borde); border-radius:16px; width:100%; max-width:500px; max-height:90vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:var(--shadow-3);">
+      <div style="padding:14px; background:var(--input); border-bottom:1px solid var(--borde); display:flex; justify-content:space-between; align-items:center;">
+        <span style="color:var(--texto); font-weight:700; font-size:16px;">📊 Dashboard</span>
+        <button onclick="toggleDashboard()" style="background:none; border:none; color:var(--suave); font-size:22px; cursor:pointer;">×</button>
       </div>
       <div id="dashboard-contenido" style="padding:16px; overflow-y:auto; flex:1;">
-        <p style="text-align:center; color:#94A3B8; font-size:13px;">Cargando dashboard...</p>
+        <p style="text-align:center; color:var(--suave); font-size:13px;">Cargando dashboard...</p>
       </div>
     </div>
   </div>
