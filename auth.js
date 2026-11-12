@@ -81,7 +81,75 @@ const Auth = (function() {
     inicializar: inicializar
   };
 })();
+// ============================================
+// SISTEMA DE TEMAS (CLARO / OSCURO)
+// ============================================
+const Tema = (function() {
+  const CLAVE_TEMA = 'tat_tema';
+  const TEMA_DEFAULT = 'claro'; // 'claro' u 'oscuro'
 
+  // Detectar tema del sistema operativo
+  function detectarSistema() {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'oscuro';
+    }
+    return 'claro';
+  }
+
+  // Obtener el tema actual (guardado o detectado)
+  function obtenerTema() {
+    try {
+      const guardado = localStorage.getItem(CLAVE_TEMA);
+      if (guardado === 'claro' || guardado === 'oscuro') return guardado;
+    } catch (e) {}
+    return detectarSistema();
+  }
+
+  // Aplicar tema al HTML
+  function aplicarTema(tema) {
+    document.documentElement.setAttribute('data-tema', tema);
+    actualizarBoton(tema);
+  }
+
+  // Actualizar el ícono del botón
+  function actualizarBoton(tema) {
+    const boton = document.getElementById('btn-tema');
+    if (!boton) return;
+    boton.textContent = tema === 'oscuro' ? '☀️' : '🌙';
+    boton.setAttribute('title', tema === 'oscuro' ? 'Cambiar a claro' : 'Cambiar a oscuro');
+  }
+
+  // Cambiar entre claro y oscuro
+  function cambiar() {
+    const actual = document.documentElement.getAttribute('data-tema') || 'claro';
+    const nuevo = actual === 'oscuro' ? 'claro' : 'oscuro';
+    document.documentElement.setAttribute('data-tema', nuevo);
+    try {
+      localStorage.setItem(CLAVE_TEMA, nuevo);
+    } catch (e) {}
+    actualizarBoton(nuevo);
+  }
+
+  // Inicializar al cargar
+  function inicializar() {
+    const tema = obtenerTema();
+    aplicarTema(tema);
+  }
+
+  return {
+    inicializar: inicializar,
+    cambiar: cambiar,
+    obtenerTema: obtenerTema
+  };
+})();
+
+// Ejecutar al cargar (antes de DOMContentLoaded para evitar parpadeo)
+Tema.inicializar();
+
+// Actualizar el botón cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+  Tema.inicializar();
+});
 // Ejecutar la verificación al cargar el DOM
 document.addEventListener('DOMContentLoaded', function() {
   Auth.inicializar();
