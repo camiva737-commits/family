@@ -226,6 +226,8 @@ let lineasAgregadas = [];
 let indexEditando = -1; // -1 = agregar nuevo; >= 0 = reemplazar pendiente
 
 // --- CARGA INICIAL DEL CATÁLOGO ---
+// --- CARGA INICIAL DEL CATÁLOGO ---
+// --- CARGA INICIAL DEL CATÁLOGO ---
 (async function () {
   try {
     const r = await apiGet('accion=inventario');
@@ -240,12 +242,11 @@ let indexEditando = -1; // -1 = agregar nuevo; >= 0 = reemplazar pendiente
   await cargarProveedores();
 })();
 
-() {
+async function cargarProveedores() {
   try {
- async function cargarProveedores   const r = await apiPost({ accion: 'listar_proveedores_completo' }, 30);
+    const r = await apiPost({ accion: 'listar_proveedores_completo' }, 30);
     if (!r.ok) throw new Error(r.error || 'No se pudieron cargar los proveedores');
     const select = document.getElementById('proveedor');
-    // Conservar el valor seleccionado (si lo hay) y el placeholder
     const seleccionado = select.value;
     select.innerHTML = '<option value="">Seleccione Proveedor...</option>';
     (r.items || []).forEach(function (p) {
@@ -259,6 +260,10 @@ let indexEditando = -1; // -1 = agregar nuevo; >= 0 = reemplazar pendiente
     console.error('Error cargando proveedores:', err);
   }
 }
+
+// --- PROCESAR FOTO CON RECORTE ---
+
+// --- PROCESAR FOTO CON RECORTE ---
 
 
 // --- PROCESAR FOTO CON RECORTE ---
