@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es" data-tema="claro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Iniciar sesión · Distribuidora TAT</title>
+<script src="auth.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FCF9F8;
+    --card: #FFFFFF;
+    --input: #F6F3F2;
+    --texto: #1B1C1C;
+    --suave: #6B7280;
+    --borde: #EEEEEE;
+    --acento: #F28C00;
+    --cta: #F59E0B;
+    --peligro: #EF4444;
+    --verde: #10B981;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body {
+    background: var(--bg);
+    color: var(--texto);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .login-container {
+    width: 100%;
+    max-width: 420px;
+  }
+  .login-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .login-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #F28C00, #F59E0B);
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    box-shadow: 0 10px 24px -4px rgba(242, 140, 0, 0.3), 0 4px 8px -2px rgba(242, 140, 0, 0.15);
+  }
+  .login-header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--texto);
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+  .login-header p {
+    font-size: 14px;
+    color: var(--suave);
+    font-weight: 500;
+  }
+  .login-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 32px 24px;
+    border: 1px solid var(--borde);
+    box-shadow: 0 2px 8px -2px rgba(41, 41, 41, 0.04), 0 1px 3px -1px rgba(242, 140, 0, 0.03);
+  }
+  .login-card label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--texto);
+    margin-bottom: 8px;
+  }
+  .login-card input[type="password"] {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 16px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    border-radius: 10px;
+    border: 1.5px solid var(--borde);
+    background: var(--input);
+    color: var(--texto);
+    outline: none;
+    transition: 0.2s;
+    letter-spacing: 0.1em;
+  }
+  .login-card input[type="password"]:focus {
+    border-color: var(--acento);
+    background: var(--card);
+    box-shadow: 0 0 0 3px rgba(242, 140, 0, 0.15);
+  }
+  .login-card button {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    border: none;
+    border-radius: 10px;
+    background: var(--cta);
+    color: white;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: 0.2s;
+    box-shadow: 0 4px 12px -2px rgba(245, 158, 11, 0.3);
+  }
+  .login-card button:hover:not(:disabled) {
+    background: var(--acento);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px -2px rgba(245, 158, 11, 0.4);
+  }
+  .login-card button:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  .login-card button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .login-error {
+    background: #FEF2F2;
+    color: var(--peligro);
+    border: 1px solid #FECACA;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 16px;
+    display: none;
+  }
+  .login-error.visible {
+    display: block;
+  }
+  .login-footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--suave);
+  }
+  .login-footer a {
+    color: var(--acento);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="login-container">
+    <div class="login-header">
+      <div class="login-logo">📦</div>
+      <h1>Distribuidora TAT</h1>
+      <p>Almacén Central · Acceso privado</p>
+    </div>
+
+    <div class="login-card">
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" autofocus>
+
+      <button id="btn-login" onclick="intentarLogin()">
+        Entrar al sistema
+      </button>
+
+      <div id="login-error" class="login-error"></div>
+    </div>
+
+    <p class="login-footer">
+      © Distribuidora TAT · Sistema interno
+    </p>
+  </div>
+
+<script>
+// Esperar a que comun.js esté disponible (necesitamos apiPost)
+// Como comun.js no está incluido en esta página, definimos aquí una versión mínima
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxJTtF1dkIdS21iiDer0mYOoykbRKMs6yEqZlL8uxNMNVmvY6jr0dMrWbD_He7kO5GU/exec';
+
+async function apiPostLocal(objeto) {
+  const resp = await fetch(WEB_APP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(objeto)
+  });
+  const texto = await resp.text();
+  return JSON.parse(texto);
+}
+
+async function intentarLogin() {
+  const input = document.getElementById('password');
+  const btn = document.getElementById('btn-login');
+  const errorDiv = document.getElementById('login-error');
+  const password = input.value;
+
+  // Limpiar error previo
+  errorDiv.classList.remove('visible');
+  errorDiv.textContent = '';
+
+  if (!password) {
+    errorDiv.textContent = '⚠️ Escribe la contraseña.';
+    errorDiv.classList.add('visible');
+    input.focus();
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Verificando...';
+
+  try {
+    const r = await apiPostLocal({
+      accion: 'verificar_login',
+      datos: { password: password }
+    });
+
+    if (!r.ok) {
+      // Contraseña incorrecta
+      errorDiv.textContent = '❌ ' + (r.error || 'Contraseña incorrecta.');
+      errorDiv.classList.add('visible');
+      input.value = '';
+      input.focus();
+      return;
+    }
+
+    // Login exitoso: guardar sesión
+    Auth.guardarSesion(r.token, r.expira_en, password);
+
+    // Redirigir al index
+    window.location.href = 'index.html';
+
+  } catch (err) {
+    errorDiv.textContent = '❌ Error de conexión: ' + err.message;
+    errorDiv.classList.add('visible');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Entrar al sistema';
+  }
+}
+
+// Permitir Enter en el input
+document.addEventListener('DOMContentLoaded', function() {
+  const input = document.getElementById('password');
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      intentarLogin();
+    }
+  });
+
+  // Si ya hay sesión activa, redirigir al index
+  if (Auth.sesionActiva()) {
+    window.location.href = 'index.html';
+  }
+});
+</script>
+
+</body>
+</html>

@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Distribuidora TAT · Menú Principal</title>
+<script src="auth.js"></script>
 <script src="comun.js?v=10"></script>
 <style>
   :root {
@@ -28,7 +29,12 @@
 </style>
 </head>
 <body>
-  <h1>Distribuidora TAT</h1>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+    <h1 style="margin-top: 0;">Distribuidora TAT</h1>
+    <button onclick="Auth.cerrarSesion()" style="background: none; border: 1px solid var(--borde); color: var(--suave); padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer;">
+      🚪 Salir
+    </button>
+  </div>
   <p class="sub">Selecciona una opción</p>
 
   <a href="inventario.html" class="card">
