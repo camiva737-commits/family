@@ -698,3 +698,228 @@ body {
   font-size: 14px;
   font-weight: 500;
 }
+/* ============================================
+   HEADER RICO (con avatar, título, subtítulo)
+   ============================================ */
+.tat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background-color: var(--bg);
+  border-bottom: 1px solid var(--borde);
+  margin: -20px -20px 20px -20px;
+  gap: 12px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.avatar-store {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--acento) 0%, var(--acento-2) 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(242, 140, 0, 0.25);
+  flex-shrink: 0;
+}
+
+.header-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.header-main-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--texto);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--suave);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--ok);
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--borde);
+  background-color: var(--card);
+  color: var(--texto);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+  transition: 0.15s;
+  padding: 0;
+}
+
+.icon-btn:hover {
+  background: var(--acento-suave);
+  border-color: var(--acento);
+}
+
+.icon-btn:active {
+  transform: scale(0.95);
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================
+   BOTTOM NAVIGATION BAR
+   ============================================ */
+.tat-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background-color: var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border-top: 1px solid var(--borde);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+  z-index: 9997;
+  padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-decoration: none;
+  color: var(--suave);
+  flex: 1;
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: 0.15s;
+}
+
+.nav-item:hover {
+  color: var(--acento);
+}
+
+.nav-item .nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-item .nav-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.nav-item.active {
+  color: var(--acento);
+}
+
+.nav-item.active .nav-label {
+  font-weight: 800;
+}
+
+/* Ítem central con el búho */
+.nav-item-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: -26px;
+  flex: 1;
+  gap: 3px;
+}
+
+.nav-center-bubble {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 3px solid var(--acento);
+  box-shadow: 0 4px 14px rgba(242, 140, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: 0.15s;
+  padding: 0;
+}
+
+.nav-center-bubble:hover {
+  transform: scale(1.05);
+}
+
+.nav-center-bubble:active {
+  transform: scale(0.95);
+}
+
+.nav-center-bubble img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nav-item-center .nav-label {
+  color: var(--acento);
+  font-weight: 800;
+}
+
+/* Ajuste del body para que el bottom nav no tape contenido */
+body {
+  padding-bottom: 100px !important;
+}
