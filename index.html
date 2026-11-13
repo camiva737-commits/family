@@ -9,9 +9,8 @@
 <link rel="stylesheet" href="tema.css">
 <style>
   /* ============================================
-     ESTILOS ESPECÍFICOS DEL DASHBOARD
+     ESTILOS DEL DASHBOARD
      ============================================ */
-  
   body {
     padding: 20px !important;
     padding-bottom: 100px !important;
@@ -311,7 +310,7 @@
   .stock-bar-fill.critico { background: #BA1A1A; }
   .stock-bar-fill.bajo { background: var(--acento); }
 
-  /* Módulos del negocio */
+  /* Sección título */
   .section-title {
     font-size: 13px;
     font-weight: 800;
@@ -321,57 +320,36 @@
     margin: 24px 0 12px 0;
   }
 
-  .modules-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  @media (min-width: 768px) {
-    .modules-grid { grid-template-columns: repeat(3, 1fr); }
-  }
-
-  .module-card {
-    background: var(--card);
-    border: 1px solid var(--borde);
-    border-radius: 16px;
-    padding: 16px 14px;
+  /* Cards del menú (las que ya tenías) */
+  .menu-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
     text-decoration: none;
     color: var(--texto);
-    box-shadow: var(--shadow-1);
-    transition: 0.15s;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .module-card:active {
-    transform: scale(0.98);
-    box-shadow: var(--shadow-2);
   }
 
-  .module-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
+  .menu-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
     background: var(--acento-suave);
     color: var(--acento);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 26px;
+    flex-shrink: 0;
   }
 
-  .module-text h3 {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--texto);
-    margin: 0 0 2px 0;
+  .menu-card-text h2 {
+    font-size: 16px;
+    margin-bottom: 4px;
   }
-  .module-text p {
-    font-size: 11px;
+
+  .menu-card-text p {
+    font-size: 13px;
     color: var(--suave);
-    margin: 0;
-    line-height: 1.3;
   }
 </style>
 </head>
@@ -467,9 +445,7 @@
         <button id="btn-semana" onclick="cambiarPeriodo('semana')">Semana</button>
       </div>
     </div>
-    <div class="chart-bars" id="chart-bars">
-      <!-- Se llena con JS -->
-    </div>
+    <div class="chart-bars" id="chart-bars"></div>
     <div class="chart-footer">
       <div class="top-product">
         <div class="top-product-num">#1</div>
@@ -496,51 +472,49 @@
   </div>
 
   <!-- ============================================
-       MÓDULOS DEL NEGOCIO
+       MÓDULOS (cards del menú, como antes)
        ============================================ -->
   <div class="section-title">📦 Módulos del Negocio</div>
 
-  <div class="modules-grid">
-    <a href="inventario.html" class="module-card">
-      <div class="module-icon">📦</div>
-      <div class="module-text">
-        <h3>Inventario</h3>
-        <p>Stock y ajustes</p>
-      </div>
-    </a>
+  <a href="inventario.html" class="card menu-card">
+    <div class="menu-icon">📦</div>
+    <div class="menu-card-text">
+      <h2>Inventario</h2>
+      <p>Stock y ajustes</p>
+    </div>
+  </a>
 
-    <a href="entradas.html" class="module-card">
-      <div class="module-icon">📥</div>
-      <div class="module-text">
-        <h3>Recepciones</h3>
-        <p>Mercancía nueva</p>
-      </div>
-    </a>
+  <a href="entradas.html" class="card menu-card">
+    <div class="menu-icon">📥</div>
+    <div class="menu-card-text">
+      <h2>Recepciones</h2>
+      <p>Registro de mercancía nueva</p>
+    </div>
+  </a>
 
-    <a href="salidas.html" class="module-card">
-      <div class="module-icon" style="color: var(--peligro); background: var(--peligro-bg);">📤</div>
-      <div class="module-text">
-        <h3>Salidas / Ventas</h3>
-        <p>Descontar mercancía</p>
-      </div>
-    </a>
+  <a href="salidas.html" class="card menu-card">
+    <div class="menu-icon" style="color: var(--peligro); background: var(--peligro-bg);">📤</div>
+    <div class="menu-card-text">
+      <h2>Salidas / Ventas</h2>
+      <p>Descontar mercancía</p>
+    </div>
+  </a>
 
-    <a href="devoluciones.html" class="module-card">
-      <div class="module-icon" style="color: var(--warning); background: var(--warning-bg);">🔄</div>
-      <div class="module-text">
-        <h3>Devoluciones</h3>
-        <p>Productos con problemas</p>
-      </div>
-    </a>
+  <a href="devoluciones.html" class="card menu-card">
+    <div class="menu-icon" style="color: var(--warning); background: var(--warning-bg);">🔄</div>
+    <div class="menu-card-text">
+      <h2>Devoluciones</h2>
+      <p>Gestionar productos con problemas</p>
+    </div>
+  </a>
 
-    <a href="recordatorios.html" class="module-card">
-      <div class="module-icon" style="color: var(--info); background: var(--info-bg);">🔔</div>
-      <div class="module-text">
-        <h3>Alertas</h3>
-        <p>Recordatorios</p>
-      </div>
-    </a>
-  </div>
+  <a href="recordatorios.html" class="card menu-card">
+    <div class="menu-icon" style="color: var(--info); background: var(--info-bg);">🔔</div>
+    <div class="menu-card-text">
+      <h2>Recordatorios</h2>
+      <p>Alertas inteligentes</p>
+    </div>
+  </a>
 
   <!-- ============================================
        BURBUJA FLOTANTE DEL ASISTENTE
@@ -746,22 +720,18 @@
     }
 
     function renderizarKPIs(datos) {
-      // Ventas hoy
       document.getElementById('kpi-ventas-valor').textContent = formatoDinero(datos.ventasHoy.monto);
       document.getElementById('kpi-ventas-badge').textContent = '+' + (datos.ventasHoy.unidades || 0) + ' und';
 
-      // Ganancias
       if (datos.gananciasHoy) {
         document.getElementById('kpi-ganancias-valor').textContent = formatoDinero(datos.gananciasHoy.ganancia);
         document.getElementById('kpi-ganancias-badge').textContent = Math.round(datos.margenHoy || 0) + '% margen';
       }
 
-      // Stock crítico
       const criticos = (datos.porAcabarse || []).length;
       document.getElementById('kpi-stock-valor').textContent = criticos;
       document.getElementById('kpi-stock-badge').textContent = criticos === 1 ? 'artículo' : 'artículos';
 
-      // Existencias (total de unidades)
       const totalUnidades = (datos.porAcabarse || []).reduce((s, p) => s + (p.stock_actual || 0), 0);
       document.getElementById('kpi-existencias-valor').textContent = totalUnidades.toLocaleString('es-CO');
       document.getElementById('kpi-existencias-badge').textContent = (datos.porAcabarse || []).length + ' refs';
@@ -771,15 +741,11 @@
       const cont = document.getElementById('chart-bars');
       const sub = document.getElementById('chart-sub');
       
-      // Datos simulados basados en las ventas del dashboard (hasta que el backend tenga el endpoint real)
       let datos = [];
       let subtitulo = '';
       
       if (periodo === 'hoy') {
-        const totalHoy = (datosDashboard && datosDashboard.ventasHoy) ? datosDashboard.ventasHoy.monto : 0;
         const gananciaHoy = (datosDashboard && datosDashboard.gananciasHoy) ? datosDashboard.gananciasHoy.ganancia : 0;
-        
-        // Distribución por horas (simulada con base en el total)
         const horas = ['08h', '10h', '12h', '14h', '16h', '18h'];
         const porcentajes = [0.30, 0.55, 0.95, 0.60, 0.75, 0.35];
         
@@ -815,7 +781,6 @@
       });
       cont.innerHTML = html;
       
-      // Top producto
       if (datosDashboard && datosDashboard.topHoy && datosDashboard.topHoy.length > 0) {
         const top = datosDashboard.topHoy[0];
         document.getElementById('top-producto-nombre').textContent = top.nombre;
