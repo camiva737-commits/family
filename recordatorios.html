@@ -173,7 +173,35 @@
 </nav>
 <!-- Burbuja del Dashboard (volver al inicio) -->
 <div id="dashboard-mascota" onclick="window.location.href='index.html'" style="position:fixed; bottom:160px; right:20px; width:56px; height:56px; border-radius:50%; background:var(--info); color:#FFF; display:flex; align-items:center; justify-content:center; font-size:26px; cursor:pointer; box-shadow:0 6px 20px rgba(59,130,246,0.4); z-index:9996; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Ir al inicio">📊</div>
-
+<!-- ============================================
+     BURBUJA FLOTANTE DEL ASISTENTE
+     ============================================ -->
+<div id="asistente-mascota" onclick="toggleAsistente()" style="position:fixed; bottom:90px; right:20px; left:auto; width:56px; height:56px; border-radius:50%; background:var(--card); border:2px solid var(--acento); display:flex; align-items:center; justify-content:center; overflow:visible; cursor:pointer; box-shadow:0 6px 20px rgba(242,140,0,0.4); z-index:9998; padding:0;" title="Asistente">
+  <img src="buho.png" alt="" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
+  <div id="badge-recordatorios" style="display:none; position:absolute; top:-4px; right:-4px; background:var(--peligro); color:#FFF; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:bold; align-items:center; justify-content:center; border:2px solid var(--bg); z-index:9999;"></div>
+</div>
+<!-- ============================================
+     CHAT DEL ASISTENTE
+     ============================================ -->
+<div id="asistente-chat" style="display:none; position:fixed; bottom:160px; right:20px; width:340px; max-width:calc(100vw - 40px); background:var(--card); border:1px solid var(--borde); border-radius:16px; overflow:hidden; z-index:9999; box-shadow:var(--shadow-3);">
+  <div style="padding:14px; background:var(--input); border-bottom:1px solid var(--borde); display:flex; justify-content:space-between; align-items:center;">
+    <span style="color:var(--texto); font-weight:700; font-size:15px;">🦉 Asistente TAT</span>
+    <button onclick="toggleAsistente()" style="background:none; border:none; color:var(--suave); font-size:20px; cursor:pointer;">×</button>
+  </div>
+  <div id="asistente-mensajes" style="padding:14px; max-height:350px; overflow-y:auto; font-size:14px; color:var(--texto); background:var(--bg);">
+    <div style="background:var(--acento-suave); color:var(--primario); padding:12px; border-radius:12px; margin-bottom:8px; line-height:1.5;">
+      ¡Hola! Soy tu asistente. Pregúntame:
+      <br>• "¿Cuánto queda de Doritos?"
+      <br>• "¿Cómo nos fue este mes?"
+      <br>• "¿Qué productos están por acabarse?"
+      <br>• "¿Cuánto vale el inventario?"
+    </div>
+  </div>
+  <div style="padding:10px; border-top:1px solid var(--borde); display:flex; gap:8px; background:var(--card);">
+    <input type="text" id="asistente-input" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter')enviarPreguntaAsistente()" style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid var(--borde); background:var(--input); color:var(--texto); font-size:14px; outline:none; margin-bottom:0;">
+    <button onclick="enviarPreguntaAsistente()" style="padding:0 14px; border-radius:10px; border:none; background:var(--acento-2); color:#FFF; font-weight:bold; cursor:pointer; font-size:16px;">→</button>
+  </div>
+</div>
 <script>
 let recordatorios = [];
 
@@ -282,6 +310,80 @@ function formatearFecha(fecha) {
   const min = String(d.getMinutes()).padStart(2, '0');
   return dia + '/' + mes + '/' + año + ' ' + hora + ':' + min;
 }
+// ============================================
+// ASISTENTE (burbuja flotante)
+// ============================================
+function toggleAsistente() {
+  const chat = document.getElementById('asistente-chat');
+  if (!chat) return;
+  chat.style.display = chat.style.display === 'none' ? 'block' : 'none';
+  if (chat.style.display === 'block') {
+    setTimeout(function() { document.getElementById('asistente-input').focus(); }, 100);
+  }
+}
+
+async function enviarPreguntaAsistente() {
+  const input = document.getElementById('asistente-input');
+  const pregunta = input.value.trim();
+  if (!pregunta) return;
+  agregarMensajeAsistente(pregunta, 'usuario');
+  input.value = '';
+  const typing = agregarMensajeAsistente('🤔 Pensando...', 'asistente');
+  try {
+    const r = await apiPost({ accion: 'consultar_asistente', pregunta: pregunta }, 120);
+    if (typing && typing.parentNode) typing.remove();
+    if (r.ok) { agregarMensajeAsistente(r.respuesta, 'asistente'); }
+    else { agregarMensajeAsistente('❌ Error: ' + r.error, 'asistente'); }
+  } catch (err) {
+    if (typing && typing.parentNode) typing.remove();
+    agregarMensajeAsistente('❌ Error de conexión: ' + err.message, 'asistente');
+  }
+}
+
+function agregarMensajeAsistente(texto, tipo) {
+  const cont = document.getElementById('asistente-mensajes');
+  if (!cont) return null;
+  const div = document.createElement('div');
+  div.style.marginBottom = '8px';
+  div.style.padding = '10px';
+  div.style.borderRadius = '12px';
+  div.style.whiteSpace = 'pre-line';
+  div.style.lineHeight = '1.5';
+  if (tipo === 'usuario') {
+    div.style.background = 'var(--ok)';
+    div.style.color = '#FFF';
+    div.style.marginLeft = '40px';
+  } else {
+    div.style.background = 'var(--input)';
+    div.style.color = 'var(--texto)';
+    div.style.marginRight = '40px';
+  }
+  div.textContent = texto;
+  cont.appendChild(div);
+  cont.scrollTop = cont.scrollHeight;
+  return div;
+}
+
+async function actualizarBadgeRecordatorios() {
+  try {
+    const r = await apiPost({ accion: 'contar_recordatorios_pendientes' }, 15);
+    if (!r.ok) return;
+    const badge = document.getElementById('badge-recordatorios');
+    if (!badge) return;
+    const total = r.total || 0;
+    if (total > 0) {
+      badge.textContent = total > 99 ? '99+' : total;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch (e) { console.error('Error badge:', e); }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  actualizarBadgeRecordatorios();
+  setInterval(actualizarBadgeRecordatorios, 60000);
+});
 </script>
 </body>
 </html>
