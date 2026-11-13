@@ -5,26 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Distribuidora TAT · Menú Principal</title>
 <script src="auth.js"></script>
-<script src="comun.js?v=10"></script>
+<script src="comun.js?v=11"></script>
 <link rel="stylesheet" href="tema.css">
 <style>
-  /* Personalización específica del index (el resto viene de tema.css) */
-  
-  .menu-title {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--acento);
-    letter-spacing: -0.02em;
-    margin-top: 20px;
-  }
-  
-  .menu-sub {
-    color: var(--suave);
-    font-size: 15px;
-    margin-bottom: 32px;
-    margin-top: 8px;
-  }
-
   .menu-card {
     display: flex;
     align-items: center;
@@ -58,22 +41,17 @@
 </style>
 </head>
 <body>
-  <!-- ============================================
-       HEADER DE LA PÁGINA
-       ============================================ -->
   <div class="page-header">
     <div class="page-header-left">
       <h1 style="color: var(--acento); margin: 0;">Distribuidora TAT</h1>
       <p class="subtitulo">Almacén Central · Selecciona una opción</p>
     </div>
     <div class="page-header-right">
+      <button class="icon-btn" id="btn-tema" onclick="Tema.cambiar()" title="Cambiar tema">🌙</button>
       <button class="icon-btn" onclick="Auth.cerrarSesion()" title="Cerrar sesión">🚪</button>
     </div>
   </div>
 
-  <!-- ============================================
-       MENÚ DE MÓDULOS
-       ============================================ -->
   <div style="margin-top: 24px;">
     <a href="inventario.html" class="card menu-card">
       <div class="menu-icon">📦</div>
@@ -116,9 +94,7 @@
     </a>
   </div>
 
-  <!-- ============================================
-       BOTONES FLOTANTES (Dashboard + Asistente)
-       ============================================ -->
+  <!-- Botones flotantes -->
   <div id="dashboard-mascota" onclick="toggleDashboard()" style="position:fixed; bottom:90px; right:20px; width:56px; height:56px; border-radius:50%; background:var(--info); color:#FFF; display:flex; align-items:center; justify-content:center; font-size:26px; cursor:pointer; box-shadow:0 6px 20px rgba(59,130,246,0.4); z-index:9998;" title="Dashboard">📊</div>
 
   <div id="asistente-mascota" onclick="toggleAsistente()" style="position:fixed; bottom:20px; right:20px; width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, var(--acento), var(--acento-2)); display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer; box-shadow:0 6px 20px rgba(242,140,0,0.4); z-index:9998; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Asistente">
@@ -126,9 +102,7 @@
     <div id="badge-recordatorios" style="display:none; position:absolute; top:-4px; right:-4px; background:var(--peligro); color:#FFF; border-radius:50%; width:20px; height:20px; font-size:10px; font-weight:bold; align-items:center; justify-content:center; border:2px solid var(--bg);"></div>
   </div>
 
-  <!-- ============================================
-       CHAT DEL ASISTENTE
-       ============================================ -->
+  <!-- Chat del asistente -->
   <div id="asistente-chat" style="display:none; position:fixed; bottom:88px; right:20px; width:340px; max-width:calc(100vw - 40px); background:var(--card); border:1px solid var(--borde); border-radius:16px; overflow:hidden; z-index:9999; box-shadow:var(--shadow-3);">
     <div style="padding:14px; background:var(--input); border-bottom:1px solid var(--borde); display:flex; justify-content:space-between; align-items:center;">
       <span style="color:var(--texto); font-weight:700; font-size:15px;">🦉 Asistente TAT</span>
@@ -149,9 +123,7 @@
     </div>
   </div>
 
-  <!-- ============================================
-       MODAL DEL DASHBOARD
-       ============================================ -->
+  <!-- Modal dashboard -->
   <div id="modal-dashboard" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center; padding:20px;">
     <div style="background:var(--card); border:1px solid var(--borde); border-radius:16px; width:100%; max-width:500px; max-height:90vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:var(--shadow-3);">
       <div style="padding:14px; background:var(--input); border-bottom:1px solid var(--borde); display:flex; justify-content:space-between; align-items:center;">
@@ -202,12 +174,12 @@ function agregarMensajeAsistente(texto, tipo) {
   div.style.whiteSpace = 'pre-line';
   div.style.lineHeight = '1.5';
   if (tipo === 'usuario') {
-    div.style.background = '#10B981';
-    div.style.color = '#000';
+    div.style.background = 'var(--ok)';
+    div.style.color = '#FFF';
     div.style.marginLeft = '40px';
   } else {
-    div.style.background = '#25293D';
-    div.style.color = '#F8FAFC';
+    div.style.background = 'var(--input)';
+    div.style.color = 'var(--texto)';
     div.style.marginRight = '40px';
   }
   div.textContent = texto;
@@ -229,13 +201,13 @@ function toggleDashboard() {
 
 async function cargarDashboard() {
   const cont = document.getElementById('dashboard-contenido');
-  cont.innerHTML = '<p style="text-align:center; color:#94A3B8; font-size:13px;">Cargando dashboard...</p>';
+  cont.innerHTML = '<p style="text-align:center; color:var(--suave); font-size:13px;">Cargando dashboard...</p>';
   try {
     const r = await apiPost({ accion: 'obtener_dashboard' }, 60);
     if (!r.ok) throw new Error(r.error);
     renderizarDashboard(r);
   } catch (err) {
-    cont.innerHTML = '<p style="text-align:center; color:#EF4444; font-size:13px;">❌ Error: ' + err.message + '</p>';
+    cont.innerHTML = '<p style="text-align:center; color:var(--peligro); font-size:13px;">❌ Error: ' + err.message + '</p>';
   }
 }
 
@@ -243,8 +215,8 @@ function renderizarDashboard(datos) {
   const cont = document.getElementById('dashboard-contenido');
   
   function tarjeta(titulo, valor, color, icono) {
-    return '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px;">' +
-      '<div style="font-size:11px; color:#94A3B8; margin-bottom:4px;">' + icono + ' ' + titulo + '</div>' +
+    return '<div style="background:var(--input); border:1px solid var(--borde); border-radius:12px; padding:12px;">' +
+      '<div style="font-size:11px; color:var(--suave); margin-bottom:4px;">' + icono + ' ' + titulo + '</div>' +
       '<div style="font-size:18px; font-weight:bold; color:' + color + ';">' + valor + '</div>' +
       '</div>';
   }
@@ -255,110 +227,99 @@ function renderizarDashboard(datos) {
   
   let html = '';
   
-  // ============ VENTAS HOY ============
-  html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">💰 VENTAS HOY</div>';
+  html += '<div class="label" style="margin-bottom:8px;">💰 VENTAS HOY</div>';
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
-  html += tarjeta('Unidades', datos.ventasHoy.unidades, '#10B981', '📦');
-  html += tarjeta('Monto', formatoDinero(datos.ventasHoy.monto), '#10B981', '💵');
+  html += tarjeta('Unidades', datos.ventasHoy.unidades, 'var(--ok)', '📦');
+  html += tarjeta('Monto', formatoDinero(datos.ventasHoy.monto), 'var(--ok)', '💵');
   html += '</div>';
   
-  // ============ GANANCIAS HOY ============
   if (datos.gananciasHoy) {
-    html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">💎 GANANCIAS HOY</div>';
+    html += '<div class="label" style="margin-bottom:8px;">💎 GANANCIAS HOY</div>';
     html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
     html += tarjeta('Ganancia', formatoDinero(datos.gananciasHoy.ganancia), '#A855F7', '💎');
     html += tarjeta('Margen', Math.round(datos.margenHoy || 0) + '%', '#A855F7', '📈');
     html += '</div>';
   }
   
-  // ============ VENTAS MES ============
-  html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">📊 VENTAS MES</div>';
+  html += '<div class="label" style="margin-bottom:8px;">📊 VENTAS MES</div>';
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
-  html += tarjeta('Unidades', datos.ventasMes.unidades, '#F59E0B', '📦');
-  html += tarjeta('Monto', formatoDinero(datos.ventasMes.monto), '#F59E0B', '💵');
+  html += tarjeta('Unidades', datos.ventasMes.unidades, 'var(--acento)', '📦');
+  html += tarjeta('Monto', formatoDinero(datos.ventasMes.monto), 'var(--acento)', '💵');
   html += '</div>';
   
-  // ============ GANANCIAS MES ============
   if (datos.gananciasMes) {
-    html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">💎 GANANCIAS MES</div>';
+    html += '<div class="label" style="margin-bottom:8px;">💎 GANANCIAS MES</div>';
     html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
     html += tarjeta('Ganancia', formatoDinero(datos.gananciasMes.ganancia), '#A855F7', '💎');
     html += tarjeta('Margen', Math.round(datos.margenMes || 0) + '%', '#A855F7', '📈');
     html += '</div>';
   }
   
-  // ============ ENTRADAS ============
-  html += '<div style="font-size:12px; color:#94A3B8; font-weight:bold; margin-bottom:8px;">📥 ENTRADAS</div>';
+  html += '<div class="label" style="margin-bottom:8px;">📥 ENTRADAS</div>';
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">';
-  html += tarjeta('Hoy', datos.entradasHoy.unidades + ' und', '#3B82F6', '📥');
-  html += tarjeta('Mes', datos.entradasMes.unidades + ' und', '#3B82F6', '📦');
+  html += tarjeta('Hoy', datos.entradasHoy.unidades + ' und', 'var(--info)', '📥');
+  html += tarjeta('Mes', datos.entradasMes.unidades + ' und', 'var(--info)', '📦');
   html += '</div>';
   
-  // ============ VALOR INVENTARIO ============
-  html += tarjeta('Valor del inventario', formatoDinero(datos.valorInventario), '#10B981', '🏦');
+  html += tarjeta('Valor del inventario', formatoDinero(datos.valorInventario), 'var(--ok)', '🏦');
   
-  // ============ TOP RENTABLES ============
   if (datos.topRentables && datos.topRentables.length > 0) {
-    html += '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px; margin-top:12px;">';
-    html += '<div style="font-size:12px; color:#94A3B8; margin-bottom:8px; font-weight:bold;">💎 Top 5 más rentables del mes</div>';
+    html += '<div style="background:var(--input); border:1px solid var(--borde); border-radius:12px; padding:12px; margin-top:12px;">';
+    html += '<div class="label" style="margin-bottom:8px;">💎 Top 5 más rentables del mes</div>';
     datos.topRentables.forEach(function(t, i) {
-      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:#F8FAFC; font-size:13px;">' +
+      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:var(--texto); font-size:13px;">' +
         '<span>' + (i+1) + '. ' + t.nombre + '</span>' +
-        '<span style="color:#A855F7; font-weight:bold;">' + formatoDinero(t.ganancia) + ' <span style="font-size:11px; color:#94A3B8;">(' + Math.round(t.margen) + '%)</span></span>' +
+        '<span style="color:#A855F7; font-weight:bold;">' + formatoDinero(t.ganancia) + ' <span style="font-size:11px; color:var(--suave);">(' + Math.round(t.margen) + '%)</span></span>' +
       '</div>';
     });
     html += '</div>';
   }
   
-  // ============ TOP VENTAS HOY ============
   if (datos.topHoy.length > 0) {
-    html += '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px; margin-top:12px;">';
-    html += '<div style="font-size:12px; color:#94A3B8; margin-bottom:8px; font-weight:bold;">🏆 Top ventas hoy</div>';
+    html += '<div style="background:var(--input); border:1px solid var(--borde); border-radius:12px; padding:12px; margin-top:12px;">';
+    html += '<div class="label" style="margin-bottom:8px;">🏆 Top ventas hoy</div>';
     datos.topHoy.forEach(function(t, i) {
-      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:#F8FAFC; font-size:13px;">' +
+      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:var(--texto); font-size:13px;">' +
         '<span>' + (i+1) + '. ' + t.nombre + '</span>' +
-        '<span style="color:#10B981;">' + t.cantidad + ' und</span>' +
+        '<span style="color:var(--ok);">' + t.cantidad + ' und</span>' +
       '</div>';
     });
     html += '</div>';
   }
   
-  // ============ TOP VENTAS MES ============
   if (datos.topMes.length > 0) {
-    html += '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px; margin-top:12px;">';
-    html += '<div style="font-size:12px; color:#94A3B8; margin-bottom:8px; font-weight:bold;">🏆 Top ventas mes</div>';
+    html += '<div style="background:var(--input); border:1px solid var(--borde); border-radius:12px; padding:12px; margin-top:12px;">';
+    html += '<div class="label" style="margin-bottom:8px;">🏆 Top ventas mes</div>';
     datos.topMes.forEach(function(t, i) {
-      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:#F8FAFC; font-size:13px;">' +
+      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:var(--texto); font-size:13px;">' +
         '<span>' + (i+1) + '. ' + t.nombre + '</span>' +
-        '<span style="color:#F59E0B;">' + t.cantidad + ' und</span>' +
+        '<span style="color:var(--acento);">' + t.cantidad + ' und</span>' +
       '</div>';
     });
     html += '</div>';
   }
   
-  // ============ POR ACABARSE ============
   if (datos.porAcabarse.length > 0) {
-    html += '<div style="background:#0F111A; border:1px solid #334155; border-radius:12px; padding:12px; margin-top:12px;">';
-    html += '<div style="font-size:12px; color:#94A3B8; margin-bottom:8px; font-weight:bold;">⚠️ Por acabarse</div>';
+    html += '<div style="background:var(--input); border:1px solid var(--borde); border-radius:12px; padding:12px; margin-top:12px;">';
+    html += '<div class="label" style="margin-bottom:8px;">⚠️ Por acabarse</div>';
     datos.porAcabarse.forEach(function(p) {
-      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:#F8FAFC; font-size:13px;">' +
+      html += '<div style="display:flex; justify-content:space-between; padding:4px 0; color:var(--texto); font-size:13px;">' +
         '<span>' + p.nombre + '</span>' +
-        '<span style="color:#EF4444;">' + p.stock_actual + ' ' + (p.unidad_base || '') + '</span>' +
+        '<span style="color:var(--peligro);">' + p.stock_actual + ' ' + (p.unidad_base || '') + '</span>' +
       '</div>';
     });
     html += '</div>';
   }
-    // ============ LOTES POR VENCER ============
+  
   if (datos.lotesPorVencer && datos.lotesPorVencer.length > 0) {
-    html += '<div style="background:#0F111A; border:1px solid #EF4444; border-radius:12px; padding:12px; margin-top:12px;">';
-    html += '<div style="font-size:12px; color:#EF4444; margin-bottom:8px; font-weight:bold;">⏰ Próximos a vencer (' + datos.lotesPorVencer.length + ')</div>';
+    html += '<div style="background:var(--peligro-bg); border:1px solid var(--peligro); border-radius:12px; padding:12px; margin-top:12px;">';
+    html += '<div class="label" style="margin-bottom:8px; color:var(--peligro);">⏰ Próximos a vencer (' + datos.lotesPorVencer.length + ')</div>';
     
     datos.lotesPorVencer.slice(0, 10).forEach(function(l) {
-      let color = '#F59E0B';
+      let color = 'var(--warning)';
       let icono = '📅';
-      if (l.vencido) { color = '#EF4444'; icono = '❌'; }
-      else if (l.urgente) { color = '#EF4444'; icono = '⚠️'; }
-      else if (l.proximo) { color = '#F59E0B'; icono = '📅'; }
+      if (l.vencido) { color = 'var(--peligro)'; icono = '❌'; }
+      else if (l.urgente) { color = 'var(--peligro)'; icono = '⚠️'; }
       
       let textoDias = '';
       if (l.vencido) textoDias = 'VENCIDO hace ' + Math.abs(l.dias_restantes) + ' días';
@@ -366,10 +327,10 @@ function renderizarDashboard(datos) {
       else if (l.dias_restantes === 1) textoDias = 'Vence mañana';
       else textoDias = 'Vence en ' + l.dias_restantes + ' días';
       
-      html += '<div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #334155; font-size:12px;">' +
+      html += '<div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--borde); font-size:12px;">' +
         '<div style="flex:1;">' +
-          '<div style="color:#F8FAFC; font-weight:bold;">' + l.nombre + '</div>' +
-          '<div style="color:#94A3B8; font-size:11px;">' + l.cantidad + ' ' + l.unidad.toLowerCase() + '(s) · Lote ' + l.id_lote + '</div>' +
+          '<div style="color:var(--texto); font-weight:bold;">' + l.nombre + '</div>' +
+          '<div style="color:var(--suave); font-size:11px;">' + l.cantidad + ' ' + l.unidad.toLowerCase() + '(s) · Lote ' + l.id_lote + '</div>' +
         '</div>' +
         '<div style="text-align:right;">' +
           '<div style="color:' + color + '; font-weight:bold; font-size:11px;">' + icono + ' ' + textoDias + '</div>' +
@@ -378,16 +339,13 @@ function renderizarDashboard(datos) {
     });
     
     if (datos.lotesPorVencer.length > 10) {
-      html += '<div style="text-align:center; color:#94A3B8; font-size:11px; margin-top:8px;">... y ' + (datos.lotesPorVencer.length - 10) + ' más</div>';
+      html += '<div style="text-align:center; color:var(--suave); font-size:11px; margin-top:8px;">... y ' + (datos.lotesPorVencer.length - 10) + ' más</div>';
     }
     
     html += '</div>';
   }
   cont.innerHTML = html;
 }
-// ============================================
-// BADGE DE RECORDATORIOS PENDIENTES
-// ============================================
 
 async function actualizarBadgeRecordatorios() {
   try {
@@ -402,7 +360,6 @@ async function actualizarBadgeRecordatorios() {
       badge.textContent = total > 99 ? '99+' : total;
       badge.style.display = 'flex';
       
-      // Si hay pendientes y es la primera vez que carga, mostrar mensaje en el chat
       if (!window._resumenMostrado) {
         window._resumenMostrado = true;
         mostrarResumenPendientes();
@@ -441,8 +398,8 @@ async function mostrarResumenPendientes() {
     div.style.marginBottom = '8px';
     div.style.padding = '10px';
     div.style.borderRadius = '12px';
-    div.style.background = '#F59E0B';
-    div.style.color = '#000';
+    div.style.background = 'var(--warning)';
+    div.style.color = '#FFF';
     div.style.fontWeight = 'bold';
     div.style.whiteSpace = 'pre-line';
     div.style.lineHeight = '1.5';
@@ -451,10 +408,9 @@ async function mostrarResumenPendientes() {
     cont.scrollTop = cont.scrollHeight;
   } catch (e) { console.error(e); }
 }
-// Cargar el badge al abrir la app
+
 document.addEventListener('DOMContentLoaded', function() {
   actualizarBadgeRecordatorios();
-  // Actualizar cada 60 segundos
   setInterval(actualizarBadgeRecordatorios, 60000);
 });
 </script>
