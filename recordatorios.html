@@ -173,13 +173,7 @@
 </nav>
 <!-- Burbuja del Dashboard (volver al inicio) -->
 <div id="dashboard-mascota" onclick="window.location.href='index.html'" style="position:fixed; bottom:160px; right:20px; width:56px; height:56px; border-radius:50%; background:var(--info); color:#FFF; display:flex; align-items:center; justify-content:center; font-size:26px; cursor:pointer; box-shadow:0 6px 20px rgba(59,130,246,0.4); z-index:9996; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Ir al inicio">📊</div>
-<!-- ============================================
-     BURBUJA FLOTANTE DEL ASISTENTE
-     ============================================ -->
-<div id="asistente-mascota" onclick="toggleAsistente()" style="position:fixed; bottom:90px; right:20px; left:auto; width:56px; height:56px; border-radius:50%; background:var(--card); border:2px solid var(--acento); display:flex; align-items:center; justify-content:center; overflow:visible; cursor:pointer; box-shadow:0 6px 20px rgba(242,140,0,0.4); z-index:9998; padding:0;" title="Asistente">
-  <img src="buho.png" alt="" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
-  <div id="badge-recordatorios" style="display:none; position:absolute; top:-4px; right:-4px; background:var(--peligro); color:#FFF; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:bold; align-items:center; justify-content:center; border:2px solid var(--bg); z-index:9999;"></div>
-</div>
+
 <script>
 let recordatorios = [];
 
@@ -244,34 +238,23 @@ async function cargarStats() {
     if (!r.ok) return;
     
     const items = r.items || [];
-    const conteo = { stock_bajo: 0, vencimiento_proximo: 0, incremento_precio: 0, devolucion_pendiente: 0 };
+    const conteo = { stock_bajo: 0, vencimiento_proximo: 0, incremento_precio: 0 };
     items.forEach(function(rec) {
       if (conteo[rec.tipo] !== undefined) conteo[rec.tipo]++;
     });
     
+    // Contar devoluciones reales (desde la hoja Devoluciones)
+    let devolucionesActivas = 0;
+    try {
+      const rDev = await apiPost({ accion: 'contar_devoluciones_activas' }, 30);
+      if (rDev.ok) devolucionesActivas = rDev.total || 0;
+    } catch (e) { console.error('Error contando devoluciones:', e); }
+    
     document.getElementById('stat-stock').textContent = conteo.stock_bajo;
     document.getElementById('stat-venc').textContent = conteo.vencimiento_proximo;
     document.getElementById('stat-precio').textContent = conteo.incremento_precio;
-    document.getElementById('stat-dev').textContent = conteo.devolucion_pendiente;
+    document.getElementById('stat-dev').textContent = devolucionesActivas;
   } catch (e) { console.error(e); }
-}
-
-async function marcarCompletado(id) {
-  if (!confirm('¿Marcar este recordatorio como completado?')) return;
-  
-  try {
-    const r = await apiPost({ accion: 'marcar_recordatorio', id_recordatorio: id }, 30);
-    if (r.ok) {
-      mostrarEstado('✅ Recordatorio completado', 'ok');
-      await cargarRecordatorios();
-      await cargarStats();
-      setTimeout(function() { document.getElementById('estado').style.display = 'none'; }, 2000);
-    } else {
-      mostrarEstado('❌ Error: ' + r.error, 'error');
-    }
-  } catch (e) {
-    mostrarEstado('❌ Error de conexión: ' + e.message, 'error');
-  }
 }
 
 function mostrarEstado(msg, tipo) {
