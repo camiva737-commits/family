@@ -3,37 +3,375 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Distribuidora TAT · Menú Principal</title>
+<title>Distribuidora TAT · Dashboard</title>
 <script src="auth.js"></script>
 <script src="comun.js?v=11"></script>
 <link rel="stylesheet" href="tema.css">
 <style>
-  .menu-card {
+  /* ============================================
+     ESTILOS ESPECÍFICOS DEL DASHBOARD
+     ============================================ */
+  
+  body {
+    padding: 20px !important;
+    padding-bottom: 100px !important;
+  }
+
+  /* Saludo */
+  .greeting {
+    margin-bottom: 24px;
+  }
+  .greeting h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--texto);
+    margin: 0 0 4px 0;
+  }
+  .greeting p {
+    font-size: 13px;
+    color: var(--suave);
+    margin: 0;
+    font-weight: 500;
+  }
+
+  /* KPIs */
+  .kpis {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  @media (min-width: 768px) {
+    .kpis { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .kpi-card {
+    padding: 18px 16px;
+    border-radius: 20px;
     display: flex;
-    align-items: center;
-    gap: 16px;
-    text-decoration: none;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.15s;
+  }
+  .kpi-card:active { transform: scale(0.98); }
+
+  .kpi-ventas {
+    background: linear-gradient(135deg, #6b3b00, #a85d00);
+    color: #FFFFFF;
+  }
+  .kpi-ganancias {
+    background: var(--card);
+    border: 1px solid var(--borde);
     color: var(--texto);
   }
-  .menu-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
+  .kpi-stock {
+    background: #FFF1EF;
+    border: 1px solid #F6C9C3;
+    color: #93000A;
+  }
+  [data-tema="oscuro"] .kpi-stock {
+    background: #3D1A1A;
+    border-color: #7A2020;
+    color: #F87171;
+  }
+  .kpi-existencias {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    color: var(--texto);
+  }
+
+  .kpi-label {
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.9;
+    letter-spacing: 0.02em;
+  }
+  .kpi-value {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .kpi-ganancias .kpi-value { color: #8D4F00; }
+  [data-tema="oscuro"] .kpi-ganancias .kpi-value { color: var(--acento); }
+
+  .kpi-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    align-self: flex-start;
+  }
+  .kpi-ventas .kpi-badge { background: rgba(255,255,255,0.2); color: #FFFFFF; }
+  .kpi-ganancias .kpi-badge { background: #FFE9CF; color: #6B3B00; }
+  [data-tema="oscuro"] .kpi-ganancias .kpi-badge { background: var(--acento-suave); color: var(--primario); }
+  .kpi-stock .kpi-badge { background: #BA1A1A; color: #FFFFFF; }
+  .kpi-existencias .kpi-badge { background: var(--input); color: var(--suave); }
+
+  /* Sección chart */
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-1);
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .chart-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--texto);
+    margin: 0 0 4px 0;
+  }
+  .chart-sub {
+    font-size: 12px;
+    color: var(--suave);
+    margin: 0;
+  }
+
+  .chart-toggle {
+    display: flex;
+    background: var(--input);
+    padding: 3px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .chart-toggle button {
+    border: none;
+    background: transparent;
+    color: var(--suave);
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .chart-toggle button.active {
+    background: var(--card);
+    color: var(--texto);
+    font-weight: 700;
+  }
+
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    height: 180px;
+    border-bottom: 1px solid var(--borde);
+    padding-bottom: 6px;
+    margin-bottom: 16px;
+  }
+
+  .bar-wrap {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .bar {
+    width: 100%;
+    max-width: 36px;
+    border-radius: 10px 10px 3px 3px;
+    background: #F6C486;
+    transition: 0.3s;
+  }
+  .bar.pico {
+    background: linear-gradient(180deg, var(--acento), #8D4F00);
+    box-shadow: 0 4px 12px rgba(242, 140, 0, 0.3);
+  }
+
+  .bar-label {
+    font-size: 11px;
+    color: var(--suave);
+    font-weight: 500;
+  }
+  .bar-label.pico-label {
+    color: var(--acento);
+    font-weight: 800;
+  }
+
+  .chart-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .top-product {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .top-product-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: #FFE9CF;
+    color: #6B3B00;
+    font-weight: 800;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  [data-tema="oscuro"] .top-product-num {
+    background: var(--acento-suave);
+    color: var(--primario);
+  }
+  .top-product-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--texto);
+  }
+  .top-product-sub {
+    font-size: 11px;
+    color: var(--suave);
+  }
+  .top-product-value {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--acento);
+    white-space: nowrap;
+  }
+
+  /* Por agotarse */
+  .stock-card {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-1);
+  }
+
+  .stock-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .stock-header h2 {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--texto);
+    margin: 0;
+  }
+  .stock-header a {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--acento);
+    text-decoration: none;
+  }
+
+  .stock-item {
+    margin-bottom: 14px;
+  }
+  .stock-item:last-child { margin-bottom: 0; }
+
+  .stock-item-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--texto);
+  }
+
+  .stock-bar {
+    height: 8px;
+    border-radius: 99px;
+    background: var(--input);
+    overflow: hidden;
+  }
+  .stock-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.3s;
+  }
+  .stock-bar-fill.critico { background: #BA1A1A; }
+  .stock-bar-fill.bajo { background: var(--acento); }
+
+  /* Módulos del negocio */
+  .section-title {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--suave);
+    margin: 24px 0 12px 0;
+  }
+
+  .modules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  @media (min-width: 768px) {
+    .modules-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .module-card {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    padding: 16px 14px;
+    text-decoration: none;
+    color: var(--texto);
+    box-shadow: var(--shadow-1);
+    transition: 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .module-card:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-2);
+  }
+
+  .module-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
     background: var(--acento-suave);
     color: var(--acento);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
-    flex-shrink: 0;
+    font-size: 20px;
   }
-  .menu-card-text h2 {
-    font-size: 16px;
-    margin-bottom: 4px;
-  }
-  .menu-card-text p {
+
+  .module-text h3 {
     font-size: 13px;
+    font-weight: 700;
+    color: var(--texto);
+    margin: 0 0 2px 0;
+  }
+  .module-text p {
+    font-size: 11px;
     color: var(--suave);
+    margin: 0;
+    line-height: 1.3;
   }
 </style>
 </head>
@@ -53,7 +391,7 @@
       <div class="header-titles">
         <div class="header-main-title">Almacén Central TAT</div>
         <div class="header-subtitle">
-          <span class="status-dot"></span> Sistema de inventario
+          <span class="status-dot"></span> Dashboard general
         </div>
       </div>
     </div>
@@ -82,52 +420,130 @@
   </header>
 
   <!-- ============================================
-       MENÚ DE MÓDULOS
+       SALUDO
        ============================================ -->
-  <div style="margin-top: 24px;">
-    <a href="inventario.html" class="card menu-card">
-      <div class="menu-icon">📦</div>
-      <div class="menu-card-text">
-        <h2>Inventario</h2>
+  <div class="greeting">
+    <h1 id="saludo">Buenos días, Camila</h1>
+    <p id="fecha-hoy">Viernes 13 de noviembre · así va tu almacén hoy</p>
+  </div>
+
+  <!-- ============================================
+       KPIs
+       ============================================ -->
+  <div class="kpis" id="kpis">
+    <div class="kpi-card kpi-ventas">
+      <div class="kpi-label">Ventas de hoy</div>
+      <div class="kpi-value" id="kpi-ventas-valor">$0</div>
+      <div class="kpi-badge" id="kpi-ventas-badge">Cargando...</div>
+    </div>
+    <div class="kpi-card kpi-ganancias">
+      <div class="kpi-label">Ganancias estimadas</div>
+      <div class="kpi-value" id="kpi-ganancias-valor">$0</div>
+      <div class="kpi-badge" id="kpi-ganancias-badge">Cargando...</div>
+    </div>
+    <div class="kpi-card kpi-stock">
+      <div class="kpi-label">Stock crítico</div>
+      <div class="kpi-value" id="kpi-stock-valor">0</div>
+      <div class="kpi-badge" id="kpi-stock-badge">artículos</div>
+    </div>
+    <div class="kpi-card kpi-existencias">
+      <div class="kpi-label">Existencias</div>
+      <div class="kpi-value" id="kpi-existencias-valor">0</div>
+      <div class="kpi-badge" id="kpi-existencias-badge">refs</div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       GRÁFICO DE BARRAS (Ganancias)
+       ============================================ -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <div>
+        <h2 class="chart-title">Ganancias por hora</h2>
+        <p class="chart-sub" id="chart-sub">Hoy · pico a las 12h</p>
+      </div>
+      <div class="chart-toggle">
+        <button class="active" id="btn-hoy" onclick="cambiarPeriodo('hoy')">Hoy</button>
+        <button id="btn-semana" onclick="cambiarPeriodo('semana')">Semana</button>
+      </div>
+    </div>
+    <div class="chart-bars" id="chart-bars">
+      <!-- Se llena con JS -->
+    </div>
+    <div class="chart-footer">
+      <div class="top-product">
+        <div class="top-product-num">#1</div>
+        <div>
+          <div class="top-product-name" id="top-producto-nombre">—</div>
+          <div class="top-product-sub">Líder del turno</div>
+        </div>
+      </div>
+      <div class="top-product-value" id="top-producto-valor">—</div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       POR AGOTARSE
+       ============================================ -->
+  <div class="stock-card">
+    <div class="stock-header">
+      <h2>⚠️ Por agotarse</h2>
+      <a href="inventario.html">Ver lista</a>
+    </div>
+    <div id="por-agotarse-lista">
+      <div style="text-align: center; color: var(--suave); font-size: 13px; padding: 20px;">Cargando...</div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       MÓDULOS DEL NEGOCIO
+       ============================================ -->
+  <div class="section-title">📦 Módulos del Negocio</div>
+
+  <div class="modules-grid">
+    <a href="inventario.html" class="module-card">
+      <div class="module-icon">📦</div>
+      <div class="module-text">
+        <h3>Inventario</h3>
         <p>Stock y ajustes</p>
       </div>
     </a>
 
-    <a href="entradas.html" class="card menu-card">
-      <div class="menu-icon">📥</div>
-      <div class="menu-card-text">
-        <h2>Recepciones</h2>
-        <p>Registro de mercancía nueva</p>
+    <a href="entradas.html" class="module-card">
+      <div class="module-icon">📥</div>
+      <div class="module-text">
+        <h3>Recepciones</h3>
+        <p>Mercancía nueva</p>
       </div>
     </a>
 
-    <a href="salidas.html" class="card menu-card">
-      <div class="menu-icon" style="color: var(--peligro); background: var(--peligro-bg);">📤</div>
-      <div class="menu-card-text">
-        <h2>Salidas / Ventas</h2>
+    <a href="salidas.html" class="module-card">
+      <div class="module-icon" style="color: var(--peligro); background: var(--peligro-bg);">📤</div>
+      <div class="module-text">
+        <h3>Salidas / Ventas</h3>
         <p>Descontar mercancía</p>
       </div>
     </a>
 
-    <a href="devoluciones.html" class="card menu-card">
-      <div class="menu-icon" style="color: var(--warning); background: var(--warning-bg);">🔄</div>
-      <div class="menu-card-text">
-        <h2>Devoluciones</h2>
-        <p>Gestionar productos con problemas</p>
+    <a href="devoluciones.html" class="module-card">
+      <div class="module-icon" style="color: var(--warning); background: var(--warning-bg);">🔄</div>
+      <div class="module-text">
+        <h3>Devoluciones</h3>
+        <p>Productos con problemas</p>
       </div>
     </a>
 
-    <a href="recordatorios.html" class="card menu-card">
-      <div class="menu-icon" style="color: var(--info); background: var(--info-bg);">🔔</div>
-      <div class="menu-card-text">
-        <h2>Recordatorios</h2>
-        <p>Alertas inteligentes</p>
+    <a href="recordatorios.html" class="module-card">
+      <div class="module-icon" style="color: var(--info); background: var(--info-bg);">🔔</div>
+      <div class="module-text">
+        <h3>Alertas</h3>
+        <p>Recordatorios</p>
       </div>
     </a>
   </div>
 
   <!-- ============================================
-       BURBUJA FLOTANTE DEL ASISTENTE (UNA SOLA, A LA DERECHA)
+       BURBUJA FLOTANTE DEL ASISTENTE
        ============================================ -->
   <div id="asistente-mascota" onclick="toggleAsistente()" style="position:fixed; bottom:90px; right:20px; left:auto; width:56px; height:56px; border-radius:50%; background:var(--card); border:2px solid var(--acento); display:flex; align-items:center; justify-content:center; overflow:visible; cursor:pointer; box-shadow:0 6px 20px rgba(242,140,0,0.4); z-index:9998; padding:0;" title="Asistente">
     <img src="buho.png" alt="" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
@@ -212,6 +628,9 @@
   </nav>
 
   <script>
+    // ============================================
+    // ASISTENTE
+    // ============================================
     function toggleAsistente() {
       const chat = document.getElementById('asistente-chat');
       if (!chat) return;
@@ -263,6 +682,9 @@
       return div;
     }
 
+    // ============================================
+    // BADGE
+    // ============================================
     async function actualizarBadgeRecordatorios() {
       try {
         const r = await apiPost({ accion: 'contar_recordatorios_pendientes' }, 15);
@@ -276,12 +698,176 @@
         } else {
           badge.style.display = 'none';
         }
-      } catch (e) {
-        console.error('Error badge:', e);
+      } catch (e) { console.error('Error badge:', e); }
+    }
+
+    // ============================================
+    // SALUDO Y FECHA
+    // ============================================
+    function actualizarSaludo() {
+      const ahora = new Date();
+      const hora = ahora.getHours();
+      const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
+      document.getElementById('saludo').textContent = saludo + ', Camila';
+      
+      const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+      const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      const dia = dias[ahora.getDay()];
+      const fecha = ahora.getDate();
+      const mes = meses[ahora.getMonth()];
+      document.getElementById('fecha-hoy').textContent = dia + ' ' + fecha + ' de ' + mes + ' · así va tu almacén hoy';
+    }
+
+    // ============================================
+    // DASHBOARD
+    // ============================================
+    let datosDashboard = null;
+    let periodoActual = 'hoy';
+
+    async function cargarDashboard() {
+      try {
+        const r = await apiPost({ accion: 'obtener_dashboard' }, 60);
+        if (!r.ok) throw new Error(r.error);
+        datosDashboard = r;
+        renderizarKPIs(r);
+        renderizarGrafico('hoy');
+        renderizarPorAgotarse(r.porAcabarse || []);
+      } catch (err) {
+        console.error('Error dashboard:', err);
+        document.getElementById('kpi-ventas-badge').textContent = 'Error';
       }
     }
 
+    function formatoDinero(n) {
+      const num = Math.round(n || 0);
+      if (num >= 1000000) return '$' + (num / 1000000).toFixed(2) + 'M';
+      if (num >= 1000) return '$' + (num / 1000).toFixed(1) + 'K';
+      return '$' + num.toLocaleString('es-CO');
+    }
+
+    function renderizarKPIs(datos) {
+      // Ventas hoy
+      document.getElementById('kpi-ventas-valor').textContent = formatoDinero(datos.ventasHoy.monto);
+      document.getElementById('kpi-ventas-badge').textContent = '+' + (datos.ventasHoy.unidades || 0) + ' und';
+
+      // Ganancias
+      if (datos.gananciasHoy) {
+        document.getElementById('kpi-ganancias-valor').textContent = formatoDinero(datos.gananciasHoy.ganancia);
+        document.getElementById('kpi-ganancias-badge').textContent = Math.round(datos.margenHoy || 0) + '% margen';
+      }
+
+      // Stock crítico
+      const criticos = (datos.porAcabarse || []).length;
+      document.getElementById('kpi-stock-valor').textContent = criticos;
+      document.getElementById('kpi-stock-badge').textContent = criticos === 1 ? 'artículo' : 'artículos';
+
+      // Existencias (total de unidades)
+      const totalUnidades = (datos.porAcabarse || []).reduce((s, p) => s + (p.stock_actual || 0), 0);
+      document.getElementById('kpi-existencias-valor').textContent = totalUnidades.toLocaleString('es-CO');
+      document.getElementById('kpi-existencias-badge').textContent = (datos.porAcabarse || []).length + ' refs';
+    }
+
+    function renderizarGrafico(periodo) {
+      const cont = document.getElementById('chart-bars');
+      const sub = document.getElementById('chart-sub');
+      
+      // Datos simulados basados en las ventas del dashboard (hasta que el backend tenga el endpoint real)
+      let datos = [];
+      let subtitulo = '';
+      
+      if (periodo === 'hoy') {
+        const totalHoy = (datosDashboard && datosDashboard.ventasHoy) ? datosDashboard.ventasHoy.monto : 0;
+        const gananciaHoy = (datosDashboard && datosDashboard.gananciasHoy) ? datosDashboard.gananciasHoy.ganancia : 0;
+        
+        // Distribución por horas (simulada con base en el total)
+        const horas = ['08h', '10h', '12h', '14h', '16h', '18h'];
+        const porcentajes = [0.30, 0.55, 0.95, 0.60, 0.75, 0.35];
+        
+        datos = horas.map((h, i) => ({
+          label: h,
+          valor: gananciaHoy * porcentajes[i] / 2,
+          altura: porcentajes[i] * 100,
+          pico: i === 2
+        }));
+        subtitulo = 'Hoy · pico a las 12h';
+      } else {
+        const totalMes = (datosDashboard && datosDashboard.gananciasMes) ? datosDashboard.gananciasMes.ganancia : 0;
+        const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        const porcentajes = [0.45, 0.65, 0.55, 0.80, 0.95, 0.70];
+        
+        datos = dias.map((d, i) => ({
+          label: d,
+          valor: totalMes * porcentajes[i] / 7,
+          altura: porcentajes[i] * 100,
+          pico: i === 4
+        }));
+        subtitulo = 'Esta semana · pico el viernes';
+      }
+      
+      sub.textContent = subtitulo;
+      
+      let html = '';
+      datos.forEach(d => {
+        html += '<div class="bar-wrap">';
+        html += '<div class="bar ' + (d.pico ? 'pico' : '') + '" style="height: ' + d.altura + '%;"></div>';
+        html += '<span class="bar-label ' + (d.pico ? 'pico-label' : '') + '">' + d.label + '</span>';
+        html += '</div>';
+      });
+      cont.innerHTML = html;
+      
+      // Top producto
+      if (datosDashboard && datosDashboard.topHoy && datosDashboard.topHoy.length > 0) {
+        const top = datosDashboard.topHoy[0];
+        document.getElementById('top-producto-nombre').textContent = top.nombre;
+        document.getElementById('top-producto-valor').textContent = top.cantidad + ' und';
+      }
+    }
+
+    function cambiarPeriodo(periodo) {
+      periodoActual = periodo;
+      document.getElementById('btn-hoy').classList.toggle('active', periodo === 'hoy');
+      document.getElementById('btn-semana').classList.toggle('active', periodo === 'semana');
+      renderizarGrafico(periodo);
+    }
+
+    function renderizarPorAgotarse(productos) {
+      const cont = document.getElementById('por-agotarse-lista');
+      
+      if (!productos || productos.length === 0) {
+        cont.innerHTML = '<div style="text-align: center; color: var(--suave); font-size: 13px; padding: 20px;">🎉 No hay productos por agotarse</div>';
+        return;
+      }
+      
+      let html = '';
+      productos.slice(0, 4).forEach(p => {
+        const stock = p.stock_actual || 0;
+        const porcentaje = Math.min(100, Math.max(5, (stock / 50) * 100));
+        const criticos = stock <= 15;
+        
+        html += '<div class="stock-item">';
+        html += '<div class="stock-item-header">';
+        html += '<span>' + p.nombre + '</span>';
+        html += '<span style="color: ' + (criticos ? 'var(--peligro)' : 'var(--acento)') + ';">' + stock + ' ' + (p.unidad_base || 'uds') + '</span>';
+        html += '</div>';
+        html += '<div class="stock-bar">';
+        html += '<div class="stock-bar-fill ' + (criticos ? 'critico' : 'bajo') + '" style="width: ' + porcentaje + '%;"></div>';
+        html += '</div>';
+        html += '</div>';
+      });
+      
+      if (productos.length > 4) {
+        html += '<a href="inventario.html" style="display: block; text-align: center; font-size: 12px; color: var(--acento); font-weight: 700; margin-top: 12px; text-decoration: none;">Ver los ' + productos.length + ' productos →</a>';
+      }
+      
+      cont.innerHTML = html;
+    }
+
+    // ============================================
+    // INIT
+    // ============================================
     document.addEventListener('DOMContentLoaded', function() {
+      actualizarSaludo();
+      cargarDashboard();
       actualizarBadgeRecordatorios();
       setInterval(actualizarBadgeRecordatorios, 60000);
     });
