@@ -779,7 +779,7 @@
       document.getElementById('kpi-existencias-badge').textContent = (datos.porAcabarse || []).length + ' refs';
     }
 
-    async function renderizarGrafico(periodo) {
+   async function renderizarGrafico(periodo) {
   const cont = document.getElementById('chart-bars');
   const titulo = document.querySelector('.chart-title');
   const sub = document.getElementById('chart-sub');
@@ -787,43 +787,64 @@
   cont.innerHTML = '<div style="text-align:center;color:var(--suave);font-size:12px;width:100%;">Cargando...</div>';
   
   try {
-    let accion, datosRespuesta, subtitulo, tituloTexto;
+    let datosRespuesta, subtitulo, tituloTexto, totalPeriodo;
     
     if (periodo === 'hoy') {
       tituloTexto = 'Ganancias por hora';
-      accion = 'obtener_ganancias_por_hora';
-      const r = await apiPost({ accion: accion, fecha: new Date().toISOString() }, 30);
+      const r = await apiPost({ accion: 'obtener_ganancias_por_hora', fecha: new Date().toISOString() }, 30);
       if (!r.ok) throw new Error(r.error);
       datosRespuesta = r.datos;
-      subtitulo = 'Hoy · ganancias reales por franja horaria';
+      
+      // Calcular total
+      const totalHoy = datosRespuesta.reduce((s, d) => s + d.ganancia, 0);
+      totalPeriodo = totalHoy;
+      subtitulo = totalHoy > 0 
+        ? 'Hoy · ' + formatoDinero(totalHoy) + ' de ganancia'
+        : 'Hoy · sin ventas registradas';
     } else {
       tituloTexto = 'Ganancias por día';
-      accion = 'obtener_ganancias_por_dia';
-      const r = await apiPost({ accion: accion }, 30);
+      const r = await apiPost({ accion: 'obtener_ganancias_por_dia' }, 30);
       if (!r.ok) throw new Error(r.error);
       datosRespuesta = r.datos;
-      subtitulo = 'Últimos 6 días · ganancias reales';
+      
+      const totalSemana = datosRespuesta.reduce((s, d) => s + d.ganancia, 0);
+      totalPeriodo = totalSemana;
+      subtitulo = totalSemana > 0
+        ? 'Últimos 6 días · ' + formatoDinero(totalSemana) + ' de ganancia'
+        : 'Últimos 6 días · sin ventas registradas';
     }
     
     titulo.textContent = tituloTexto;
     sub.textContent = subtitulo;
     
-    // Encontrar el pico
     const maxGanancia = Math.max(...datosRespuesta.map(d => d.ganancia));
     const picoIdx = datosRespuesta.findIndex(d => d.ganancia === maxGanancia);
+    const hayDatos = maxGanancia > 0;
     
-    // Calcular altura relativa (mínimo 5% para que se vea algo)
-    let html = '';
-    datosRespuesta.forEach((d, i) => {
-      let alturaPct = maxGanancia > 0 ? (d.ganancia / maxGanancia) * 100 : 5;
-      if (alturaPct < 5) alturaPct = 5;
-      
-      html += '<div class="bar-wrap">';
-      html += '<div class="bar ' + (i === picoIdx && d.ganancia > 0 ? 'pico' : '') + '" style="height: ' + alturaPct + '%;"></div>';
-      html += '<span class="bar-label ' + (i === picoIdx && d.ganancia > 0 ? 'pico-label' : '') + '">' + d.label + '</span>';
+    // Si no hay datos, mostrar mensaje en el gráfico
+    if (!hayDatos) {
+      let html = '';
+      html += '<div style="width:100%;text-align:center;padding:40px 20px;color:var(--suave);">';
+      html += '<div style="font-size:32px;margin-bottom:8px;opacity:0.5;">📊</div>';
+      html += '<div style="font-size:13px;font-weight:600;">Sin ventas registradas</div>';
+      html += '<div style="font-size:11px;margin-top:4px;">Las barras aparecerán aquí cuando haya ventas</div>';
       html += '</div>';
-    });
-    cont.innerHTML = html;
+      cont.innerHTML = html;
+    } else {
+      let html = '';
+      datosRespuesta.forEach((d, i) => {
+        // Altura mínima del 8% si el valor es 0 (para que se vea algo)
+        let alturaPct = (d.ganancia / maxGanancia) * 100;
+        if (d.ganancia === 0) alturaPct = 8;
+        if (alturaPct < 8) alturaPct = 8;
+        
+        html += '<div class="bar-wrap">';
+        html += '<div class="bar ' + (i === picoIdx ? 'pico' : '') + '" style="height: ' + alturaPct + '%;"></div>';
+        html += '<span class="bar-label ' + (i === picoIdx ? 'pico-label' : '') + '">' + d.label + '</span>';
+        html += '</div>';
+      });
+      cont.innerHTML = html;
+    }
     
     // Top producto
     if (datosDashboard && datosDashboard.topHoy && datosDashboard.topHoy.length > 0) {
