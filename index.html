@@ -779,44 +779,67 @@
       document.getElementById('kpi-existencias-badge').textContent = (datos.porAcabarse || []).length + ' refs';
     }
 
-    function renderizarGrafico(periodo) {
-      const cont = document.getElementById('chart-bars');
-      const sub = document.getElementById('chart-sub');
-      
-      let datos = [];
-      let subtitulo = '';
-      
-      if (periodo === 'hoy') {
-        const gananciaHoy = (datosDashboard && datosDashboard.gananciasHoy) ? datosDashboard.gananciasHoy.ganancia : 0;
-        const horas = ['08h', '10h', '12h', '14h', '16h', '18h'];
-        const porcentajes = [0.30, 0.55, 0.95, 0.60, 0.75, 0.35];
-        datos = horas.map((h, i) => ({ label: h, altura: porcentajes[i] * 100, pico: i === 2 }));
-        subtitulo = 'Hoy · pico a las 12h';
-      } else {
-        const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-        const porcentajes = [0.45, 0.65, 0.55, 0.80, 0.95, 0.70];
-        datos = dias.map((d, i) => ({ label: d, altura: porcentajes[i] * 100, pico: i === 4 }));
-        subtitulo = 'Esta semana · pico el viernes';
-      }
-      
-      sub.textContent = subtitulo;
-      
-      let html = '';
-      datos.forEach(d => {
-        html += '<div class="bar-wrap">';
-        html += '<div class="bar ' + (d.pico ? 'pico' : '') + '" style="height: ' + d.altura + '%;"></div>';
-        html += '<span class="bar-label ' + (d.pico ? 'pico-label' : '') + '">' + d.label + '</span>';
-        html += '</div>';
-      });
-      cont.innerHTML = html;
-      
-      if (datosDashboard && datosDashboard.topHoy && datosDashboard.topHoy.length > 0) {
-        const top = datosDashboard.topHoy[0];
-        document.getElementById('top-producto-nombre').textContent = top.nombre;
-        document.getElementById('top-producto-valor').textContent = top.cantidad + ' und';
-      }
+    async function renderizarGrafico(periodo) {
+  const cont = document.getElementById('chart-bars');
+  const titulo = document.querySelector('.chart-title');
+  const sub = document.getElementById('chart-sub');
+  
+  cont.innerHTML = '<div style="text-align:center;color:var(--suave);font-size:12px;width:100%;">Cargando...</div>';
+  
+  try {
+    let accion, datosRespuesta, subtitulo, tituloTexto;
+    
+    if (periodo === 'hoy') {
+      tituloTexto = 'Ganancias por hora';
+      accion = 'obtener_ganancias_por_hora';
+      const r = await apiPost({ accion: accion, fecha: new Date().toISOString() }, 30);
+      if (!r.ok) throw new Error(r.error);
+      datosRespuesta = r.datos;
+      subtitulo = 'Hoy · ganancias reales por franja horaria';
+    } else {
+      tituloTexto = 'Ganancias por día';
+      accion = 'obtener_ganancias_por_dia';
+      const r = await apiPost({ accion: accion }, 30);
+      if (!r.ok) throw new Error(r.error);
+      datosRespuesta = r.datos;
+      subtitulo = 'Últimos 6 días · ganancias reales';
     }
-
+    
+    titulo.textContent = tituloTexto;
+    sub.textContent = subtitulo;
+    
+    // Encontrar el pico
+    const maxGanancia = Math.max(...datosRespuesta.map(d => d.ganancia));
+    const picoIdx = datosRespuesta.findIndex(d => d.ganancia === maxGanancia);
+    
+    // Calcular altura relativa (mínimo 5% para que se vea algo)
+    let html = '';
+    datosRespuesta.forEach((d, i) => {
+      let alturaPct = maxGanancia > 0 ? (d.ganancia / maxGanancia) * 100 : 5;
+      if (alturaPct < 5) alturaPct = 5;
+      
+      html += '<div class="bar-wrap">';
+      html += '<div class="bar ' + (i === picoIdx && d.ganancia > 0 ? 'pico' : '') + '" style="height: ' + alturaPct + '%;"></div>';
+      html += '<span class="bar-label ' + (i === picoIdx && d.ganancia > 0 ? 'pico-label' : '') + '">' + d.label + '</span>';
+      html += '</div>';
+    });
+    cont.innerHTML = html;
+    
+    // Top producto
+    if (datosDashboard && datosDashboard.topHoy && datosDashboard.topHoy.length > 0) {
+      const top = datosDashboard.topHoy[0];
+      document.getElementById('top-producto-nombre').textContent = top.nombre;
+      document.getElementById('top-producto-valor').textContent = top.cantidad + ' und';
+    } else {
+      document.getElementById('top-producto-nombre').textContent = 'Sin ventas hoy';
+      document.getElementById('top-producto-valor').textContent = '—';
+    }
+    
+  } catch (err) {
+    console.error('Error gráfico:', err);
+    cont.innerHTML = '<div style="text-align:center;color:var(--peligro);font-size:12px;width:100%;">❌ Error: ' + err.message + '</div>';
+  }
+}
     function cambiarPeriodo(periodo) {
       periodoActual = periodo;
       document.getElementById('btn-hoy').classList.toggle('active', periodo === 'hoy');
