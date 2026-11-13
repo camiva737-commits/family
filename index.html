@@ -9,29 +9,11 @@
 <link rel="stylesheet" href="tema.css">
 <style>
   /* ============================================
-     ESTILOS DEL DASHBOARD
+     DASHBOARD
      ============================================ */
   body {
     padding: 20px !important;
     padding-bottom: 100px !important;
-  }
-
-  /* Saludo */
-  .greeting {
-    margin-bottom: 24px;
-  }
-  .greeting h1 {
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    color: var(--texto);
-    margin: 0 0 4px 0;
-  }
-  .greeting p {
-    font-size: 13px;
-    color: var(--suave);
-    margin: 0;
-    font-weight: 500;
   }
 
   /* KPIs */
@@ -109,7 +91,7 @@
   .kpi-stock .kpi-badge { background: #BA1A1A; color: #FFFFFF; }
   .kpi-existencias .kpi-badge { background: var(--input); color: var(--suave); }
 
-  /* Sección chart */
+  /* Chart */
   .chart-card {
     background: var(--card);
     border: 1px solid var(--borde);
@@ -253,7 +235,7 @@
     white-space: nowrap;
   }
 
-  /* Por agotarse */
+  /* Stock crítico */
   .stock-card {
     background: var(--card);
     border: 1px solid var(--borde);
@@ -310,47 +292,102 @@
   .stock-bar-fill.critico { background: #BA1A1A; }
   .stock-bar-fill.bajo { background: var(--acento); }
 
-  /* Sección título */
-  .section-title {
+  /* Secciones del dashboard */
+  .dash-section-title {
     font-size: 13px;
     font-weight: 800;
     letter-spacing: 0.03em;
     text-transform: uppercase;
     color: var(--suave);
-    margin: 24px 0 12px 0;
-  }
-
-  /* Cards del menú (las que ya tenías) */
-  .menu-card {
+    margin: 20px 0 12px 0;
     display: flex;
     align-items: center;
-    gap: 16px;
-    text-decoration: none;
-    color: var(--texto);
+    gap: 6px;
   }
 
-  .menu-icon {
-    width: 52px;
-    height: 52px;
+  /* Grid de métricas del mes */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .metric-card {
+    background: var(--card);
+    border: 1px solid var(--borde);
     border-radius: 14px;
-    background: var(--acento-suave);
-    color: var(--acento);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    flex-shrink: 0;
+    padding: 14px 16px;
+    box-shadow: var(--shadow-1);
   }
 
-  .menu-card-text h2 {
-    font-size: 16px;
+  .metric-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--suave);
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
     margin-bottom: 4px;
   }
 
-  .menu-card-text p {
-    font-size: 13px;
-    color: var(--suave);
+  .metric-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--texto);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
   }
+
+  .metric-value.ok { color: var(--ok); }
+  .metric-value.peligro { color: var(--peligro); }
+  .metric-value.warning { color: var(--warning); }
+  .metric-value.info { color: var(--info); }
+  .metric-value.acento { color: var(--acento); }
+  .metric-value.purple { color: #A855F7; }
+
+  /* Top rentables / top ventas (listas) */
+  .top-list {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-1);
+  }
+
+  .top-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--borde);
+    font-size: 13px;
+  }
+  .top-list-item:last-child { border-bottom: none; }
+  .top-list-item .rank {
+    font-weight: 800;
+    color: var(--acento);
+    margin-right: 6px;
+  }
+  .top-list-item .value {
+    font-weight: 800;
+    color: var(--acento);
+  }
+
+  /* Lotes por vencer */
+  .lote-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--borde);
+    font-size: 12px;
+  }
+  .lote-item:last-child { border-bottom: none; }
+  .lote-name { font-weight: 700; color: var(--texto); }
+  .lote-sub { color: var(--suave); font-size: 11px; }
 </style>
 </head>
 <body>
@@ -398,14 +435,6 @@
   </header>
 
   <!-- ============================================
-       SALUDO
-       ============================================ -->
-  <div class="greeting">
-    <h1 id="saludo">Buenos días, Camila</h1>
-    <p id="fecha-hoy">Viernes 13 de noviembre · así va tu almacén hoy</p>
-  </div>
-
-  <!-- ============================================
        KPIs
        ============================================ -->
   <div class="kpis" id="kpis">
@@ -432,7 +461,7 @@
   </div>
 
   <!-- ============================================
-       GRÁFICO DE BARRAS (Ganancias)
+       GRÁFICO DE BARRAS
        ============================================ -->
   <div class="chart-card">
     <div class="chart-header">
@@ -472,49 +501,74 @@
   </div>
 
   <!-- ============================================
-       MÓDULOS (cards del menú, como antes)
+       MÉTRICAS DEL MES
        ============================================ -->
-  <div class="section-title">📦 Módulos del Negocio</div>
-
-  <a href="inventario.html" class="card menu-card">
-    <div class="menu-icon">📦</div>
-    <div class="menu-card-text">
-      <h2>Inventario</h2>
-      <p>Stock y ajustes</p>
+  <div class="dash-section-title">📊 Ventas del mes</div>
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-label">📦 Unidades</div>
+      <div class="metric-value acento" id="ventas-mes-unidades">0</div>
     </div>
-  </a>
-
-  <a href="entradas.html" class="card menu-card">
-    <div class="menu-icon">📥</div>
-    <div class="menu-card-text">
-      <h2>Recepciones</h2>
-      <p>Registro de mercancía nueva</p>
+    <div class="metric-card">
+      <div class="metric-label">💵 Monto</div>
+      <div class="metric-value acento" id="ventas-mes-monto">$0</div>
     </div>
-  </a>
+  </div>
 
-  <a href="salidas.html" class="card menu-card">
-    <div class="menu-icon" style="color: var(--peligro); background: var(--peligro-bg);">📤</div>
-    <div class="menu-card-text">
-      <h2>Salidas / Ventas</h2>
-      <p>Descontar mercancía</p>
+  <div class="dash-section-title">💎 Ganancias del mes</div>
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-label">💎 Ganancia</div>
+      <div class="metric-value purple" id="ganancias-mes-valor">$0</div>
     </div>
-  </a>
+    <div class="metric-card">
+      <div class="metric-label">📈 Margen</div>
+      <div class="metric-value purple" id="ganancias-mes-margen">0%</div>
+    </div>
+  </div>
 
-  <a href="devoluciones.html" class="card menu-card">
-    <div class="menu-icon" style="color: var(--warning); background: var(--warning-bg);">🔄</div>
-    <div class="menu-card-text">
-      <h2>Devoluciones</h2>
-      <p>Gestionar productos con problemas</p>
+  <div class="dash-section-title">📥 Entradas</div>
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-label">📥 Hoy</div>
+      <div class="metric-value info" id="entradas-hoy">0 und</div>
     </div>
-  </a>
+    <div class="metric-card">
+      <div class="metric-label">📦 Mes</div>
+      <div class="metric-value info" id="entradas-mes">0 und</div>
+    </div>
+  </div>
 
-  <a href="recordatorios.html" class="card menu-card">
-    <div class="menu-icon" style="color: var(--info); background: var(--info-bg);">🔔</div>
-    <div class="menu-card-text">
-      <h2>Recordatorios</h2>
-      <p>Alertas inteligentes</p>
+  <div class="dash-section-title">🏦 Inventario</div>
+  <div class="metrics-grid">
+    <div class="metric-card" style="grid-column: span 2;">
+      <div class="metric-label">💰 Valor del inventario</div>
+      <div class="metric-value ok" id="valor-inventario">$0</div>
     </div>
-  </a>
+  </div>
+
+  <!-- ============================================
+       TOP RENTABLES / TOP VENTAS / LOTES
+       ============================================ -->
+  <div class="dash-section-title">💎 Top 5 más rentables del mes</div>
+  <div id="top-rentables-lista" class="top-list">
+    <div style="text-align: center; color: var(--suave); font-size: 13px; padding: 12px;">Cargando...</div>
+  </div>
+
+  <div class="dash-section-title">🏆 Top ventas hoy</div>
+  <div id="top-ventas-hoy-lista" class="top-list">
+    <div style="text-align: center; color: var(--suave); font-size: 13px; padding: 12px;">Cargando...</div>
+  </div>
+
+  <div class="dash-section-title">🏆 Top ventas del mes</div>
+  <div id="top-ventas-mes-lista" class="top-list">
+    <div style="text-align: center; color: var(--suave); font-size: 13px; padding: 12px;">Cargando...</div>
+  </div>
+
+  <div class="dash-section-title">⏰ Lotes por vencer</div>
+  <div id="lotes-por-vencer-lista" class="top-list">
+    <div style="text-align: center; color: var(--suave); font-size: 13px; padding: 12px;">Cargando...</div>
+  </div>
 
   <!-- ============================================
        BURBUJA FLOTANTE DEL ASISTENTE
@@ -676,23 +730,6 @@
     }
 
     // ============================================
-    // SALUDO Y FECHA
-    // ============================================
-    function actualizarSaludo() {
-      const ahora = new Date();
-      const hora = ahora.getHours();
-      const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
-      document.getElementById('saludo').textContent = saludo + ', Camila';
-      
-      const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-      const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-      const dia = dias[ahora.getDay()];
-      const fecha = ahora.getDate();
-      const mes = meses[ahora.getMonth()];
-      document.getElementById('fecha-hoy').textContent = dia + ' ' + fecha + ' de ' + mes + ' · así va tu almacén hoy';
-    }
-
-    // ============================================
     // DASHBOARD
     // ============================================
     let datosDashboard = null;
@@ -706,6 +743,11 @@
         renderizarKPIs(r);
         renderizarGrafico('hoy');
         renderizarPorAgotarse(r.porAcabarse || []);
+        renderizarMetricasMes(r);
+        renderizarTopRentables(r.topRentables || []);
+        renderizarTopVentas(r.topHoy || [], 'top-ventas-hoy-lista', 'ok');
+        renderizarTopVentas(r.topMes || [], 'top-ventas-mes-lista', 'acento');
+        renderizarLotesPorVencer(r.lotesPorVencer || []);
       } catch (err) {
         console.error('Error dashboard:', err);
         document.getElementById('kpi-ventas-badge').textContent = 'Error';
@@ -748,25 +790,12 @@
         const gananciaHoy = (datosDashboard && datosDashboard.gananciasHoy) ? datosDashboard.gananciasHoy.ganancia : 0;
         const horas = ['08h', '10h', '12h', '14h', '16h', '18h'];
         const porcentajes = [0.30, 0.55, 0.95, 0.60, 0.75, 0.35];
-        
-        datos = horas.map((h, i) => ({
-          label: h,
-          valor: gananciaHoy * porcentajes[i] / 2,
-          altura: porcentajes[i] * 100,
-          pico: i === 2
-        }));
+        datos = horas.map((h, i) => ({ label: h, altura: porcentajes[i] * 100, pico: i === 2 }));
         subtitulo = 'Hoy · pico a las 12h';
       } else {
-        const totalMes = (datosDashboard && datosDashboard.gananciasMes) ? datosDashboard.gananciasMes.ganancia : 0;
         const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
         const porcentajes = [0.45, 0.65, 0.55, 0.80, 0.95, 0.70];
-        
-        datos = dias.map((d, i) => ({
-          label: d,
-          valor: totalMes * porcentajes[i] / 7,
-          altura: porcentajes[i] * 100,
-          pico: i === 4
-        }));
+        datos = dias.map((d, i) => ({ label: d, altura: porcentajes[i] * 100, pico: i === 4 }));
         subtitulo = 'Esta semana · pico el viernes';
       }
       
@@ -827,11 +856,76 @@
       cont.innerHTML = html;
     }
 
-    // ============================================
-    // INIT
-    // ============================================
+    function renderizarMetricasMes(datos) {
+      document.getElementById('ventas-mes-unidades').textContent = (datos.ventasMes.unidades || 0).toLocaleString('es-CO');
+      document.getElementById('ventas-mes-monto').textContent = formatoDinero(datos.ventasMes.monto);
+      
+      if (datos.gananciasMes) {
+        document.getElementById('ganancias-mes-valor').textContent = formatoDinero(datos.gananciasMes.ganancia);
+        document.getElementById('ganancias-mes-margen').textContent = Math.round(datos.margenMes || 0) + '%';
+      }
+      
+      document.getElementById('entradas-hoy').textContent = (datos.entradasHoy.unidades || 0) + ' und';
+      document.getElementById('entradas-mes').textContent = (datos.entradasMes.unidades || 0) + ' und';
+      document.getElementById('valor-inventario').textContent = formatoDinero(datos.valorInventario);
+    }
+
+    function renderizarTopRentables(items) {
+      const cont = document.getElementById('top-rentables-lista');
+      if (!items || items.length === 0) {
+        cont.innerHTML = '<div style="text-align: center; color: var(--suave); font-size: 13px; padding: 12px;">Sin datos</div>';
+        return;
+      }
+      let html = '';
+      items.forEach((t, i) => {
+        html += '<div class="top-list-item">';
+        html += '<div><span class="rank">' + (i+1) + '.</span>' + t.nombre + '</div>';
+        html += '<div class="value">' + formatoDinero(t.ganancia) + ' <span style="font-size: 11px; color: var(--suave);">(' + Math.round(t.margen) + '%)</span></div>';
+        html += '</div>';
+      });
+      cont.innerHTML = html;
+    }
+
+    function renderizarTopVentas(items, contId, colorClass) {
+      const cont = document.getElementById(contId);
+      if (!items || items.length === 0) {
+        cont.innerHTML = '<div style="text-align: center; color: var(--suave); font-size: 13px; padding: 12px;">Sin datos</div>';
+        return;
+      }
+      let html = '';
+      items.forEach((t, i) => {
+        html += '<div class="top-list-item">';
+        html += '<div><span class="rank">' + (i+1) + '.</span>' + t.nombre + '</div>';
+        html += '<div class="value" style="color: var(--' + colorClass + ');">' + t.cantidad + ' und</div>';
+        html += '</div>';
+      });
+      cont.innerHTML = html;
+    }
+
+    function renderizarLotesPorVencer(lotes) {
+      const cont = document.getElementById('lotes-por-vencer-lista');
+      if (!lotes || lotes.length === 0) {
+        cont.innerHTML = '<div style="text-align: center; color: var(--suave); font-size: 13px; padding: 12px;">Sin lotes por vencer</div>';
+        return;
+      }
+      let html = '';
+      lotes.slice(0, 5).forEach(l => {
+        let color = 'var(--warning)';
+        let textoDias = '';
+        if (l.vencido) { color = 'var(--peligro)'; textoDias = 'VENCIDO hace ' + Math.abs(l.dias_restantes) + ' días'; }
+        else if (l.dias_restantes === 0) { textoDias = 'Vence HOY'; color = 'var(--peligro)'; }
+        else if (l.dias_restantes === 1) { textoDias = 'Vence mañana'; }
+        else { textoDias = 'Vence en ' + l.dias_restantes + ' días'; }
+        
+        html += '<div class="lote-item">';
+        html += '<div><div class="lote-name">' + l.nombre + '</div><div class="lote-sub">' + l.cantidad + ' ' + (l.unidad || 'uds') + ' · Lote ' + l.id_lote + '</div></div>';
+        html += '<div style="color: ' + color + '; font-weight: 700; font-size: 11px;">' + textoDias + '</div>';
+        html += '</div>';
+      });
+      cont.innerHTML = html;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-      actualizarSaludo();
       cargarDashboard();
       actualizarBadgeRecordatorios();
       setInterval(actualizarBadgeRecordatorios, 60000);
